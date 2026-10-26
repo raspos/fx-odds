@@ -186,7 +186,8 @@ export default function App() {
 
       <footer className="mt-12 border-t pt-4 text-[12px] leading-relaxed" style={{ borderColor: "var(--line)", color: "var(--ink-3)" }}>
         최종 갱신 {M.updated_at.replace("T", " ").slice(0, 16)} KST · 원·달러 기준 {L.base_date}(ECOS) · Yahoo {M.latest_obs["yahoo:USDKRW"]} · {M.version}<br />
-        투자 조언이 아닙니다. 통계적 확률은 과거 자료에서 추정한 값이며 실제 결과를 보장하지 않습니다. 설계 철학은 BOK WATCH를 계승했습니다.
+        <p className="mt-2">면책: 이 사이트의 확률·전망은 공개 금리와 언론 보도를 바탕으로 한 모형 추정치이며, 투자 자문이나 특정 금융상품의 매수·매도 권유가 아닙니다. 수치의 정확성·완전성·적시성을 보장하지 않습니다. 기관 전망과 발언은 보도 인용이라 원문과 다를 수 있습니다. 이 정보를 이용하거나 해석해 내린 판단과 그 결과의 책임은 전적으로 이용자에게 있으며, 운영자는 이로 인해 생긴 손해에 책임지지 않습니다.</p>
+        <p className="mt-2">© 2026 databrew · 이 사이트에는 추후 광고가 게재될 수 있습니다.</p>
       </footer>
     </div>
   );
