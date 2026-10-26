@@ -7,8 +7,9 @@ import Scorecard from "./components/Scorecard";
 import Methodology from "./components/Methodology";
 import { Pressure } from "./components/Pressure";
 import { Events } from "./components/Events";
+import { News } from "./components/News";
 
-const FILES = ["latest", "series", "scorecard", "radar", "history", "meta", "fpi", "events"] as const;
+const FILES = ["latest", "series", "scorecard", "radar", "history", "meta", "fpi", "events", "news"] as const;
 
 function Section({ id, no, title, sub, children }: { id: string; no: string; title: string; sub: string; children: React.ReactNode }) {
   return (
@@ -91,7 +92,7 @@ export default function App() {
           {asOf && <button className="btn" onClick={() => setAsOf(null)}>최신으로</button>}
         </div>
         <nav className="mt-2 flex gap-1.5 overflow-x-auto text-[13px]" role="tablist">
-          {[["s1", "환율의 미래"], ["s2", "환율의 압력"], ["s4", "보고서·뉴스"], ["s3", "동조화 레이더"], ["s5", "예측 성적표"], ["s6", "방법론"]].map(([id, t]) => (
+          {[["s1", "환율의 미래"], ["s2", "압력·뉴스"], ["s3", "동조화 레이더"], ["s5", "예측 성적표"], ["s6", "방법론"]].map(([id, t]) => (
             <button key={id} role="tab" aria-selected={tab === id} className="btn whitespace-nowrap" aria-pressed={tab === id} onClick={() => { setTab(id); window.scrollTo(0, 0); }}>{t}</button>))}
         </nav>
       </header>
@@ -164,23 +165,25 @@ export default function App() {
         </p>
       </Section>}
 
-      {tab === "s2" && <Section id="s2" no="02" title="환율의 압력" sub="FX PRESSURE INDEX (실험적) — 경제지표·정책·자본흐름이 환율을 미는 방향">
+      {tab === "s2" && <Section id="s2" no="02" title="압력·뉴스" sub="뉴스가 환율을 미는 방향(실험) · 통계 압력 지수(FPI) · 시장 사건">
+        <News N={D.news} refDate={L.base_date} asOf={histMode ? entry.d : null} />
+        <h3 className="pt-2 text-xl font-extrabold">통계로 본 압력 (FPI)</h3>
         <Pressure P={D.fpi} asOf={histMode ? entry.d : null} />
+        <h3 className="pt-2 text-xl font-extrabold">시장 사건 (통계 추출)</h3>
+        <Events E={D.events} asOf={histMode ? entry.d : null} refDate={histMode ? entry.d : L.base_date} />
       </Section>}
 
       {tab === "s3" && <Section id="s3" no="03" title="원화 동조화 레이더" sub="원화는 최근 엔화·위안화·대만 달러 중 어느 통화와 가장 밀접하게 움직였나">
         <Radar R={D.radar} asOf={histMode ? entry.d : null} />
       </Section>}
 
-      {tab === "s4" && <Section id="s4" no="04" title="보고서와 뉴스" sub="공식 통계·시장 데이터에서 추출한 사건 (뉴스·보고서 원문 수집은 준비 중)">
-        <Events E={D.events} asOf={histMode ? entry.d : null} refDate={histMode ? entry.d : L.base_date} />
-      </Section>}
+      
 
-      {tab === "s5" && <Section id="s5" no="05" title="예측 성적표" sub="FX SCORECARD — 이 서비스의 전망은 랜덤워크보다 실제로 정확한가">
+      {tab === "s5" && <Section id="s5" no="04" title="예측 성적표" sub="FX SCORECARD — 이 서비스의 전망은 랜덤워크보다 실제로 정확한가">
         <Scorecard S={D.scorecard} base={L.base_date} />
       </Section>}
 
-      {tab === "s6" && <Section id="s6" no="06" title="방법론" sub="원시자료 · 계산식 · 한계 · 변경 이력">
+      {tab === "s6" && <Section id="s6" no="05" title="방법론" sub="원시자료 · 계산식 · 한계 · 변경 이력">
         <Methodology meta={M} />
       </Section>}
 

@@ -5,6 +5,7 @@ import json, sys
 import numpy as np
 import pandas as pd
 from scipy import stats
+import news as N
 import prep, models as M, backtest as B, radar, fpi as F, events as EV
 import pandas as pd  # noqa
 from common import DATA, OUT, now_kst
@@ -225,6 +226,22 @@ def main(skip_bt=False, write_live=True):
                     "ext": "ECOS 301Y017 경상수지(월)", "flow": "ECOS 301Y013 증권투자(부채)(월)", "commod": "Yahoo CL=F(WTI)", "market": "Yahoo ^VIX·^KS11"},
         "missing": ["외국인 일별 주식·채권 순매수 자료(월별 국제수지로 대체, 발표 지연)", "지정학 위험 지표", "시장 컨센서스(예상 대비 차이)", "일본은행·인민은행 정책 변수"]})
     evs = EV.build(df)
+    # 뉴스(네이버): 분석·기록 후 통계 사건에 전후 1일 관련 기사를 붙인다
+    st = json.loads((DATA / "fetch_status.json").read_text(encoding="utf-8")).get("naver") if (DATA / "fetch_status.json").exists() else None
+    today = now_kst().date()
+    nj = N.build_output(today, st or {})
+    if nj.get("available") and write_live:
+        N.log_npi(today, nj["npi"])
+    FAM = {"usd": "dollar", "us_rates": "dollar", "jpy": "dollar", "kr_rates": "krrate", "risk": "risk", "oil": "oil", "krw": None}
+    arts = nj.get("articles", [])
+    for e in evs:
+        fams = {FAM.get(c) for c in e["cats"]} - {None}
+        d0 = pd.Timestamp(e["date"])
+        cand = [a for a in arts if a["dir"] != 0 and abs((pd.Timestamp(a["date"]) - d0).days) <= 1 and (not fams or N.FAMILY.get(a["topic"]) in fams)]
+        e["news"] = [{"title": a["title"], "link": a["link"], "press": a["press"], "published": a["published"]} for a in cand[:3]]
+        if e["news"]:
+            e["cause"] = "관련 기사(전후 1일) 링크 참조 — 인과는 확정이 아니라 후보"
+    jdump("news.json", {k: v for k, v in nj.items() if k != "articles"} | {"articles": [{k: a[k] for k in ("id", "title", "link", "press", "published", "date", "topic", "dir", "strength", "why", "status", "official")} for a in arts[:300]]})
     jdump("events.json", {"events": evs, "cats": EV.CATS, "note": "공식 통계·시장 데이터에서 규칙으로 추출한 사건입니다. 뉴스·보고서 원문 수집(FX INTELLIGENCE)은 미구현이라 원인과 '예상 대비'는 표시하지 않습니다."})
 
     # ---------- 메타 ----------

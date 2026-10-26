@@ -9,7 +9,7 @@ DATA = ROOT / "data"
 RAW = DATA / "raw"
 OUT = ROOT / "web" / "public" / "data"
 KST = timezone(timedelta(hours=9))
-KEY_ENVS = ("ECOS_API_KEY", "FRED_API_KEY", "OPENAI_API_KEY")
+KEY_ENVS = ("ECOS_API_KEY", "FRED_API_KEY", "OPENAI_API_KEY", "NAVER_CLIENT_ID", "NAVER_CLIENT_SECRET")
 
 
 def load_dotenv(path: Path) -> None:
