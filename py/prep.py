@@ -65,7 +65,7 @@ def cross_check_krw(df: pd.DataFrame) -> dict:
     """ECOS vs Yahoo vs FRED USD/KRW 일치도 (수준 차이 + 일별 수익률 상관, 시차별)."""
     e = wide(df, ["ecos:KRW_per_USD"]).iloc[:, 0]
     out = {}
-    for src in ("yahoo", "fred"):
+    for src in ("yahoo",):
         s = wide(df, [f"{src}:USDKRW"]).iloc[:, 0]
         j = pd.concat([e, s], axis=1, keys=["e", "s"]).dropna()
         j = j[j.index >= j.index.max() - pd.Timedelta(days=730)]

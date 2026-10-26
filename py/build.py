@@ -221,8 +221,8 @@ def main(skip_bt=False, write_live=True):
         "history": {"dates": [d.strftime("%Y-%m-%d") for d in fh.index], "fpi": [rnd(v, 1) for v in fh["fpi"]], "coverage": [rnd(v, 2) for v in fh["coverage"]],
                     **{a: [rnd(v, 1) for v in fh[a]] for a in ids}},
         "validation": F.validate(fres, ecos), "z_window": F.Z_WIN, "signal_window": F.H,
-        "sources": {"us_policy": "FRED DGS2·DGS10", "kr_policy": "ECOS 817Y002 국고채 3년", "usd": "Yahoo 6개 통화", "jpy": "Yahoo USD/JPY", "cny": "Yahoo USD/CNY", "twd": "Yahoo USD/TWD",
-                    "ext": "ECOS 301Y017 경상수지(월)", "flow": "ECOS 301Y013 증권투자(부채)(월)", "commod": "FRED DCOILWTICO", "market": "FRED VIXCLS, Yahoo ^KS11"},
+        "sources": {"us_policy": "Yahoo ^FVX·^TNX", "kr_policy": "ECOS 817Y002 국고채 3년", "usd": "Yahoo 6개 통화", "jpy": "Yahoo USD/JPY", "cny": "Yahoo USD/CNY", "twd": "Yahoo USD/TWD",
+                    "ext": "ECOS 301Y017 경상수지(월)", "flow": "ECOS 301Y013 증권투자(부채)(월)", "commod": "Yahoo CL=F(WTI)", "market": "Yahoo ^VIX·^KS11"},
         "missing": ["외국인 일별 주식·채권 순매수 자료(월별 국제수지로 대체, 발표 지연)", "지정학 위험 지표", "시장 컨센서스(예상 대비 차이)", "일본은행·인민은행 정책 변수"]})
     evs = EV.build(df)
     jdump("events.json", {"events": evs, "cats": EV.CATS, "note": "공식 통계·시장 데이터에서 규칙으로 추출한 사건입니다. 뉴스·보고서 원문 수집(FX INTELLIGENCE)은 미구현이라 원인과 '예상 대비'는 표시하지 않습니다."})
@@ -230,19 +230,18 @@ def main(skip_bt=False, write_live=True):
     # ---------- 메타 ----------
     last = {}
     lng = df.groupby("series").observed_date.max()
-    for s_ in ("ecos:KRW_per_USD", "fred:USDKRW", "yahoo:USDKRW"):
+    for s_ in ("ecos:KRW_per_USD", "yahoo:USDKRW"):
         last[s_] = lng[s_].strftime("%Y-%m-%d")
     stale_days = (now_kst().date() - base.date()).days
     status = json.loads((DATA / "fetch_status.json").read_text(encoding="utf-8")) if (DATA / "fetch_status.json").exists() else {}
-    thresholds = {"ecos:KRW_per_USD": ("한국은행 ECOS 원/달러", 4), "yahoo:USDJPY": ("Yahoo Finance 일봉(비공식)", 4), "fred:USDKRW": ("FRED H.10 환율(주간 발표)", 14),
-                  "fred:DGS2": ("FRED 미국 금리·VIX·유가(일별)", 6), "ecos:BOP_CURRENT_ACCOUNT": ("ECOS 국제수지(월)", 75)}
+    thresholds = {"ecos:KRW_per_USD": ("한국은행 ECOS 원/달러", 4), "yahoo:USDJPY": ("Yahoo Finance 일봉(비공식)", 4), "yahoo:UST10Y": ("Yahoo Finance 미국 금리·VIX·유가", 4), "ecos:BOP_CURRENT_ACCOUNT": ("ECOS 국제수지(월)", 75)}
     srcs = []
     for s_, (nm, th) in thresholds.items():
         row = df[df.series == s_]
         lo, la = row.observed_date.max(), pd.to_datetime(row.available_at).max()
         age = (now_kst().date() - lo.date()).days
         srcs.append({"series": s_, "name": nm, "last_obs": lo.strftime("%Y-%m-%d"), "last_available": la.strftime("%Y-%m-%d"), "age_days": age, "threshold_days": th, "stale": age > th})
-    failed = [k for grp in ("ecos", "yahoo", "fred") for k, v_ in (status.get(grp) or {}).items() if isinstance(v_, str) and v_.startswith("fail")]
+    failed = [k for grp in ("ecos", "yahoo") for k, v_ in (status.get(grp) or {}).items() if isinstance(v_, str) and v_.startswith("fail")]
     jdump("meta.json", {"sources": srcs, "failed_series": failed, "updated_at": now_kst().isoformat(timespec="seconds"), "latest_obs": last, "stale_days": stale_days,
                         "stale_warning": stale_days > 4, "cross_check": prep.cross_check_krw(df), "fetch_status": status,
                         "version": "v0.2.0", "model_names": MODEL_NAMES})

@@ -4,7 +4,7 @@
 규칙 기반: 요인별 신호(최근 20영업일 변화 또는 월별 수준)를 과거 756영업일(월별은 60개월) 분포로 z-표준화(±3 절단)해
  p = sign × z/3 × 100 으로 환산하고, 영역(10개)별로 동일가중 평균한다. 자료가 없는 영역은 0점으로 채우지 않고 제외하며 자료 충족률을 함께 보여 준다.
 모든 입력은 '서울 기준일 D 에 이미 이용 가능했던(available_at <= D)' 값만 쓴다.
-공통 충격 중복 방지: 한국 금리는 미국 2년 금리를, 엔·위안·대만달러는 달러 공통요인을 trailing 회귀로 제거한 잔차만 신호로 쓴다.
+공통 충격 중복 방지: 한국 금리는 미국 5년 금리를, 엔·위안·대만달러는 달러 공통요인을 trailing 회귀로 제거한 잔차만 신호로 쓴다.
 """
 from __future__ import annotations
 import numpy as np
@@ -19,8 +19,8 @@ H = 20  # 신호 창(영업일)
 MAX_AGE = {"daily": 10, "monthly": 120}  # 마지막 관측이 이보다 오래되면 '자료 없음' 처리(달력일)
 
 AREAS = [  # (id, 이름, 설명)
-    ("us_policy", "미국 통화정책", "미국 2년·10년 국채금리 20일 변화"),
-    ("kr_policy", "한국 통화정책", "국고채 3년 20일 변화 중 미국 2년 금리로 설명되지 않는 부분(잔차)"),
+    ("us_policy", "미국 통화정책", "미국 5년·10년 국채금리 20일 변화"),
+    ("kr_policy", "한국 통화정책", "국고채 3년 20일 변화 중 미국 5년 금리로 설명되지 않는 부분(잔차)"),
     ("usd", "글로벌 달러", "EUR·GBP·AUD·CAD·CHF·SEK 기반 달러 요인 20일 변화"),
     ("jpy", "일본 엔화", "USD/JPY 20일 변화 중 달러 요인으로 설명되지 않는 부분(잔차)"),
     ("cny", "중국 위안화", "USD/CNY 20일 변화 중 달러 요인 잔차"),
@@ -57,7 +57,7 @@ def _resid(y: pd.Series, f: pd.Series, daily_y: pd.Series, daily_f: pd.Series) -
 def compute(df: pd.DataFrame, dates: pd.DatetimeIndex) -> dict:
     """dates: 서울 기준일(ECOS 영업일). 반환 dict: panel(DataFrame), comps(요인 정의), meta."""
     v, age = {}, {}
-    names = {"dgs2": "fred:DGS2", "dgs10": "fred:DGS10", "ktb": "ecos:KTB3Y", "vix": "fred:VIXCLS", "wti": "fred:DCOILWTICO", "kospi": "yahoo:KOSPI",
+    names = {"dgs2": "yahoo:UST5Y", "dgs10": "yahoo:UST10Y", "ktb": "ecos:KTB3Y", "vix": "yahoo:VIX", "wti": "yahoo:WTI", "kospi": "yahoo:KOSPI",
              "jpy": "yahoo:USDJPY", "cny": "yahoo:USDCNY", "twd": "yahoo:USDTWD"}
     for k, n in names.items():
         v[k], o = asof_series(df, n, dates); age[k] = (dates.to_series() - o).dt.days

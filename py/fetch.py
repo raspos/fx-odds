@@ -2,7 +2,7 @@
 
 출처(우선순위)
   ecos   : 한국은행 ECOS 731Y001 (매매기준율, 서울 15:30 부근 기준) - USD/KRW 기준 시계열, 대원화 교차환율
-  fred   : FRED DEXKOUS/DEXJPUS/DEXCHUS/DEXTAUS (뉴욕 정오 매입환율). 접속 가능한 환경에서만 사용
+  fred   : (미사용) FRED DEXKOUS/DEXJPUS/DEXCHUS/DEXTAUS (뉴욕 정오 매입환율). 접속 가능한 환경에서만 사용
   yahoo  : Yahoo Finance 일봉 종가 (비공식, 런던/뉴욕 마감 부근). JPY·CNY·TWD·달러요인 통화
 적재 규칙: 값이 양수가 아니면 버리고, 주말 행은 버린다. 출처를 섞어 한 시계열로 합치지 않는다.
 """
@@ -27,7 +27,7 @@ YAHOO = {  # 심볼 -> series 이름. 모두 'USD 1단위당 외화' 형태로 �
     "KRW=X": "yahoo:USDKRW", "JPY=X": "yahoo:USDJPY", "CNY=X": "yahoo:USDCNY", "TWD=X": "yahoo:USDTWD",
     "EURUSD=X": "yahoo:EURUSD", "GBPUSD=X": "yahoo:GBPUSD", "AUDUSD=X": "yahoo:AUDUSD",
     "CAD=X": "yahoo:USDCAD", "CHF=X": "yahoo:USDCHF", "SEK=X": "yahoo:USDSEK",
-    "^KS11": "yahoo:KOSPI",
+    "^KS11": "yahoo:KOSPI", "^TNX": "yahoo:UST10Y", "^FVX": "yahoo:UST5Y", "^VIX": "yahoo:VIX", "CL=F": "yahoo:WTI",
 }
 FRED = {"DEXKOUS": "fred:USDKRW", "DEXJPUS": "fred:USDJPY", "DEXCHUS": "fred:USDCNY", "DEXTAUS": "fred:USDTWD",
         # 달러 공통요인(아시아 통화 제외) 구성용
@@ -163,7 +163,7 @@ def fetch_fred() -> dict:
 
 def run() -> dict:
     RAW.mkdir(parents=True, exist_ok=True)
-    return {"ecos": {**fetch_ecos(), **fetch_ecos_rates()}, "yahoo": fetch_yahoo(), "fred": fetch_fred()}
+    return {"ecos": {**fetch_ecos(), **fetch_ecos_rates()}, "yahoo": fetch_yahoo()}  # FRED는 사용하지 않는다(fetch_fred 는 보관만)
 
 
 if __name__ == "__main__":

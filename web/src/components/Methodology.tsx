@@ -22,7 +22,7 @@ export const STATUS: [string, string, string][] = [
   ["시장 사건 타임라인 (정책금리·급변동, 사건 그룹)", "일부", "통계 추출. 뉴스·보고서 원문 수집은 미구현"],
   ["FX SCENARIO (시나리오 분석기)", "미구현", "추정 계수가 없어 임의 변경하지 않음"],
   ["통합 전망 C (정량+정성)", "미구현", "FPI·뉴스 점수가 생긴 뒤 백테스트로 검증"],
-  ["ECOS 외 교차검증 (Yahoo·FRED ↔ ECOS)", "구현", "메타 데이터 참조"],
+  ["교차검증 (Yahoo ↔ ECOS 원/달러)", "구현", "메타 데이터 참조"],
 ];
 
 export default function Methodology({ meta }: { meta: J }) {
@@ -40,7 +40,6 @@ export default function Methodology({ meta }: { meta: J }) {
         <h3 className="text-lg font-bold">계산 방법 공개</h3>
         <Item n={1} t="데이터 출처">
           <p><b>ECOS</b> 731Y001 원/미국달러·원/위안·원/100엔·원/대만달러 매매기준율(서울 기준) — 전망의 기준 시계열.</p>
-          <p><b>FRED</b> 미국 금리·VIX·유가(FPI)와 H.10 환율(교차검증용). 레이더에는 쓰지 않습니다(H.10 환율은 발표가 1~2주 늦음).</p>
           <p><b>Yahoo Finance</b> 일봉 마감(비공식·무료) — 동조화 레이더의 원·엔·위안·대만달러와 달러요인(단일 출처, 같은 시각 관측). 수집 실패 시 해당 항목은 비어 있으며 대체값을 만들지 않습니다.</p>
           <p>적재 규칙: 양수가 아닌 값, 주말 행 제거. 출처를 섞어 한 시계열로 합치지 않습니다.</p>
         </Item>
@@ -69,7 +68,7 @@ export default function Methodology({ meta }: { meta: J }) {
         </Item>
         <Item n={11} t="선행·후행 분석">
           <p>corr(KRW_t, X_(t−k)), k = 0,1,2,3,5 및 반대 방향. 최근 1년·3년, 원화 변동성 상위 25%(불안기)·평시로 나눠 봅니다. Granger 검정(시차 1~5)은 예측 정보 추가 여부만 보며 인과관계가 아닙니다.</p>
-          <p>관측 시각: FRED는 뉴욕 정오로 네 통화가 동일, ECOS는 서울 오후 3시 30분경입니다. B 기준은 서울 기준일 직전 영업일 해외 마감만 사용해 미래 정보를 배제합니다. 관측 시각을 맞출 수 없는 선행관계는 공식 결과로 표시하지 않습니다.</p>
+          <p>관측 시각: 레이더는 Yahoo 일봉(런던 자정 마감) 단일 출처라 네 통화가 같은 시각입니다. 예측 기여도 검증은 서울 기준일 직전 영업일 해외 마감만 사용해 미래 정보를 배제합니다. 관측 시각을 맞출 수 없는 선행관계는 공식 결과로 표시하지 않습니다.</p>
         </Item>
         <Item n={12} t="예측 모형 가중치">
           <p>공식 전망 = 실현이 확정된 예측의 평균 CRPS가 가장 낮은 모형(A~D). 선택은 기준일마다 그때까지 실현된 예측만으로 다시 하며(과거 날짜 재현 시 미래 정보 배제), 표본이 250개 미만이면 C를 씁니다.</p>
@@ -104,10 +103,10 @@ export default function Methodology({ meta }: { meta: J }) {
         <h3 className="mt-4 text-lg font-bold" style={{ color: "var(--ink)" }}>출처 간 교차검증 (최근 2년)</h3>
         <div className="scrollx">
           <table className="t"><thead><tr><th>비교</th><th>일치 일수</th><th>평균 차이</th><th>평균 절대 차이</th><th>일별 수익률 상관(ECOS 기준, 해외 시차 −1/0/+1일)</th></tr></thead>
-            <tbody>{(["yahoo", "fred"] as const).map((k) => (<tr key={k}><td>ECOS vs {k === "yahoo" ? "Yahoo" : "FRED"}</td><td className="num">{cc[k].n}</td><td className="num">{cc[k].mean_diff_pct}%</td><td className="num">{cc[k].mean_abs_diff_pct}%</td>
+            <tbody>{(["yahoo"] as const).map((k) => (<tr key={k}><td>ECOS vs Yahoo</td><td className="num">{cc[k].n}</td><td className="num">{cc[k].mean_diff_pct}%</td><td className="num">{cc[k].mean_abs_diff_pct}%</td>
               <td className="num">{cc[k].ret_corr_by_shift["-1"]} / {cc[k].ret_corr_by_shift["0"]} / {cc[k].ret_corr_by_shift["1"]}</td></tr>))}</tbody></table>
         </div>
-        <p className="mt-1">ECOS(서울 오후)와 Yahoo·FRED(런던 자정·뉴욕 정오)는 관측 시각이 달라 같은 날 수준이 약간 다르고, 수익률 상관이 시차 +1일에서 가장 높은 것은 해외 시장의 움직임이 서울의 다음 거래일에 반영되기 때문입니다. 그래서 이 서비스는 같은 날짜 자료를 같은 시각의 가격으로 취급하지 않고 출처·시각을 분리합니다.</p>
+        <p className="mt-1">ECOS(서울 오후)와 Yahoo(런던 자정)는 관측 시각이 달라 같은 날 수준이 약간 다르고, 수익률 상관이 시차 +1일에서 가장 높은 것은 해외 시장의 움직임이 서울의 다음 거래일에 반영되기 때문입니다. 그래서 이 서비스는 같은 날짜 자료를 같은 시각의 가격으로 취급하지 않고 출처·시각을 분리합니다.</p>
       </div>
     </div>
   );

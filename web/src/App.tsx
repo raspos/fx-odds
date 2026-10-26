@@ -91,7 +91,7 @@ export default function App() {
           {asOf && <button className="btn" onClick={() => setAsOf(null)}>최신으로</button>}
         </div>
         <nav className="mt-2 flex gap-1.5 overflow-x-auto text-[13px]" role="tablist">
-          {[["s1", "환율의 미래"], ["s2", "환율의 압력"], ["s3", "동조화 레이더"], ["s4", "보고서·뉴스"], ["s5", "예측 성적표"], ["s6", "방법론"]].map(([id, t]) => (
+          {[["s1", "환율의 미래"], ["s2", "환율의 압력"], ["s4", "보고서·뉴스"], ["s3", "동조화 레이더"], ["s5", "예측 성적표"], ["s6", "방법론"]].map(([id, t]) => (
             <button key={id} role="tab" aria-selected={tab === id} className="btn whitespace-nowrap" aria-pressed={tab === id} onClick={() => { setTab(id); window.scrollTo(0, 0); }}>{t}</button>))}
         </nav>
       </header>
@@ -185,7 +185,7 @@ export default function App() {
       </Section>}
 
       <footer className="mt-12 border-t pt-4 text-[12px] leading-relaxed" style={{ borderColor: "var(--line)", color: "var(--ink-3)" }}>
-        최종 갱신 {M.updated_at.replace("T", " ").slice(0, 16)} KST · 원·달러 기준 {L.base_date}(ECOS) · FRED {M.latest_obs["fred:USDKRW"]} · Yahoo {M.latest_obs["yahoo:USDKRW"]} · {M.version}<br />
+        최종 갱신 {M.updated_at.replace("T", " ").slice(0, 16)} KST · 원·달러 기준 {L.base_date}(ECOS) · Yahoo {M.latest_obs["yahoo:USDKRW"]} · {M.version}<br />
         투자 조언이 아닙니다. 통계적 확률은 과거 자료에서 추정한 값이며 실제 결과를 보장하지 않습니다. 설계 철학은 BOK WATCH를 계승했습니다.
       </footer>
     </div>
