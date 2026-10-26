@@ -20,7 +20,7 @@ def main() -> int:
     try:
         status["kis"] = kis.collect()
     except Exception as e:
-        status["naver"] = {"ok": False, "why": redact(repr(e))[:200]}
+        status["kis"] = {"ok": False, "why": redact(repr(e))[:200]}
     (DATA / "fetch_status.json").write_text(json.dumps(status, ensure_ascii=False, indent=1), encoding="utf-8")
     build.main()
     return 0
