@@ -61,7 +61,9 @@ def avail_date(series: str, obs: pd.Timestamp) -> pd.Timestamp:
     obs = pd.Timestamp(obs).normalize()
     src, _, name = series.partition(":")
     if src == "ecos":
-        return obs + pd.Timedelta(days=MONTHLY_LAG_DAYS) if name.startswith("BOP_") else obs
+        return obs + pd.Timedelta(days=MONTHLY_LAG_DAYS) if name.startswith(("BOP_", "POLICY_", "FLOW_")) else obs
+    if src == "gpr":  # GPR 지수는 사후 수정되므로 2일 보수적 지연
+        return obs + pd.Timedelta(days=2)
     if src == "yahoo":
         return obs + pd.Timedelta(days=1)
     if src == "fred":

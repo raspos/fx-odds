@@ -223,8 +223,8 @@ def main(skip_bt=False, write_live=True):
                     **{a: [rnd(v, 1) for v in fh[a]] for a in ids}},
         "validation": F.validate(fres, ecos), "z_window": F.Z_WIN, "signal_window": F.H,
         "sources": {"us_policy": "Yahoo ^FVX·^TNX", "kr_policy": "ECOS 817Y002 국고채 3년", "usd": "Yahoo 6개 통화", "jpy": "Yahoo USD/JPY", "cny": "Yahoo USD/CNY", "twd": "Yahoo USD/TWD",
-                    "ext": "ECOS 301Y017 경상수지(월)", "flow": "ECOS 301Y013 증권투자(부채)(월)", "commod": "Yahoo CL=F(WTI)", "market": "Yahoo ^VIX·^KS11"},
-        "missing": ["외국인 일별 주식·채권 순매수 자료(월별 국제수지로 대체, 발표 지연)", "지정학 위험 지표", "시장 컨센서스(예상 대비 차이)", "일본은행·인민은행 정책 변수"]})
+                    "ext": "ECOS 301Y017 경상수지(월)", "flow": "ECOS 301Y013 증권투자(부채), 901Y055 외국인 순매수(월)", "commod": "Yahoo CL=F(WTI), GPR 지정학 위험지수", "market": "Yahoo ^VIX·^KS11"},
+        "missing": ["외국인 일별 순매수·채권 자금(월별 통계로만 확보, 발표 지연)", "시장 컨센서스(예상 대비 차이) — 무료·합법 자료원 없음"]})
     evs = EV.build(df)
     # 뉴스(네이버): 분석·기록 후 통계 사건에 전후 1일 관련 기사를 붙인다
     st = json.loads((DATA / "fetch_status.json").read_text(encoding="utf-8")).get("naver") if (DATA / "fetch_status.json").exists() else None
@@ -258,7 +258,7 @@ def main(skip_bt=False, write_live=True):
         lo, la = row.observed_date.max(), pd.to_datetime(row.available_at).max()
         age = (now_kst().date() - lo.date()).days
         srcs.append({"series": s_, "name": nm, "last_obs": lo.strftime("%Y-%m-%d"), "last_available": la.strftime("%Y-%m-%d"), "age_days": age, "threshold_days": th, "stale": age > th})
-    failed = [k for grp in ("ecos", "yahoo") for k, v_ in (status.get(grp) or {}).items() if isinstance(v_, str) and v_.startswith("fail")]
+    failed = [k for grp in ("ecos", "yahoo", "gpr") for k, v_ in (status.get(grp) or {}).items() if isinstance(v_, str) and v_.startswith("fail")]
     jdump("meta.json", {"sources": srcs, "failed_series": failed, "updated_at": now_kst().isoformat(timespec="seconds"), "latest_obs": last, "stale_days": stale_days,
                         "stale_warning": stale_days > 4, "cross_check": prep.cross_check_krw(df), "fetch_status": status,
                         "version": "v0.2.0", "model_names": MODEL_NAMES})

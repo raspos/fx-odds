@@ -12,13 +12,15 @@ from common import avail_date
 
 SRC = {
     "ecos_base": ("한국은행 ECOS 722Y001 기준금리", "https://ecos.bok.or.kr/"),
+    "ecos_policy": ("한국은행 ECOS 902Y006 국제 주요국 중앙은행 정책금리(월)", "https://ecos.bok.or.kr/"),
+    "gpr": ("Caldara-Iacoviello 지정학 위험지수(GPR)", "https://www.matteoiacoviello.com/gpr.htm"),
     "ecos_fx": ("한국은행 ECOS 731Y001 원/달러 매매기준율", "https://ecos.bok.or.kr/"),
     "yahoo_fx": ("Yahoo Finance 일봉(비공식) 달러 요인 구성 통화", "https://finance.yahoo.com/"),
     "fred_dgs10": ("Yahoo Finance ^TNX 미국 10년 국채금리(비공식)", "https://finance.yahoo.com/quote/%5ETNX/"),
     "fred_vix": ("Yahoo Finance ^VIX", "https://finance.yahoo.com/quote/%5EVIX/"),
     "fred_wti": ("Yahoo Finance CL=F WTI 원유(비공식)", "https://finance.yahoo.com/quote/CL%3DF/"),
 }
-CATS = {"krw": "원화", "usd": "달러", "jpy": "엔화", "us_rates": "미국 금리", "kr_rates": "한국 금리", "risk": "위험회피", "oil": "유가"}
+CATS = {"krw": "원화", "usd": "달러", "jpy": "엔화", "cny": "위안화", "us_rates": "미국 금리", "kr_rates": "한국 금리", "risk": "위험회피", "oil": "유가"}
 
 
 def _ew_sigma(r: pd.Series, lam=0.94) -> pd.Series:
@@ -45,9 +47,16 @@ def build(df: pd.DataFrame, since="2023-01-01") -> list[dict]:
                        "dir": ("up" if up else "down") if sign > 0 else ("down" if up else "up"), "strength": min(3, 1 + int(abs(x) * 100 // 25)),
                        "why": ("미국 금리 상승은 달러 강세·원화 약세 압력으로 작용하는 것이 일반적입니다." if cat == "us_rates" and up else
                                "미국 금리 하락은 달러 약세·원화 강세 압력으로 작용하는 것이 일반적입니다." if cat == "us_rates" else
+                               "일본은행 금리 인상은 엔화 강세를 통해 원화에도 강세 압력으로 작용하는 경향이 있습니다." if cat == "jpy" and up else
+                               "일본은행 금리 인하는 엔화 약세를 통해 원화에도 약세 압력으로 작용하는 경향이 있습니다." if cat == "jpy" else
+                               "중국 금리 인상은 위안화 강세를 통해 원화에도 강세 압력으로 작용하는 경향이 있습니다." if cat == "cny" and up else
+                               "중국 금리 인하는 위안화 약세를 통해 원화에도 약세 압력으로 작용하는 경향이 있습니다." if cat == "cny" else
                                "한국 금리 인상은 내외금리차를 좁혀 원화 강세 압력으로 작용하는 것이 일반적입니다." if up else
                                "한국 금리 인하는 내외금리차를 넓혀 원화 약세 압력으로 작용하는 것이 일반적입니다.")})
     cat = "kr_rates"; steps("ecos:BASE_RATE", 1, "한국은행 기준금리 변경", "ecos_base", cat, -1)
+    cat = "us_rates"; steps("ecos:POLICY_US", 1, "미국 정책금리 변경(월 통계)", "ecos_policy", cat, +1)
+    cat = "jpy"; steps("ecos:POLICY_JP", 1, "일본 정책금리 변경(월 통계)", "ecos_policy", cat, -1)
+    cat = "cny"; steps("ecos:POLICY_CN", 1, "중국 정책금리 변경(월 통계)", "ecos_policy", cat, -1)
 
     # 2) 시장 급변동(데이터로 추출)
     y = prep.panel_yahoo_or_fred(df, "yahoo")
@@ -80,6 +89,11 @@ def build(df: pd.DataFrame, since="2023-01-01") -> list[dict]:
         if d < pd.Timestamp(since): continue
         add(d, "vix", ["risk"], "fred_vix", f"VIX 급등 ({vx.loc[d]:.1f}, 전일비 {np.expm1(x) * 100:+.0f}%)", "up", 2 if vx.loc[d] < 30 else 3,
             "위험회피 심리 확대는 원화 약세 압력으로 작용하는 경향이 있습니다.", avail_date("yahoo:VIX", d))
+    gp = df[df.series == "gpr:GPRD"].sort_values("observed_date").set_index("observed_date").value
+    for d, x in gp[(gp >= 1.6 * gp.rolling(30).mean().shift(1)) & (gp >= 200)].items():
+        if d < pd.Timestamp(since): continue
+        add(d, "gpr", ["risk"], "gpr", f"지정학 위험지수 급등 (GPR {x:.0f}, 30일 평균의 {x / gp.rolling(30).mean().shift(1).loc[d]:.1f}배)", "up", 2 if x < 300 else 3,
+            "지정학 위험 확대는 위험회피를 통해 원화 약세 압력으로 작용하는 경향이 있습니다.", avail_date("gpr:GPRD", d))
     wt = df[df.series == "yahoo:WTI"].sort_values("observed_date").set_index("observed_date").value
     wr = np.log(wt[wt > 0]).diff()
     for d, x in wr[wr.abs() >= 0.06].items():

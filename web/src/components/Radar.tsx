@@ -195,9 +195,9 @@ export default function Radar({ R, asOf }: { R: J; asOf: string | null }) {
           <table className="t">
             <thead><tr><th>추가 변수</th><th>7일 CRPS 개선</th><th>7일 p</th><th>30일 CRPS 개선</th><th>30일 p</th><th>30일 방향 적중</th></tr></thead>
             <tbody>
-              {(["JPY", "CNY", "TWD", "ALL3", "ALL3+FACTOR", "FPI"] as const).map((k) => {
+              {(["JPY", "CNY", "TWD", "ALL3", "ALL3+FACTOR", "RATES", "FPI"] as const).map((k) => {
                 const a = R.contribution[k].h7, b = R.contribution[k].h30;
-                const lab = k === "FPI" ? "압력지수(FPI)" : k === "ALL3" ? "세 통화 모두" : k === "ALL3+FACTOR" ? "세 통화 + 달러요인" : NAME[k];
+                const lab = k === "RATES" ? "세 통화+달러요인+한미 금리차(F)" : k === "FPI" ? "압력지수(FPI)" : k === "ALL3" ? "세 통화 모두" : k === "ALL3+FACTOR" ? "세 통화 + 달러요인" : NAME[k];
                 return (<tr key={k}><td>{lab}</td>
                   <td className="num">{a ? sgn(a.vs_e0_pct, 2) + "%" : "–"}</td><td className="num">{a ? a.p.toFixed(3) : "–"}</td>
                   <td className="num">{b ? sgn(b.vs_e0_pct, 2) + "%" : "–"}</td><td className="num">{b ? b.p.toFixed(3) : "–"}</td>
@@ -206,7 +206,7 @@ export default function Radar({ R, asOf }: { R: J; asOf: string | null }) {
             </tbody>
           </table>
         </div>
-        <p className="mt-1 text-[11px]" style={{ color: "var(--ink-3)" }}>금리·경제지표 변수는 아직 수집하지 않아 '금리 등을 통제한 조건부 모형(F)'은 미구현입니다. 달러요인 행은 금리 없이 달러 요인만 추가한 실험입니다.</p>
+        <p className="mt-1 text-[11px]" style={{ color: "var(--ink-3)" }}>'세 통화+달러요인+한미 금리차' 행이 금리를 통제한 조건부 모형(F)입니다(국고채 3년 − 미국 5년 금리의 5·20일 변화).</p>
       </div>
 
       <div className="card p-4 sm:p-5">

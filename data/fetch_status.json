@@ -1,15 +1,19 @@
 {
- "at": "2026-10-26T13:28:32+00:00",
+ "at": "2026-10-26T23:09:25+00:00",
  "ecos": {
-  "ecos:KRW_per_USD": "fail: {'RESULT': {'CODE': 'INFO-100', 'MESSAGE': '인증키가 유효하지 않습니다. 인증키를 확인하십시오! 인증키가 없는 경우 인증키를 신청하십시오!'}}",
-  "ecos:KRW_per_CNY": "fail: {'RESULT': {'CODE': 'INFO-100', 'MESSAGE': '인증키가 유효하지 않습니다. 인증키를 확인하십시오! 인증키가 없는 경우 인증키를 신청하십시오!'}}",
-  "ecos:KRW_per_100JPY": "fail: {'RESULT': {'CODE': 'INFO-100', 'MESSAGE': '인증키가 유효하지 않습니다. 인증키를 확인하십시오! 인증키가 없는 경우 인증키를 신청하십시오!'}}",
-  "ecos:KRW_per_TWD": "fail: {'RESULT': {'CODE': 'INFO-100', 'MESSAGE': '인증키가 유효하지 않습니다. 인증키를 확인하십시오! 인증키가 없는 경우 인증키를 신청하십시오!'}}",
-  "ecos:KTB3Y": "fail: {'RESULT': {'CODE': 'INFO-100', 'MESSAGE': '인증키가 유효하지 않습니다. 인증키를 확인하십시오! 인증키가 없는 경우 인증키를 신청하십시오!'}}",
-  "ecos:BASE_RATE": "fail: {'RESULT': {'CODE': 'INFO-100', 'MESSAGE': '인증키가 유효하지 않습니다. 인증키를 확인하십시오! 인증키가 없는 경우 인증키를 신청하십시오!'}}",
-  "ecos:BOP_CURRENT_ACCOUNT": "fail: {'RESULT': {'CODE': 'INFO-100', 'MESSAGE': '인증키가 유효하지 않습니다. 인증키를 확인하십시오! 인증키가 없는 경우 인증키를 신청하십시오!'}}",
-  "ecos:BOP_EXPORTS": "fail: {'RESULT': {'CODE': 'INFO-100', 'MESSAGE': '인증키가 유효하지 않습니다. 인증키를 확인하십시오! 인증키가 없는 경우 인증키를 신청하십시오!'}}",
-  "ecos:BOP_PORTFOLIO_LIAB": "fail: {'RESULT': {'CODE': 'INFO-100', 'MESSAGE': '인증키가 유효하지 않습니다. 인증키를 확인하십시오! 인증키가 없는 경우 인증키를 신청하십시오!'}}"
+  "ecos:KRW_per_USD": 6635,
+  "ecos:KRW_per_CNY": 2660,
+  "ecos:KRW_per_100JPY": 6635,
+  "ecos:KRW_per_TWD": 2909,
+  "ecos:KTB3Y": 6635,
+  "ecos:BASE_RATE": 6995,
+  "ecos:BOP_CURRENT_ACCOUNT": 279,
+  "ecos:BOP_EXPORTS": 320,
+  "ecos:POLICY_US": 321,
+  "ecos:POLICY_JP": 121,
+  "ecos:POLICY_CN": 321,
+  "ecos:FLOW_FOREIGN_NET": 154,
+  "ecos:BOP_PORTFOLIO_LIAB": 215
  },
  "yahoo": {
   "yahoo:USDKRW": 5939,
@@ -27,5 +31,8 @@
   "yahoo:UST5Y": 5985,
   "yahoo:VIX": 5993,
   "yahoo:WTI": 5984
+ },
+ "gpr": {
+  "gpr:GPRD": 10910
  }
 }

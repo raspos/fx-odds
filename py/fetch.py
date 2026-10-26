@@ -65,6 +65,8 @@ ECOS_RATES = {  # (stat, cycle, item) -> 이름
     ("817Y002", "D", "010200000"): "ecos:KTB3Y", ("722Y001", "D", "0101000"): "ecos:BASE_RATE",
     ("301Y017", "M", "SA000"): "ecos:BOP_CURRENT_ACCOUNT",       # 경상수지(월, 백만달러)
     ("301Y017", "M", "SA110"): "ecos:BOP_EXPORTS",
+    ("902Y006", "M", "US"): "ecos:POLICY_US", ("902Y006", "M", "JP"): "ecos:POLICY_JP", ("902Y006", "M", "CN"): "ecos:POLICY_CN",  # 주요국 중앙은행 정책금리(월)
+    ("901Y055", "M", "S22CC"): "ecos:FLOW_FOREIGN_NET",             # 외국인 주식 순매수(월, 백만원)
     ("301Y013", "M", "BOPF22000000"): "ecos:BOP_PORTFOLIO_LIAB",  # 증권투자(부채) = 외국인의 국내 증권투자 순유입(월)
 }
 
@@ -117,6 +119,19 @@ def fetch_ecos(start="20000101") -> dict:
     return res
 
 
+def fetch_gpr() -> dict:
+    """지정학 위험 지수(Caldara & Iacoviello) 일별. 주말 행은 _store 가 제거한다."""
+    try:
+        import io
+        r = requests.get("https://www.matteoiacoviello.com/gpr_files/data_gpr_daily_recent.xls", headers=UA, timeout=90)
+        r.raise_for_status()
+        x = pd.read_excel(io.BytesIO(r.content))
+        df = pd.DataFrame({"observed_date": pd.to_datetime(x["DAY"].astype(str), format="%Y%m%d", errors="coerce"), "value": pd.to_numeric(x["GPRD"], errors="coerce")}).dropna()
+        return {"gpr:GPRD": _store(df, "gpr:GPRD", "gpr")}
+    except Exception as e:
+        return {"gpr:GPRD": "fail: " + redact(type(e).__name__ + " " + str(e))[:100]}
+
+
 def fetch_yahoo(range_="max") -> dict:
     res = {}
     for sym, name in YAHOO.items():
@@ -163,7 +178,7 @@ def fetch_fred() -> dict:
 
 def run() -> dict:
     RAW.mkdir(parents=True, exist_ok=True)
-    return {"ecos": {**fetch_ecos(), **fetch_ecos_rates()}, "yahoo": fetch_yahoo()}  # FRED는 사용하지 않는다(fetch_fred 는 보관만)
+    return {"ecos": {**fetch_ecos(), **fetch_ecos_rates()}, "yahoo": fetch_yahoo(), "gpr": fetch_gpr()}  # FRED는 사용하지 않는다(fetch_fred 는 보관만)
 
 
 if __name__ == "__main__":

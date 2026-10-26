@@ -14,7 +14,8 @@ TRAIN_START = pd.Timestamp("2005-01-03")
 BIG = {7: 0.01, 30: 0.02}  # '큰 상승' 이벤트 기준 (로그수익률)
 COND = {"E0": ("원·달러만", []), "EJ": ("+ 엔화", ["JPY"]), "EC": ("+ 위안화", ["CNY"]), "ET": ("+ 대만달러", ["TWD"]),
         "E3": ("+ 세 통화", ["JPY", "CNY", "TWD"]), "EF": ("+ 세 통화 + 달러요인", ["JPY", "CNY", "TWD", "USD_FACTOR"]),
-        "EP": ("+ 압력지수(FPI)", ["FPI"])}
+        "EP": ("+ 압력지수(FPI)", ["FPI"]),
+        "ER": ("+ 세 통화 + 달러요인 + 한미 금리차(F)", ["JPY", "CNY", "TWD", "USD_FACTOR", "SPR"])}
 
 
 def build_features(df_long: pd.DataFrame, fpi_series: pd.Series | None = None):
@@ -31,6 +32,11 @@ def build_features(df_long: pd.DataFrame, fpi_series: pd.Series | None = None):
         s = yahoo[c].reindex(cal).fillna(0.0).shift(1)  # 서울 기준일 t 에는 t-1 영업일 마감까지만 반영
         for k in (5, 20):
             X[f"{c}_{k}"] = s.rolling(k).sum().reindex(ecos.index)
+    # 한미 금리차: 국고채 3년(ECOS, 당일) - 미국 5년(Yahoo, 직전 영업일 마감). 변화량만 사용
+    ktb = df_long[df_long.series == "ecos:KTB3Y"].set_index("observed_date").value.reindex(ecos.index).ffill()
+    ust = df_long[df_long.series == "yahoo:UST5Y"].set_index("observed_date").value.reindex(cal).ffill().shift(1).reindex(ecos.index).ffill()
+    spr = ktb - ust
+    X["SPR_5"], X["SPR_20"] = spr.diff(5), spr.diff(20)
     if fpi_series is not None:  # FPI 는 기준일에 이용 가능했던 자료만으로 계산돼 있다(fpi.compute)
         f = fpi_series.reindex(ecos.index)
         X["FPI_5"], X["FPI_20"] = f.rolling(5, min_periods=3).mean(), f.rolling(20, min_periods=10).mean()

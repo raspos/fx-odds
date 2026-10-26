@@ -111,7 +111,7 @@ def test_dollar_factor_sign_and_no_asia():
 
 def test_no_nonpositive_or_weekend_rows(df):
     assert (df.value > 0).all()
-    daily = df[~df.series.str.contains("BOP_")]  # 월별 국제수지는 월말 관측일
+    daily = df[~df.series.str.contains("BOP_|POLICY_|FLOW_")]  # 월별 국제수지는 월말 관측일
     assert (daily.observed_date.dt.dayofweek < 5).all()
 
 

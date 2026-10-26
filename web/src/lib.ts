@@ -23,7 +23,7 @@ export function interp(xs: number[], ys: number[], x: number): number | null {
 
 export const MODEL_SHORT: Record<string, string> = {
   A: "A 랜덤워크", B: "B 역사적 변동성", C: "C EWMA", D: "D 재표본추출",
-  E0: "원·달러만", EJ: "+엔화", EC: "+위안화", ET: "+대만달러", E3: "+세 통화", EF: "+세 통화+달러요인",
+  E0: "원·달러만", EJ: "+엔화", EC: "+위안화", ET: "+대만달러", E3: "+세 통화", EF: "+세 통화+달러요인", EP: "+압력지수(FPI)", ER: "+세 통화+달러요인+금리차(F)",
 };
 
 export function fisher(rho: number, n: number, k = 0): [number, number] {

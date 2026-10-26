@@ -197,7 +197,7 @@ def contribution(bt: pd.DataFrame, since="2012-01-01"):
     """조건부 모형(릿지 평균 + EWMA 분산)의 CRPS 를 원·달러 단독 모형(E0)과 비교. HAC DM 검정."""
     import backtest as B
     out = {}
-    names = {"EJ": "JPY", "EC": "CNY", "ET": "TWD", "E3": "ALL3", "EF": "ALL3+FACTOR", "EP": "FPI"}
+    names = {"EJ": "JPY", "EC": "CNY", "ET": "TWD", "E3": "ALL3", "EF": "ALL3+FACTOR", "EP": "FPI", "ER": "RATES"}
     for k, nm in names.items():
         out[nm] = {}
         for hz in (7, 30):

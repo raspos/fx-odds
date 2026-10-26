@@ -26,8 +26,8 @@ AREAS = [  # (id, 이름, 설명)
     ("cny", "중국 위안화", "USD/CNY 20일 변화 중 달러 요인 잔차"),
     ("twd", "대만 달러", "USD/TWD 20일 변화 중 달러 요인 잔차"),
     ("ext", "한국 대외거래", "경상수지 3개월 합(월, 발표 지연)"),
-    ("flow", "자본 흐름", "외국인 증권투자 순유입(증권투자 부채) 3개월 합(월, 발표 지연)"),
-    ("commod", "원자재·지정학", "WTI 20일 변화 (지정학 위험은 지표 미보유)"),
+    ("flow", "자본 흐름", "외국인 증권투자 순유입(국제수지)·외국인 주식 순매수(월) 3개월 합(월, 발표 지연)"),
+    ("commod", "원자재·지정학", "WTI 20일 변화와 지정학 위험지수(GPR) 20일 평균"),
     ("market", "글로벌 금융시장", "VIX 수준과 코스피 20일 수익률"),
 ]
 
@@ -57,7 +57,7 @@ def _resid(y: pd.Series, f: pd.Series, daily_y: pd.Series, daily_f: pd.Series) -
 def compute(df: pd.DataFrame, dates: pd.DatetimeIndex) -> dict:
     """dates: 서울 기준일(ECOS 영업일). 반환 dict: panel(DataFrame), comps(요인 정의), meta."""
     v, age = {}, {}
-    names = {"dgs2": "yahoo:UST5Y", "dgs10": "yahoo:UST10Y", "ktb": "ecos:KTB3Y", "vix": "yahoo:VIX", "wti": "yahoo:WTI", "kospi": "yahoo:KOSPI",
+    names = {"dgs2": "yahoo:UST5Y", "dgs10": "yahoo:UST10Y", "ktb": "ecos:KTB3Y", "vix": "yahoo:VIX", "wti": "yahoo:WTI", "gpr": "gpr:GPRD", "kospi": "yahoo:KOSPI",
              "jpy": "yahoo:USDJPY", "cny": "yahoo:USDCNY", "twd": "yahoo:USDTWD"}
     for k, n in names.items():
         v[k], o = asof_series(df, n, dates); age[k] = (dates.to_series() - o).dt.days
@@ -69,7 +69,7 @@ def compute(df: pd.DataFrame, dates: pd.DatetimeIndex) -> dict:
     fdf["available_at"] = [avail_date("yahoo:USDFACTOR", d).strftime("%Y-%m-%d") for d in fdf.observed_date]
     v["f"], o = asof_series(fdf, "yahoo:USDFACTOR", dates); age["f"] = (dates.to_series() - o).dt.days  # 누적 로그수준
 
-    lg = {k: (np.log(v[k]) if k in ("jpy", "cny", "twd", "wti", "kospi") else v[k]) for k in v}  # f 는 이미 로그 누적
+    lg = {k: (np.log(v[k]) if k in ("jpy", "cny", "twd", "wti", "kospi") else v[k]) for k in v}  # gpr·금리·vix 는 수준 그대로  # f 는 이미 로그 누적
     d1 = {k: lg[k].diff() for k in lg}
 
     def chg(s):
@@ -82,6 +82,7 @@ def compute(df: pd.DataFrame, dates: pd.DatetimeIndex) -> dict:
     for c in ("jpy", "cny", "twd"):
         sig[c] = (_resid(chg(lg[c]), chg(lg["f"]), d1[c], d1["f"]), +1, c, "daily")
     sig["wti"] = (chg(lg["wti"]), +1, "wti", "daily")
+    sig["gpr"] = (lg["gpr"].rolling(20, min_periods=10).mean(), +1, "gpr", "daily")
     sig["vix"] = (lg["vix"], +1, "vix", "daily")
     sig["kospi"] = (chg(lg["kospi"]), -1, "kospi", "daily")
     zs = {}
@@ -90,7 +91,7 @@ def compute(df: pd.DataFrame, dates: pd.DatetimeIndex) -> dict:
         zs[k] = z.where(age[ak] <= MAX_AGE["daily"])
     # 월별 요인(국제수지): 3개월 합 -> 과거 60개월 z -> 이용 가능일에 맞춰 정렬
     monthly = {}
-    for k, n in (("ext", "ecos:BOP_CURRENT_ACCOUNT"), ("flow", "ecos:BOP_PORTFOLIO_LIAB")):
+    for k, n in (("ext", "ecos:BOP_CURRENT_ACCOUNT"), ("flow", "ecos:BOP_PORTFOLIO_LIAB"), ("fnet", "ecos:FLOW_FOREIGN_NET")):
         g = df[df.series == n].sort_values("observed_date").set_index("observed_date")
         s3 = g["value"].rolling(3).sum()
         zm = ((s3 - s3.rolling(60, min_periods=36).mean().shift(1)) / s3.rolling(60, min_periods=36).std().shift(1)).clip(-3, 3)
@@ -102,7 +103,7 @@ def compute(df: pd.DataFrame, dates: pd.DatetimeIndex) -> dict:
         sig[k] = (asof_series(s3df, n, dates)[0], -1, k, "monthly")
     comp_defs = {  # 영역 -> [(요인키, 부호)]
         "us_policy": [("us2", +1), ("us10", +1)], "kr_policy": [("kr", -1)], "usd": [("usd", +1)], "jpy": [("jpy", +1)], "cny": [("cny", +1)],
-        "twd": [("twd", +1)], "ext": [("ext", -1)], "flow": [("flow", -1)], "commod": [("wti", +1)], "market": [("vix", +1), ("kospi", -1)],
+        "twd": [("twd", +1)], "ext": [("ext", -1)], "flow": [("flow", -1), ("fnet", -1)], "commod": [("wti", +1), ("gpr", +1)], "market": [("vix", +1), ("kospi", -1)],
     }
     area_p = {}
     for a, comps in comp_defs.items():
