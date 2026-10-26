@@ -168,7 +168,7 @@ export default function App() {
       {tab === "s2" && <Section id="s2" no="02" title="압력·뉴스" sub="뉴스가 환율을 미는 방향(실험) · 통계 압력 지수(FPI) · 시장 사건">
         <News N={D.news} refDate={L.base_date} asOf={histMode ? entry.d : null} />
         <h3 className="pt-2 text-xl font-extrabold">통계로 본 압력 (FPI)</h3>
-        <Pressure P={D.fpi} asOf={histMode ? entry.d : null} />
+        <Pressure P={D.fpi} asOf={histMode ? entry.d : null} S={D.series} />
         <h3 className="pt-2 text-xl font-extrabold">시장 사건 (통계 추출)</h3>
         <Events E={D.events} asOf={histMode ? entry.d : null} refDate={histMode ? entry.d : L.base_date} />
       </Section>}

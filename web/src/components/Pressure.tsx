@@ -4,7 +4,7 @@ import { J, fmt, sgn } from "./../lib";
 
 const clr = (v: number | null) => (v == null ? "var(--ink-3)" : v >= 0 ? "var(--up)" : "var(--down)");
 
-export function Pressure({ P, asOf }: { P: J; asOf: string | null }) {
+export function Pressure({ P, asOf, S }: { P: J; asOf: string | null; S: J }) {
   const pal = usePalette();
   const H = P.history;
   const idx = useMemo(() => {
@@ -27,11 +27,20 @@ export function Pressure({ P, asOf }: { P: J; asOf: string | null }) {
       label: { show: true, position: "right", color: pal.ink2, formatter: (p: J) => (p.value == null ? "자료 없음" : sgn(p.value, 0)) } }],
   }), [areas, pal]);
   const tOpt = useMemo(() => {
-    const s = Math.max(0, idx - 500);
-    return { animation: false, grid: { left: 8, right: 16, top: 12, bottom: 24, containLabel: true }, tooltip: { trigger: "axis" },
-      xAxis: { type: "category", data: H.dates.slice(s, idx + 1), axisLabel: { color: pal.ink3 } }, yAxis: { type: "value", min: -60, max: 60, axisLabel: { color: pal.ink3 }, splitLine: { lineStyle: { color: pal.line } } },
-      series: [{ type: "line", showSymbol: false, data: H.fpi.slice(s, idx + 1), lineStyle: { color: pal.ink, width: 1.6 }, markLine: { silent: true, symbol: "none", data: [{ yAxis: 0 }], lineStyle: { color: pal.ink3, type: "dashed" }, label: { show: false } } }] };
-  }, [H, idx, pal]);
+    const s0 = Math.max(0, idx - 500);
+    const dates: string[] = H.dates.slice(s0, idx + 1);
+    const fx = new Map<string, number>(S.dates.map((d: string, i: number) => [d, S.usdkrw[i]]));
+    let last: number | null = null;
+    const krw = dates.map((d) => { const v = fx.get(d); if (v != null) last = v; return last; });
+    return { animation: false, grid: { left: 8, right: 8, top: 34, bottom: 24, containLabel: true }, legend: { top: 0, textStyle: { color: pal.ink2 } },
+      tooltip: { trigger: "axis", valueFormatter: (v: number) => (v == null ? "–" : v.toFixed(1)) },
+      xAxis: { type: "category", data: dates, axisLabel: { color: pal.ink3 } },
+      yAxis: [{ type: "value", name: "FPI", min: -60, max: 60, nameTextStyle: { color: pal.ink3 }, axisLabel: { color: pal.ink3 }, splitLine: { lineStyle: { color: pal.line } } },
+        { type: "value", name: "원/달러", scale: true, nameTextStyle: { color: pal.ink3 }, axisLabel: { color: pal.ink3 }, splitLine: { show: false } }],
+      series: [{ name: "FPI(왼쪽)", type: "line", showSymbol: false, data: H.fpi.slice(s0, idx + 1), lineStyle: { color: pal.up, width: 1.5 },
+          markLine: { silent: true, symbol: "none", data: [{ yAxis: 0 }], lineStyle: { color: pal.ink3, type: "dashed" }, label: { show: false } } },
+        { name: "원/달러(오른쪽)", type: "line", yAxisIndex: 1, showSymbol: false, data: krw, lineStyle: { color: pal.ink, width: 1.8 } }] };
+  }, [H, idx, pal, S]);
   const V = P.validation;
   const dir = fpi == null ? "–" : fpi > 5 ? "원화 약세(환율 상승) 압력 우세" : fpi < -5 ? "원화 강세(환율 하락) 압력 우세" : "뚜렷한 방향 없음(중립 부근)";
   return (
@@ -66,8 +75,9 @@ export function Pressure({ P, asOf }: { P: J; asOf: string | null }) {
         </p>
       </div>
       <div className="card p-4 sm:p-5">
-        <h3 className="text-lg font-bold">FPI 추이 (최근 2년)</h3>
-        <EChart option={tOpt} height={240} />
+        <h3 className="text-lg font-bold">FPI 추이와 실제 환율 (최근 2년)</h3>
+        <EChart option={tOpt} height={300} />
+        <p className="text-[12px] leading-relaxed" style={{ color: "var(--ink-3)" }}>FPI(주황)가 올라갈 때 환율(검정)이 뒤따라 오르면 지수가 방향을 짚은 것입니다. 육안으로는 두 선의 관계가 뚜렷하지 않으며, 아래 검증표가 이를 수치로 확인합니다.</p>
       </div>
       <div className="card p-4 sm:p-5">
         <h3 className="text-lg font-bold">검증: FPI는 이후 환율을 예고했는가 (2012~)</h3>
