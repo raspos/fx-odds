@@ -38,6 +38,8 @@ export function News({ N, refDate, asOf }: { N: J; refDate: string; asOf: string
         <div className="relative mt-3 h-3 rounded-full" style={{ background: "linear-gradient(90deg,var(--down),var(--surface-2) 50%,var(--up))" }}>
           <div className="absolute -top-1 h-5 w-1 rounded" style={{ left: `calc(${(npi + 100) / 2}% - 2px)`, background: "var(--ink)" }} /></div>
         <div className="mt-1 flex justify-between text-[11px]" style={{ color: "var(--ink-3)" }}><span>−100 원화 강세 압력</span><span>0</span><span>+100 원화 약세 압력</span></div>
+        {N.npi_rule != null && <p className="mt-1 text-[12px] num" style={{ color: "var(--ink-3)" }}>규칙만 사용한 값 {sgn(N.npi_rule, 0)} · 규칙+AI 보조 {sgn(npi, 0)}
+          {N.agreement && N.agreement.n_dir > 0 ? ` · 규칙·AI 방향 일치 ${N.agreement.same}/${N.agreement.n_dir}건(반대 ${N.agreement.opposite}건)` : ""}</p>}
         <div className="mt-3 grid grid-cols-3 gap-2 text-center text-[12px]">
           {([["24h", "24시간"], ["7d", "7일"], ["30d", "30일"]] as const).map(([k, l]) => (
             <div key={k} className="rounded-lg p-2" style={{ background: "var(--surface-2)" }}>
@@ -47,10 +49,10 @@ export function News({ N, refDate, asOf }: { N: J; refDate: string; asOf: string
         </div>
         <p className="mt-3 text-[12px] leading-relaxed" style={{ color: "var(--ink-2)" }}>
           네이버 뉴스 검색(제목·링크만)에서 수집한 기사를 인과 규칙(예: 외국인 매도 → 원화 약세, 미국 금리 하락 → 원화 강세)으로 분류했습니다. 같은 날 같은 주제의 기사는 하나의 사건으로 묶어 기사 수가 점수를 키우지 않고,
-          사건 영향은 반감기 {N.half_life_days}일로 줄어듭니다. 상반된 신호나 부정 표현이 있으면 '판단 유보', 환율 결과 보도("환율 하락")는 원인이 아니라서 점수에서 뺍니다.
+          사건 영향은 반감기 {N.half_life_days}일로 줄어듭니다. 규칙이 놓친 환율 관련 제목은 AI(제목만 입력, 확신 없으면 유보)가 보조 판단하며 카드에 'AI 판단'으로 표시합니다. 상반된 신호나 부정 표현이 있으면 '판단 유보', 환율 결과 보도("환율 하락")는 원인이 아니라서 점수에서 뺍니다.
           <b> 과거 환율과의 관계는 아직 검증되지 않았고</b>(과거 뉴스 보존본 없음) 오늘부터 기록을 쌓아 공개 검증합니다. 확률 전망에는 반영하지 않습니다.
         </p>
-        <p className="mt-1 text-[11px]" style={{ color: "var(--ink-3)" }}>수집 {N.counts.n_articles}건 · 판단 {N.counts.n_judged}건 · 유보 {N.counts.n_hold}건 · 분류 불가 {N.counts.n_unclassified}건 · 공식 발표 {N.counts.n_official}건 · 마지막 수집 {N.last_collected.replace("T", " ")}</p>
+        <p className="mt-1 text-[11px]" style={{ color: "var(--ink-3)" }}>수집 {N.counts.n_articles}건 · 판단 {N.counts.n_judged}건 · 유보 {N.counts.n_hold}건 · 분류 불가 {N.counts.n_unclassified}건 · AI 보조 판단 {N.counts.n_ai}건 · 공식 발표 {N.counts.n_official}건 · 마지막 수집 {N.last_collected.replace("T", " ")}</p>
       </div>
       <div className="card p-4 sm:p-5">
         <h3 className="text-lg font-bold">공식 보고서·발표 (한국은행 · 연준 · BIS)</h3>
@@ -86,6 +88,7 @@ export function News({ N, refDate, asOf }: { N: J; refDate: string; asOf: string
           <div className="flex flex-wrap items-center gap-2 text-[11px]" style={{ color: "var(--ink-3)" }}>
             <span className="num">{a.published.replace("T", " ").slice(0, 16)}</span><span>· {a.press}</span>
             <span className="rounded-full px-2 py-0.5" style={{ background: "var(--surface-2)" }}>{N.topics[a.topic] ?? "기타"}</span>
+            <span className="rounded-full px-2 py-0.5 font-bold" style={{ background: a.by === "ai" ? "var(--warn-bg)" : "var(--surface-2)", color: a.by === "ai" ? "var(--warn-ink)" : "var(--ink-3)" }}>{a.by === "ai" ? "AI 판단" : "규칙 판단"}</span>
           </div>
           <a href={a.link} target="_blank" rel="noreferrer" className="mt-1 block text-[14px] font-semibold underline-offset-2 hover:underline">{a.title}</a>
           <div className="mt-1 text-[12px]">

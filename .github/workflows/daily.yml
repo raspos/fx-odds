@@ -27,6 +27,7 @@ jobs:
           ECOS_API_KEY: ${{ secrets.ECOS_API_KEY }}
           NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
           NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: python py/run_daily.py
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: npm, cache-dependency-path: web/package-lock.json }
@@ -35,7 +36,7 @@ jobs:
       - name: 데이터·실시간 예측 기록 커밋 (덮어쓰기 없이 추가만)
         run: |
           git config user.name "fx-odds-bot"; git config user.email "bot@users.noreply.github.com"
-          git add data/fx.sqlite data/live_forecasts.csv data/fetch_status.json data/news.jsonl data/npi_log.csv
+          git add data/fx.sqlite data/live_forecasts.csv data/fetch_status.json data/news.jsonl data/npi_log.csv data/ai_news.jsonl data/ai_usage.csv
           git diff --cached --quiet || git commit -m "data: daily update $(date -u +%F)"
           git pull --rebase -X theirs origin main   # main 이 앞서가면 이 실행이 새로 만든 데이터(바이너리 DB 포함)를 우선해 충돌 없이 얹는다
           git push

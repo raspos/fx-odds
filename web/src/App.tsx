@@ -169,8 +169,10 @@ export default function App() {
         <News N={D.news} refDate={L.base_date} asOf={histMode ? entry.d : null} />
         <h3 className="pt-2 text-xl font-extrabold">통계로 본 압력 (FPI)</h3>
         <Pressure P={D.fpi} asOf={histMode ? entry.d : null} S={D.series} />
-        <h3 className="pt-2 text-xl font-extrabold">시장 사건 (통계 추출)</h3>
-        <Events E={D.events} asOf={histMode ? entry.d : null} refDate={histMode ? entry.d : L.base_date} />
+        <details className="card p-4">
+          <summary className="cursor-pointer text-[15px] font-bold">참고: 시장 데이터 급변동 목록 (통계 추출 · 펼치기)</summary>
+          <div className="mt-3"><Events E={D.events} asOf={histMode ? entry.d : null} refDate={histMode ? entry.d : L.base_date} /></div>
+        </details>
       </Section>}
 
       {tab === "s3" && <Section id="s3" no="03" title="원화 동조화 레이더" sub="원화는 최근 엔화·위안화·대만 달러 중 어느 통화와 가장 밀접하게 움직였나">

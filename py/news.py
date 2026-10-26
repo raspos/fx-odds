@@ -54,7 +54,7 @@ RULES = [
     (r"환율\s*(하락|급락|내림|떨어)|원화\s*(강세|급등)|원\s*[/·]?\s*달러\s*(하락|급락)", "krw", -1, "환율 하락 보도(결과 보도, 원인 아님)"),
 ]
 FAMILY = {"report": "report", "dollar": "dollar", "jpy": "dollar", "cny": "dollar", "flow": "flow", "krrate": "krrate", "oil": "oil", "risk": "risk", "ext": "ext", "krw": "krw"}
-TOPIC_KO = {"report": "공식 보고서·발표", "dollar": "달러·미국 금리", "flow": "외국인 자금", "krrate": "한국 금리", "jpy": "엔화", "cny": "위안화", "oil": "유가", "risk": "위험회피·지정학", "ext": "대외거래", "krw": "원화 환율 보도"}
+TOPIC_KO = {"other": "기타", "report": "공식 보고서·발표", "dollar": "달러·미국 금리", "flow": "외국인 자금", "krrate": "한국 금리", "jpy": "엔화", "cny": "위안화", "oil": "유가", "risk": "위험회피·지정학", "ext": "대외거래", "krw": "원화 환율 보도"}
 STRONG = re.compile(r"급(등|락|증|감|반등)|폭(등|락)|사상|최고|최저|쇼크|우려|전격")
 NEG = re.compile(r"(아니|않|없|전망\s*과\s*달리|부인|일축)")
 
@@ -211,44 +211,65 @@ def judge(it: dict) -> dict:
     return {"topic": main[0], "dir": int(main[1]), "strength": min(3, s), "why": main[2], "status": "판단"}
 
 
-def analyze(items: list[dict], today) -> dict:
-    rows = []
-    for it in items:
-        j = judge(it); pub = datetime.fromisoformat(it["published"])
-        rows.append({**{k: it[k] for k in ("id", "title", "summary", "link", "press", "published", "first_seen")}, "dup_press": it.get("dup_press", []), "official": bool(it.get("official")), **j, "date": pub.date().isoformat()})
-    # 사건 그룹: (날짜, 주제 가족, 방향). 기사 수는 강도에 영향 없음(max)
+def _score(rows: list[dict], today) -> dict:
+    """판단된 기사 -> 사건 그룹 -> 뉴스 압력 지수. 같은 날·주제 가족·방향의 기사는 하나(강도 max)."""
     groups = {}
     for r in rows:
-        if r["dir"] == 0 or r["topic"] == "report":
+        if r["dir"] == 0 or r["topic"] in (None, "report"):
             continue
-        key = (r["date"], FAMILY[r["topic"]], r["dir"])
-        g = groups.setdefault(key, {"date": r["date"], "family": FAMILY[r["topic"]], "dir": r["dir"], "strength": 0, "articles": [], "why": r["why"], "topics": set()})
+        key = (r["date"], FAMILY.get(r["topic"], r["topic"]), r["dir"])
+        g = groups.setdefault(key, {"date": r["date"], "family": FAMILY.get(r["topic"], r["topic"]), "dir": r["dir"], "strength": 0, "articles": [], "why": r["why"], "topics": set()})
         g["strength"] = max(g["strength"], r["strength"]); g["articles"].append(r["id"]); g["topics"].add(r["topic"])
-    # 같은 날 같은 가족에서 방향이 갈리면 둘 다 유보 처리(상쇄하지 않고 제외)
     byfd = {}
     for (d, f, dr), g in groups.items():
         byfd.setdefault((d, f), []).append(g)
     final = []
-    for (d, f), gs in byfd.items():
+    for gs in byfd.values():  # 같은 날 같은 가족에서 방향이 갈리면 상쇄하지 않고 둘 다 제외
         if len(gs) > 1:
             for g in gs:
                 g["conflict"] = True
         final += gs
     S = 0.0
     for g in final:
-        if g.get("conflict") or g["family"] == "krw":  # 결과 보도는 압력 점수에서 제외(원인 아님)
+        if g.get("conflict") or g["family"] == "krw":  # 결과 보도는 원인이 아니므로 점수 제외
             continue
         age = (today - datetime.fromisoformat(g["date"]).date()).days
-        if age < 0:
-            continue
-        S += g["dir"] * g["strength"] * 0.5 ** (age / HALF_LIFE)
+        if age >= 0:
+            S += g["dir"] * g["strength"] * 0.5 ** (age / HALF_LIFE)
     npi = float(100 * np.tanh(S / 15.0))
     win = {}
     for label, days in (("24h", 1), ("7d", 7), ("30d", 30)):
         sel = [g for g in final if 0 <= (today - datetime.fromisoformat(g["date"]).date()).days < days + (0 if days > 1 else 1) and g["family"] != "krw" and not g.get("conflict")]
         win[label] = {"up": sum(1 for g in sel if g["dir"] > 0), "down": sum(1 for g in sel if g["dir"] < 0), "articles": sum(len(g["articles"]) for g in sel)}
-    return {"rows": rows, "groups": [{**g, "topics": sorted(g["topics"])} for g in final], "npi": round(npi, 1), "S": round(S, 2), "windows": win,
-            "n_articles": len(rows), "n_judged": sum(1 for r in rows if r["dir"] != 0), "n_hold": sum(1 for r in rows if r["status"] == "판단 유보"), "n_unclassified": sum(1 for r in rows if r["status"] == "분류 불가"), "n_official": sum(1 for r in rows if r["official"])}
+    return {"groups": [{**g, "topics": sorted(g["topics"])} for g in final], "npi": round(npi, 1), "S": round(S, 2), "windows": win}
+
+
+def analyze(items: list[dict], today, ai: dict | None = None) -> dict:
+    """ai: ai_news 캐시({기사id: 행}). 규칙이 판단하지 못한 기사에만 AI 판단을 얹고, 규칙 판단 기사 중 AI 표본은 일치율 점검에만 쓴다."""
+    import ai_news
+    rows_rule, rows_all, agree = [], [], []
+    for it in items:
+        j = judge(it); pub = datetime.fromisoformat(it["published"])
+        base = {**{k: it[k] for k in ("id", "title", "summary", "link", "press", "published", "first_seen")}, "dup_press": it.get("dup_press", []),
+                "official": bool(it.get("official")), "date": pub.date().isoformat()}
+        rr = {**base, **j, "by": "rule"}
+        rows_rule.append(rr)
+        a = (ai or {}).get(it["id"])
+        if a and not it.get("official"):
+            aj = ai_news.to_judgement(a)
+            if j["status"] in ("분류 불가", "판단 유보"):
+                rows_all.append({**base, **aj, "by": "ai", "ai_model": a["model"]})
+                continue
+            if a.get("sampled") and j["dir"] != 0:
+                agree.append((j["dir"], aj["dir"]))
+        rows_all.append(rr)
+    sc_rule, sc_all = _score(rows_rule, today), _score(rows_all, today)
+    n_ag = sum(1 for r, a in agree if a != 0)
+    return {"rows": rows_all, "groups": sc_all["groups"], "npi": sc_all["npi"], "S": sc_all["S"], "windows": sc_all["windows"], "npi_rule": sc_rule["npi"], "windows_rule": sc_rule["windows"],
+            "n_articles": len(rows_all), "n_judged": sum(1 for r in rows_all if r["dir"] != 0), "n_hold": sum(1 for r in rows_all if "유보" in r["status"]),
+            "n_unclassified": sum(1 for r in rows_all if r["status"] == "분류 불가"), "n_official": sum(1 for r in rows_all if r["official"]),
+            "n_ai": sum(1 for r in rows_all if r.get("by") == "ai" and r["dir"] != 0),
+            "agreement": {"n": len(agree), "n_dir": n_ag, "same": sum(1 for r, a in agree if a == r), "opposite": sum(1 for r, a in agree if a not in (0, r)), "ai_hold": sum(1 for r, a in agree if a == 0)}}
 
 
 def build_output(today, status: dict) -> dict:
@@ -256,10 +277,11 @@ def build_output(today, status: dict) -> dict:
     if not items:
         return {"available": False, "status": status, "note": "뉴스 수집 전입니다(NAVER_CLIENT_ID/SECRET 필요).", "queries": QUERIES}
     cutoff = (today - timedelta(days=30)).isoformat()
-    a = analyze([i for i in items if i["published"][:10] >= cutoff], today)
+    import ai_news
+    a = analyze([i for i in items if i["published"][:10] >= cutoff], today, ai_news.load_cache())
     arts = [r for r in a["rows"]]
-    return {"available": True, "status": status, "npi": a["npi"], "S": a["S"], "windows": a["windows"], "half_life_days": HALF_LIFE,
-            "counts": {k: a[k] for k in ("n_articles", "n_judged", "n_hold", "n_unclassified", "n_official")}, "groups": sorted(a["groups"], key=lambda g: g["date"], reverse=True),
+    return {"available": True, "status": status, "npi": a["npi"], "npi_rule": a["npi_rule"], "windows_rule": a["windows_rule"], "agreement": a["agreement"], "S": a["S"], "windows": a["windows"], "half_life_days": HALF_LIFE,
+            "counts": {k: a[k] for k in ("n_articles", "n_judged", "n_hold", "n_unclassified", "n_official", "n_ai")}, "groups": sorted(a["groups"], key=lambda g: g["date"], reverse=True),
             "articles": arts[:400], "topics": TOPIC_KO, "queries": QUERIES, "last_collected": max(i["first_seen"] for i in items),
             "rules": [{"topic": t, "dir": d, "why": w} for _, t, d, w in RULES]}
 
