@@ -1,5 +1,5 @@
 {
- "at": "2026-10-26T23:22:46+00:00",
+ "at": "2026-10-26T23:28:29+00:00",
  "ecos": {
   "ecos:KRW_per_USD": 6635,
   "ecos:KRW_per_CNY": 2660,
@@ -37,11 +37,15 @@
  },
  "naver": {
   "ok": false,
-  "why": "NAVER_CLIENT_ID/SECRET 없음"
+  "why": "'원달러 환율': HTTPError 401 Client Error: Unauthorized for url: https://naverapihub.apigw.ntru; '원화 약세': HTTPError 401 Client Error: Unauthorized for url: https://naverapihub.apigw.ntru; '원화 강세': HTTPError 401 Client Error: Unauthorized for url: https://naverapihub.apigw.ntru; '달러 강세': HTTPError 401 Cli"
  },
  "official": {
   "ok": true,
   "received": 60,
   "errors": []
+ },
+ "kis": {
+  "ok": false,
+  "why": "KIS_APP_KEY/SECRET 없음(건너뜀)"
  }
 }
