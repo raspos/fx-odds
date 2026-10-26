@@ -1,5 +1,5 @@
 {
- "at": "2026-10-26T23:09:25+00:00",
+ "at": "2026-10-26T23:22:46+00:00",
  "ecos": {
   "ecos:KRW_per_USD": 6635,
   "ecos:KRW_per_CNY": 2660,
@@ -34,5 +34,14 @@
  },
  "gpr": {
   "gpr:GPRD": 10910
+ },
+ "naver": {
+  "ok": false,
+  "why": "NAVER_CLIENT_ID/SECRET 없음"
+ },
+ "official": {
+  "ok": true,
+  "received": 60,
+  "errors": []
  }
 }
