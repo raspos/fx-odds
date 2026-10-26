@@ -80,10 +80,10 @@ export default function App() {
       </div>
       <header className="sticky top-0 z-10 -mx-4 border-b px-4 py-3 sm:-mx-6 sm:px-6" style={{ background: "color-mix(in srgb, var(--bg) 92%, transparent)", borderColor: "var(--line)", backdropFilter: "blur(8px)" }}>
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-          <div className="mr-auto">
+          <a className="mr-auto" href="./" title="처음 화면으로 새로고침" onClick={(e) => { e.preventDefault(); location.href = location.pathname + location.search.split("#")[0]; location.reload(); }} style={{ color: "inherit", textDecoration: "none" }}>
             <h1 className="text-xl font-black tracking-tight">FX ODDS</h1>
             <p className="text-xs" style={{ color: "var(--ink-2)" }}>환율의 확률과 압력을 읽다</p>
-          </div>
+          </a>
           <label className="flex items-center gap-2 text-xs" style={{ color: "var(--ink-2)" }}>
             기준일
             <input type="date" min={first} max={last} value={asOf ?? last} onChange={(e) => setAsOf(e.target.value && e.target.value < last ? e.target.value : null)}
