@@ -9,7 +9,7 @@ DATA = ROOT / "data"
 RAW = DATA / "raw"
 OUT = ROOT / "web" / "public" / "data"
 KST = timezone(timedelta(hours=9))
-KEY_ENVS = ("ECOS_API_KEY", "FRED_API_KEY", "OPENAI_API_KEY", "NAVER_CLIENT_ID", "NAVER_CLIENT_SECRET")
+KEY_ENVS = ("ECOS_API_KEY", "FRED_API_KEY", "OPENAI_API_KEY", "NAVER_CLIENT_ID", "NAVER_CLIENT_SECRET", "KIS_APP_KEY", "KIS_APP_SECRET")
 
 
 def load_dotenv(path: Path) -> None:
@@ -62,6 +62,8 @@ def avail_date(series: str, obs: pd.Timestamp) -> pd.Timestamp:
     src, _, name = series.partition(":")
     if src == "ecos":
         return obs + pd.Timedelta(days=MONTHLY_LAG_DAYS) if name.startswith(("BOP_", "POLICY_", "FLOW_")) else obs
+    if src == "kis":  # 장 마감 후 집계 -> 다음 날부터 이용
+        return obs + pd.Timedelta(days=1)
     if src == "gpr":  # GPR 지수는 사후 수정되므로 2일 보수적 지연
         return obs + pd.Timedelta(days=2)
     if src == "yahoo":

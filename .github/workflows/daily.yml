@@ -27,6 +27,8 @@ jobs:
           ECOS_API_KEY: ${{ secrets.ECOS_API_KEY }}
           NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
           NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
+          KIS_APP_KEY: ${{ secrets.KIS_APP_KEY }}
+          KIS_APP_SECRET: ${{ secrets.KIS_APP_SECRET }}
         run: python py/run_daily.py
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: npm, cache-dependency-path: web/package-lock.json }

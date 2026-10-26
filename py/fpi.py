@@ -26,7 +26,7 @@ AREAS = [  # (id, 이름, 설명)
     ("cny", "중국 위안화", "USD/CNY 20일 변화 중 달러 요인 잔차"),
     ("twd", "대만 달러", "USD/TWD 20일 변화 중 달러 요인 잔차"),
     ("ext", "한국 대외거래", "경상수지 3개월 합(월, 발표 지연)"),
-    ("flow", "자본 흐름", "외국인 증권투자 순유입(국제수지)·외국인 주식 순매수(월) 3개월 합(월, 발표 지연)"),
+    ("flow", "외국인 증권 순매수 압력", "외국인 코스피·코스닥 일별 순매수 20일 합(KIS API) · 월별 국제수지 증권투자·외국인 주식 순매수 3개월 합"),
     ("commod", "원자재·지정학", "WTI 20일 변화와 지정학 위험지수(GPR) 20일 평균"),
     ("market", "글로벌 금융시장", "VIX 수준과 코스피 20일 수익률"),
 ]
@@ -69,6 +69,16 @@ def compute(df: pd.DataFrame, dates: pd.DatetimeIndex) -> dict:
     fdf["available_at"] = [avail_date("yahoo:USDFACTOR", d).strftime("%Y-%m-%d") for d in fdf.observed_date]
     v["f"], o = asof_series(fdf, "yahoo:USDFACTOR", dates); age["f"] = (dates.to_series() - o).dt.days  # 누적 로그수준
 
+    # 외국인 코스피+코스닥 일별 순매수(KIS). 자료가 없으면 NaN 이므로 해당 요인은 제외된다
+    kk = df[df.series.isin(["kis:FRGN_NET_KOSPI", "kis:FRGN_NET_KOSDAQ"])]
+    if len(kk):
+        w = kk.pivot_table(index="observed_date", columns="series", values="value").dropna()
+        ks = w.sum(axis=1)
+        kdf = pd.DataFrame({"series": "kis:FRGN_NET", "observed_date": ks.index, "value": ks.values})
+        kdf["available_at"] = [avail_date("kis:FRGN_NET", d).strftime("%Y-%m-%d") for d in kdf.observed_date]
+        v["fd"], o = asof_series(kdf, "kis:FRGN_NET", dates); age["fd"] = (dates.to_series() - o).dt.days
+    else:
+        v["fd"] = pd.Series(np.nan, index=dates); age["fd"] = pd.Series(999, index=dates)
     lg = {k: (np.log(v[k]) if k in ("jpy", "cny", "twd", "wti", "kospi") else v[k]) for k in v}  # gpr·금리·vix 는 수준 그대로  # f 는 이미 로그 누적
     d1 = {k: lg[k].diff() for k in lg}
 
@@ -82,6 +92,7 @@ def compute(df: pd.DataFrame, dates: pd.DatetimeIndex) -> dict:
     for c in ("jpy", "cny", "twd"):
         sig[c] = (_resid(chg(lg[c]), chg(lg["f"]), d1[c], d1["f"]), +1, c, "daily")
     sig["wti"] = (chg(lg["wti"]), +1, "wti", "daily")
+    sig["fd"] = (v["fd"].rolling(H, min_periods=15).sum(), -1, "fd", "daily")
     sig["gpr"] = (lg["gpr"].rolling(20, min_periods=10).mean(), +1, "gpr", "daily")
     sig["vix"] = (lg["vix"], +1, "vix", "daily")
     sig["kospi"] = (chg(lg["kospi"]), -1, "kospi", "daily")
@@ -103,7 +114,7 @@ def compute(df: pd.DataFrame, dates: pd.DatetimeIndex) -> dict:
         sig[k] = (asof_series(s3df, n, dates)[0], -1, k, "monthly")
     comp_defs = {  # 영역 -> [(요인키, 부호)]
         "us_policy": [("us2", +1), ("us10", +1)], "kr_policy": [("kr", -1)], "usd": [("usd", +1)], "jpy": [("jpy", +1)], "cny": [("cny", +1)],
-        "twd": [("twd", +1)], "ext": [("ext", -1)], "flow": [("flow", -1), ("fnet", -1)], "commod": [("wti", +1), ("gpr", +1)], "market": [("vix", +1), ("kospi", -1)],
+        "twd": [("twd", +1)], "ext": [("ext", -1)], "flow": [("flow", -1), ("fnet", -1), ("fd", -1)], "commod": [("wti", +1), ("gpr", +1)], "market": [("vix", +1), ("kospi", -1)],
     }
     area_p = {}
     for a, comps in comp_defs.items():
