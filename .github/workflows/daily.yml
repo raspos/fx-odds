@@ -33,6 +33,7 @@ jobs:
           git config user.name "fx-odds-bot"; git config user.email "bot@users.noreply.github.com"
           git add data/fx.sqlite data/live_forecasts.csv data/fetch_status.json data/news.jsonl data/npi_log.csv
           git diff --cached --quiet || git commit -m "data: daily update $(date -u +%F)"
+          git pull --rebase origin main   # 실행 중 main 이 앞서가도 push 가 거부되지 않도록
           git push
       - uses: actions/upload-pages-artifact@v3
         with: { path: web/dist }
