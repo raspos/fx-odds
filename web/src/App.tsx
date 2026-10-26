@@ -72,6 +72,11 @@ export default function App() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 pb-24 sm:px-6">
+      <div className="-mx-4 flex items-center gap-1 border-b px-4 py-1.5 text-[12px] sm:-mx-6 sm:px-6" style={{ borderColor: "var(--line)", background: "var(--surface-2)" }} aria-label="서비스 전환">
+        <span style={{ color: "var(--ink-3)" }}>서비스</span>
+        <a href="https://bokwatch.pages.dev/" className="rounded-full px-2.5 py-0.5" style={{ color: "var(--ink-2)" }}>BOK워치 · 금통위 금리 결정 ↗</a>
+        <span className="rounded-full px-2.5 py-0.5 font-bold" style={{ background: "var(--ink)", color: "var(--bg)" }} aria-current="page">FX ODDS · 환율</span>
+      </div>
       <header className="sticky top-0 z-10 -mx-4 border-b px-4 py-3 sm:-mx-6 sm:px-6" style={{ background: "color-mix(in srgb, var(--bg) 92%, transparent)", borderColor: "var(--line)", backdropFilter: "blur(8px)" }}>
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
           <div className="mr-auto">
