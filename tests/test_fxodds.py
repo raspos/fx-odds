@@ -87,7 +87,7 @@ def df():
 
 
 def test_direction_unified_usd_per_foreign(df):
-    y = prep.panel_yahoo_or_fred(df, "fred").dropna()
+    y = prep.panel_yahoo_or_fred(df, "yahoo").dropna()
     # EUR는 'USD per EUR' 원자료를 역수로 바꿔 USD당 외화 방향으로 통일: 1.0~1.0 근방이 아니라 0.7~1.3
     assert 0.5 < y["EUR"].iloc[-1] < 1.5
     assert 800 < y["KRW"].iloc[-1] < 2500 and 50 < y["JPY"].iloc[-1] < 300 and 4 < y["CNY"].iloc[-1] < 10 and 20 < y["TWD"].iloc[-1] < 40
