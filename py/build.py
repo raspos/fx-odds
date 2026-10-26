@@ -223,8 +223,8 @@ def main(skip_bt=False, write_live=True):
                     **{a: [rnd(v, 1) for v in fh[a]] for a in ids}},
         "validation": F.validate(fres, ecos), "z_window": F.Z_WIN, "signal_window": F.H,
         "sources": {"us_policy": "Yahoo ^FVX·^TNX", "kr_policy": "ECOS 817Y002 국고채 3년", "usd": "Yahoo 6개 통화", "jpy": "Yahoo USD/JPY", "cny": "Yahoo USD/CNY", "twd": "Yahoo USD/TWD",
-                    "ext": "ECOS 301Y017 경상수지(월)", "flow": "KIS 외국인 코스피·코스닥 일별 순매수, ECOS 301Y013·901Y055(월)", "commod": "Yahoo CL=F(WTI), GPR 지정학 위험지수", "market": "Yahoo ^VIX·^KS11"},
-        "missing": ["외국인 채권 일별 순매수(금융투자협회·코스콤 경로는 API 제공·약관 추가 확인 필요, 월별 통계만 사용)", "시장 컨센서스(예상 대비 차이) — 무료·합법 자료원 없음"] + ([] if any(c["key"] == "fd" and c["z"] is not None for a in detail["areas"] for c in a["components"]) else ["외국인 코스피·코스닥 일별 순매수(KIS 앱키 등록·백필 전이라 아직 미반영)"])})
+                    "ext": "ECOS 301Y017 경상수지(월)", "flow": "ECOS 301Y013 증권투자(부채), 901Y055 외국인 순매수(월)", "commod": "Yahoo CL=F(WTI), GPR 지정학 위험지수", "market": "Yahoo ^VIX·^KS11"},
+        "missing": ["외국인 일별 순매수·채권 자금(월별 통계로만 확보, 발표 지연 — 한국투자증권 API는 사용하지 않음, 무료 일별 자료원 없음)", "시장 컨센서스(예상 대비 차이) — 무료·합법 자료원 없음"]})
     evs = EV.build(df)
     # 뉴스(네이버): 분석·기록 후 통계 사건에 전후 1일 관련 기사를 붙인다
     st = json.loads((DATA / "fetch_status.json").read_text(encoding="utf-8")).get("naver") if (DATA / "fetch_status.json").exists() else None

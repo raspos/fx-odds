@@ -222,15 +222,3 @@ def test_fpi_range_and_coverage():
     assert vals and -100 <= min(vals) and max(vals) <= 100
     assert all(0 <= c <= 1 for c in F["history"]["coverage"])
     assert F["experimental"] is True
-
-
-def test_kis_parse_rows_and_availability():
-    import kis
-    from common import avail_date
-    out = kis.parse_rows([{"stck_bsop_date": "20261023", "frgn_ntby_tr_pbmn": "-1234567"}, {"stck_bsop_date": "20261022", "frgn_ntby_tr_pbmn": ""}, {"foo": 1}])
-    assert out == [("20261023", -1234567.0)]
-    assert avail_date("kis:FRGN_NET_KOSPI", pd.Timestamp("2026-10-23")) == pd.Timestamp("2026-10-24")
-    import os
-    for k in ("KIS_APP_KEY", "KIS_APP_SECRET"):
-        os.environ.pop(k, None)
-    assert kis.collect()["ok"] is False  # 키가 없으면 조용히 건너뛴다
