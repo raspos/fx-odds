@@ -13,7 +13,7 @@ const Code = ({ children }: { children: React.ReactNode }) => (
 export const STATUS: [string, string, string][] = [
   ["USD/KRW 7일·30일 확률 전망 (모형 A~D)", "구현", "ECOS 매매기준율, 일별 갱신"],
   ["분포 차트·구간 확률표·도달 확률 계산기·기간 중 돌파 확률", "구현", "브라운 다리 보정 포함"],
-  ["원화 동조화 레이더 (20·60·120·252일, 달러요인 통제, 선행·후행, Granger, 예측 기여도)", "구현", "FRED 동일 관측(A) + 서울 시차 정렬(B)"],
+  ["원화 동조화 레이더 (20·60·120·252일, 달러요인 통제, 선행·후행, Granger, 예측 기여도)", "구현", "Yahoo 단일 출처(비공식), 전 거래일까지"],
   ["FX SCORECARD (MAE·RMSE·포함률·Brier·CRPS·DM 검정)", "구현", "2012~ Walk-forward, 다운로드 제공"],
   ["과거 시점 재현 (HISTORICAL MODE)", "일부", "환율 전망·동조화만. 당시 뉴스·FPI는 보존 자료 없음"],
   ["조건부 모형 E (원화+해외통화+달러요인)", "실험", "백테스트에서 개선이 확인되지 않아 공식 전망 미반영"],
@@ -40,8 +40,8 @@ export default function Methodology({ meta }: { meta: J }) {
         <h3 className="text-lg font-bold">계산 방법 공개</h3>
         <Item n={1} t="데이터 출처">
           <p><b>ECOS</b> 731Y001 원/미국달러·원/위안·원/100엔·원/대만달러 매매기준율(서울 기준) — 전망의 기준 시계열.</p>
-          <p><b>FRED</b> DEXKOUS·DEXJPUS·DEXCHUS·DEXTAUS와 DEXUSEU·DEXUSUK·DEXUSAL·DEXCAUS·DEXSZUS·DEXSDUS (연준 H.10, 뉴욕 정오 매입환율) — 레이더 A.</p>
-          <p><b>Yahoo Finance</b> 일봉 마감(비공식·무료) — 레이더 B의 해외 통화와 최신일 보강. 수집 실패 시 해당 항목은 비어 있으며 대체값을 만들지 않습니다.</p>
+          <p><b>FRED</b> 미국 금리·VIX·유가(FPI)와 H.10 환율(교차검증용). 레이더에는 쓰지 않습니다(H.10 환율은 발표가 1~2주 늦음).</p>
+          <p><b>Yahoo Finance</b> 일봉 마감(비공식·무료) — 동조화 레이더의 원·엔·위안·대만달러와 달러요인(단일 출처, 같은 시각 관측). 수집 실패 시 해당 항목은 비어 있으며 대체값을 만들지 않습니다.</p>
           <p>적재 규칙: 양수가 아닌 값, 주말 행 제거. 출처를 섞어 한 시계열로 합치지 않습니다.</p>
         </Item>
         <Item n={2} t="환율 가격 정의와 방향">

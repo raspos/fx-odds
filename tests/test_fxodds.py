@@ -138,7 +138,7 @@ def test_rolling_corr_has_no_lookahead():
 
 
 def test_returns_not_levels(df):
-    r = radar.returns_A(df)
+    r = radar.returns_Y(df)
     assert r["KRW"].abs().max() < 0.2  # 가격 수준(1,300)이 아니라 일별 로그수익률
 
 
@@ -194,11 +194,11 @@ def test_availability_rules():
 @needs_data
 def test_historical_radar_never_uses_unavailable_observations():
     R = json.loads((OUT / "radar.json").read_text(encoding="utf-8"))
-    for v in ("A_FRED", "B_SEOUL"):
+    for v in ("YAHOO",):
         h = R[v]["history"]
         assert all(a >= d for a, d in zip(h["avail"], h["dates"]))
         assert h["avail"] == sorted(h["avail"])  # 선택일로 자를 수 있도록 단조
-    h = R["A_FRED"]["history"]
+    h = R["YAHOO"]["history"]
     asof = "2025-03-14"
     last = max(i for i, a in enumerate(h["avail"]) if a <= asof)
     assert h["dates"][last] <= asof and h["avail"][last] <= asof

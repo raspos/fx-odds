@@ -24,13 +24,12 @@ function rowsAt(V: J, w: number, asOfIdx: number | null): { rows: Row[]; date: s
 }
 
 export default function Radar({ R, asOf }: { R: J; asOf: string | null }) {
-  const [variant, setVariant] = useState<"A_FRED" | "B_SEOUL">("A_FRED");
   const [w, setW] = useState(60);
   const [kind, setKind] = useState<"simple" | "partial">("simple");
   const [sc, setSc] = useState<(typeof CCY)[number]>("JPY");
   const [llPeriod, setLlPeriod] = useState<"y1" | "y3" | "stress" | "calm">("y3");
   const [llDir, setLlDir] = useState<"lead" | "rev">("lead");
-  const V = R[variant];
+  const V = R.YAHOO;
   const P = usePalette();
 
   const asOfIdx = useMemo(() => {
@@ -109,16 +108,9 @@ export default function Radar({ R, asOf }: { R: J; asOf: string | null }) {
   return (
     <div className="space-y-4">
       <div className="card p-4 sm:p-5">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-sm font-semibold">자료 기준</span>
-          <button className="btn" aria-pressed={variant === "A_FRED"} onClick={() => setVariant("A_FRED")}>A · FRED 동일 관측(공식)</button>
-          <button className="btn" aria-pressed={variant === "B_SEOUL"} onClick={() => setVariant("B_SEOUL")}>B · 서울 종가 시차 정렬(Yahoo, 비공식)</button>
-        </div>
-        <p className="mt-2 text-[12px] leading-relaxed" style={{ color: "var(--ink-3)" }}>
-          {variant === "A_FRED"
-            ? "미국 연준 H.10(뉴욕 정오 매입환율) 일별 환율. 네 통화가 같은 시각에 관측돼 시각 불일치가 없지만 발표가 1~2주 늦습니다."
-            : "원화는 한국은행 ECOS 서울 매매기준율, 해외 통화·달러요인은 Yahoo Finance 일봉 마감 중 서울 기준일 '직전 영업일' 마감. 서울 종가 이전에 확정된 움직임만 쓰도록 맞췄지만 출처가 비공식입니다."}
-          {" "}자료 마지막 관측일 <b className="num">{V.last_date}</b>, 표본 {fmt(V.n_obs)}일. 모든 계산은 가격 수준이 아닌 일별 로그수익률(USD 1단위당 외화, 상승=외화 약세) 기준입니다.
+        <p className="text-[12px] leading-relaxed" style={{ color: "var(--ink-3)" }}>
+          자료: Yahoo Finance 일봉 마감(비공식) 단일 출처. 원·엔·위안·대만 달러가 같은 시각(런던 자정 마감)에 관측돼 시각 불일치가 없습니다. 자료 마지막 관측일 <b className="num">{V.last_date}</b>, 표본 {fmt(V.n_obs)}일.
+          모든 계산은 가격 수준이 아닌 일별 로그수익률(USD 1단위당 외화, 상승=외화 약세) 기준입니다. 전망 모형의 기준 환율(한국은행 ECOS 매매기준율)과는 관측 시각·출처가 달라 일 단위 값이 다를 수 있습니다.
         </p>
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <span className="text-sm font-semibold">창</span>
@@ -180,7 +172,7 @@ export default function Radar({ R, asOf }: { R: J; asOf: string | null }) {
           <EChart option={hmOpt} height={230} />
           <p className="text-[12px] leading-relaxed" style={{ color: "var(--ink-3)" }}>
             {llDir === "lead" ? "원화 수익률(t)과 해외 통화 수익률(t−k)의 상관." : "해외 통화 수익률(t)과 원화 수익률(t−k)의 상관."} 불안기는 원화 20일 변동성 상위 25% 구간.
-            {variant === "B_SEOUL" ? " B 기준의 '동시'는 서울 종가 직전 영업일에 확정된 해외 마감과의 상관이라 순수 동시점이 아닙니다." : " A 기준 '동시'는 같은 날 뉴욕 정오 관측 간 상관입니다."} 최신 기준 값이며 날짜 선택을 반영하지 않습니다.
+            {" '동시'는 같은 날 같은 시각에 관측된 마감 간 상관입니다."} 최신 기준 값이며 날짜 선택을 반영하지 않습니다.
           </p>
           <div className="scrollx mt-2">
             <table className="t">
@@ -219,7 +211,7 @@ export default function Radar({ R, asOf }: { R: J; asOf: string | null }) {
 
       <div className="card p-4 sm:p-5">
         <h3 className="text-lg font-bold">⑥ 현재 동조화 해설</h3>
-        <p className="mt-1 text-[11px]" style={{ color: "var(--ink-3)" }}>계산 결과로 자동 생성한 규칙 기반 문장입니다(LLM 미사용). 선택한 자료 기준 {variant === "A_FRED" ? "A" : "B"} · 최신 {V.last_date}.</p>
+        <p className="mt-1 text-[11px]" style={{ color: "var(--ink-3)" }}>계산 결과로 자동 생성한 규칙 기반 문장입니다(LLM 미사용). 최신 {V.last_date}.</p>
         <ul className="mt-2 list-disc space-y-1.5 pl-5 text-[14px] leading-relaxed">
           {V.narrative.map((s: string, i: number) => <li key={i}>{s}</li>)}
         </ul>

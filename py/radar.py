@@ -1,9 +1,6 @@
 """FX CORRELATION RADAR: 원화와 JPY·CNY·TWD 의 동조화. 모든 계산은 일별 로그수익률(USD 1단위당 외화, 상승=외화 약세) 기준.
 
-변형
-  A_FRED  : FRED H.10 (뉴욕 정오 매입환율) 동일 관측 기준 4개 통화 + 6개 비아시아 통화(달러요인). 공식 통계, 발표 지연(약 1~2주).
-  B_SEOUL : 원화는 ECOS 서울 매매기준율(서울 15:30 부근), 해외 통화·달러요인은 Yahoo 일봉 마감 중 '서울 기준일 직전 영업일' 마감.
-            서울 종가 이전에 확정된 해외 움직임만 사용하므로 시차 정렬형이다. 비공식 출처(Yahoo) 사용.
+자료: Yahoo Finance 일봉 마감(비공식, 무료) 단일 출처. 원·엔·위안·대만 달러와 달러요인 6개 통화가 같은 시각(런던 자정 마감)에 관측돼 시각 불일치가 없고 전 거래일까지 갱신된다.
 """
 from __future__ import annotations
 import numpy as np
@@ -20,22 +17,11 @@ LAGS = (0, 1, 2, 3, 5)
 MIN_N = {20: 20, 60: 60, 120: 120, 252: 252}
 
 
-def returns_A(df_long):
-    p = prep.panel_yahoo_or_fred(df_long, "fred")
+def returns_Y(df_long):
+    p = prep.panel_yahoo_or_fred(df_long, "yahoo")
     r = prep.logret(p.dropna()).copy()
     r["USD_FACTOR"] = prep.dollar_factor(r)
     return r[["KRW"] + CCY + ["USD_FACTOR"]]
-
-
-def returns_B(df_long):
-    ecos = prep.panel_ecos(df_long)["KRW"].dropna()
-    krw = np.log(ecos).diff().rename("KRW")
-    y = prep.logret(prep.panel_yahoo_or_fred(df_long, "yahoo"))
-    y["USD_FACTOR"] = prep.dollar_factor(y)
-    cal = pd.bdate_range(min(krw.index.min(), y.index.min()), max(krw.index.max(), y.index.max()))
-    f = y[CCY + ["USD_FACTOR"]].reindex(cal).shift(1)  # 서울 기준일 D 에는 D-1 영업일 마감 수익률
-    out = pd.concat([krw, f.reindex(krw.index)], axis=1).dropna()
-    return out[["KRW"] + CCY + ["USD_FACTOR"]]
 
 
 def partial_corr(rk, rx, rf):
@@ -165,7 +151,7 @@ def granger(r: pd.DataFrame, maxlag=5, n=756):
     return out
 
 
-def narrative(snap, ll, gr, contrib, win="60", variant="A") -> list[str]:
+def narrative(snap, ll, gr, contrib, win="60") -> list[str]:
     """계산 결과로 규칙 기반 문장을 만든다. LLM 호출 없음."""
     rows = snap[win]["rows"]
     s = sorted(rows, key=lambda x: -(x["simple"] if x["simple"] is not None else -9))
@@ -235,12 +221,12 @@ def contribution(bt: pd.DataFrame, since="2012-01-01"):
 def build(df_long, bt):
     res = {}
     contrib = contribution(bt)
-    for name, fn in (("A_FRED", returns_A), ("B_SEOUL", returns_B)):
+    for name, fn in (("YAHOO", returns_Y),):
         r = fn(df_long)
         snap = snapshot(r)
         ll = leadlag(r)
         gr = granger(r)
-        res[name] = {"last_date": r.index[-1].strftime("%Y-%m-%d"), "n_obs": int(len(r)), "snapshot": snap, "history": history(r, avail_src="fred:USDKRW" if name == "A_FRED" else "ecos:KRW_per_USD"),
+        res[name] = {"last_date": r.index[-1].strftime("%Y-%m-%d"), "n_obs": int(len(r)), "snapshot": snap, "history": history(r, avail_src="yahoo:USDKRW"),
                      "scatter": scatter(r), "leadlag": ll, "granger": gr, "narrative": narrative(snap, ll, gr, contrib)}
     res["contribution"] = contrib
     return res
