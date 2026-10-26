@@ -64,12 +64,14 @@ npm run build                              # web/dist (정적 파일)
 
 하루 1회 배치는 `python py/run_daily.py` (수집 → 분석 → JSON). 수집이 실패하면 이전 정상 데이터로 빌드하고 `meta.json`의 `stale_warning`으로 화면에 경고를 띄운다.
 
-## Cloudflare Pages 배포
+## GitHub Pages 배포
 
-- 자동: `.github/workflows/daily.yml` (평일 18:40 KST). 필요한 Secrets: `ECOS_API_KEY`, `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`. 프로젝트 이름은 `fx-odds`.
-- 수동: `npm run build` 후 `npx wrangler pages deploy web/dist --project-name=fx-odds`.
-- 개발 중 빌드는 `python py/build.py --no-live`로 실시간 기록을 만들지 않는다(첫 기록은 첫 배포 배치에서 시작).
-- 저장소에는 `data/fx.sqlite`와 `data/live_forecasts.csv`(실시간 예측 기록)를 커밋해 기록이 유지되도록 한다. `data/raw/`, `.env`는 커밋하지 않는다.
+1. GitHub에서 빈 저장소를 만들고 `git remote add origin <URL>` 후 `git push -u origin main`.
+2. 저장소 Settings → Pages → Source 를 **GitHub Actions** 로 지정.
+3. Settings → Secrets and variables → Actions 에 `ECOS_API_KEY` 등록.
+4. Actions 탭에서 `daily` 워크플로를 수동 실행(workflow_dispatch). 이후 평일 18:40 KST에 자동 갱신·배포된다.
+- 사이트 주소: `https://<사용자>.github.io/<저장소>/` (상대 경로 `base: "./"` 로 빌드).
+- `data/fx.sqlite`와 `data/live_forecasts.csv`는 배치가 커밋해 기록을 유지한다. 공개 저장소이므로 Yahoo 원시 자료 재배포 약관을 확인할 것.
 
 ## 구조
 
