@@ -156,8 +156,8 @@ export default function App() {
               <HorizonCard hz={30} spot={L.spot} H={L.horizons["30"]} />
             </div>
             <DistributionChart L={L} />
-            <ThresholdCalculator L={L} />
             <ModelTable L={L} />
+            <ThresholdCalculator L={L} />
           </>
         )}
         <p className="text-[12px] leading-relaxed" style={{ color: "var(--ink-3)" }}>
