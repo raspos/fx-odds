@@ -1,0 +1,88 @@
+# FX ODDS — 환율의 확률과 압력을 읽다
+
+원·달러 환율(달러당 원화값)의 7일·30일 확률분포와, 원화가 엔화·위안화·대만 달러와 얼마나 같이 움직이는지를 매일 계산해 정적 웹사이트로 공개하는 데이터저널리즘 서비스. [BOK WATCH](https://bokwatch.pages.dev/)의 설계 철학(확률 우선, 정량·정성 분리, 방법론·성적표 공개, 과거 기준일 선택)을 계승했고 기존 BOK WATCH 프로젝트는 수정하지 않았다(디자인 토큰만 참고).
+
+> 상승 = 달러당 원화값 상승 = 원화 약세 / 하락 = 원화 강세
+
+## 구현 상태 (Phase 1 완료, Phase 2 미착수)
+
+| 기능 | 상태 | 비고 |
+|---|---|---|
+| ECOS·FRED·Yahoo 수집기, SQLite 적재, 출처 교차검증 | ✅ 구현 | `py/fetch.py` |
+| 모형 A 랜덤워크 / B 역사적 변동성 / C EWMA / D 재표본추출(FHS) | ✅ 구현 | `py/models.py` |
+| 7일·30일 전망 카드(중앙값, 상승·하락 확률, 50/80/90% 구간), 목표일 평가 규칙 | ✅ 구현 | 목표일이 휴장일이면 직전 거래일 |
+| 확률밀도 차트, 구간별 확률표, 특정 환율 도달 확률 계산기 | ✅ 구현 | 만기 시점 vs 기간 중 돌파 구분 |
+| 기간 중 돌파 확률 (경로 시뮬레이션 + 브라운 다리 보정, 이산 한계 표시) | ✅ 구현 | 반사원리와 일치 테스트 |
+| 동조화 레이더: 20·60·120·252일 이동상관, 달러요인 통제(부분상관), 신뢰구간, 산점도 | ✅ 구현 | FRED 동일 관측(A) / 서울 시차 정렬(B) 두 방식 |
+| 선행·후행(0·1·2·3·5일) 히트맵, 불안기 vs 평시, Granger 검정 | ✅ 구현 | 결과는 "예측정보"이지 인과 아님 |
+| 예측 기여도(원·달러 단독 vs +엔/+위안/+대만/+세 통화/+달러요인) | ✅ 구현 | Walk-forward 릿지, HAC DM 검정 |
+| 규칙 기반 동조화 해설문 | ✅ 구현 | LLM 미사용 |
+| FX SCORECARD: MAE·RMSE·방향 적중·50/80/90% 포함률·Brier·CRPS·RW 대비 개선율 | ✅ 구현 | 2012~ 백테스트, CSV 다운로드 |
+| 실시간 전망 기록(덮어쓰기 없는 append-only CSV) | ✅ 구현 | 백테스트와 분리 |
+| 과거 기준일 선택(HISTORICAL MODE) | 🟡 일부 | 환율 전망·동조화·FPI·사건. `available_at`(이용 가능일) 기준으로 자름(FRED H.10은 다음 월요일 가정). 뉴스·보고서 보존본은 없음. "과거 자료 재계산"으로 명시. 당시 뉴스·FPI 보존본 없음 |
+| 조건부 모형 E(릿지 평균) | 🟡 실험 | 백테스트에서 개선 미확인 → 공식 전망 미반영 |
+| 금리·경제지표를 통제한 조건부 모형 F | ❌ 미구현 | 금리·지표 수집기 필요 |
+| FX PRESSURE INDEX(FPI, 10개 요인, 자료 충족률) | 🟡 실험 v0.1 | 규칙 기반·동일가중. 백테스트에서 7·30일 방향 예측력 **미확인**(적중≈50%) → 확률 전망 미반영. 자료 없는 영역은 제외, 외국인 일별 수급·지정학·컨센서스 미보유 |
+| 시장 사건 타임라인(정책금리 변경·달러/원화/금리/VIX/유가 급변, 사건 그룹, 출처 링크) | 🟡 일부 | 통계에서 규칙으로 추출. 원인·"예상 대비"는 '미보유' |
+| FX INTELLIGENCE(보고서·뉴스 원문 수집, LLM 판단) | ❌ 미구현 | |
+| FX SCENARIO(시나리오 분석기) | ❌ 미구현 | 추정 계수가 생기기 전에는 확률을 임의로 바꾸지 않음 |
+| 통합 전망 C(정량+정성) | ❌ 미구현 | FPI·뉴스 점수 + 백테스트 후 |
+
+## 데이터 출처와 한계
+
+| 출처 | 쓰임 | 비고 |
+|---|---|---|
+| 한국은행 ECOS 731Y001 | 전망 기준 USD/KRW(매매기준율), 대원화 환율 | API 키 필요. 서울 15:30경 |
+| FRED H.10 (DEXKOUS·DEXJPUS·DEXCHUS·DEXTAUS, DEXUSEU 등 6개) | 레이더 A, 달러요인 | 키 불필요 CSV. 발표가 1~2주 늦음. 일부 네트워크에서 접속이 막힐 수 있음(개발 PC에서는 초기에 타임아웃, 이후 성공) |
+| Yahoo Finance 일봉 | 레이더 B, 최신일 보강 | **비공식**·속도 제한. 원화(KRW=X) 종가는 ECOS와 일 단위 대응이 약함(방법론 교차검증 표 참조) |
+
+- 같은 날짜의 자료라도 같은 시각의 가격으로 취급하지 않는다. 출처·시각을 분리하고, 서울 기준일에는 직전 영업일 해외 마감만 사용한다.
+- 달러 공통요인은 EUR·GBP·AUD·CAD·CHF·SEK 로 구성(한·일·중·대만 제외). DXY는 엔화가 포함돼 사용하지 않았다.
+
+## 핵심 결과를 읽는 법
+
+- 공식 전망의 '중앙값'은 모든 모형에서 현재 환율과 같아(drift 0) 화면의 헤드라인을 80% 범위로 바꿨다. 방향 점추정은 '실험'으로만 표시한다.
+- A~D 모형은 방향(drift)을 가정하지 않아 상승확률이 50% 근처다. 백테스트에서 EWMA·역사적 변동성·재표본추출은 랜덤워크(장기 고정 변동성)보다 **확률분포의 폭**을 더 잘 맞혔고(CRPS 2% 안팎 개선, 유의), **방향은 맞히지 못한다**.
+- 엔·위안·대만 달러를 추가한 조건부 모형은 원·달러 단독 모형보다 나아지지 않았다(일부는 유의하게 나빠짐). 높은 상관이 예측 기여도로 이어진다는 증거는 아직 없다.
+- 동조화 순위는 자료 기준(A/B), 창, 달러요인 통제 여부에 따라 바뀐다. 화면에 기준일과 신뢰구간을 함께 표시한다.
+
+## 로컬 실행
+
+```bash
+# 1) Python 3.12
+pip install -r requirements.txt
+cp .env.example .env            # ECOS_API_KEY 입력 (또는 FXODDS_ENV_FILE=경로 지정)
+python py/fetch.py              # 수집 -> data/fx.sqlite
+python py/build.py              # 백테스트 + 전망 + 레이더 -> web/public/data/*.json (약 2분)
+python py/build.py --skip-bt    # 백테스트 캐시(data/bt.pkl) 재사용
+python -m pytest tests -q       # 21개 자동 검증
+
+# 2) 웹
+cd web && npm install && npm run dev     # http://localhost:5173
+npm run build                              # web/dist (정적 파일)
+```
+
+하루 1회 배치는 `python py/run_daily.py` (수집 → 분석 → JSON). 수집이 실패하면 이전 정상 데이터로 빌드하고 `meta.json`의 `stale_warning`으로 화면에 경고를 띄운다.
+
+## Cloudflare Pages 배포
+
+- 자동: `.github/workflows/daily.yml` (평일 18:40 KST). 필요한 Secrets: `ECOS_API_KEY`, `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`. 프로젝트 이름은 `fx-odds`.
+- 수동: `npm run build` 후 `npx wrangler pages deploy web/dist --project-name=fx-odds`.
+- 개발 중 빌드는 `python py/build.py --no-live`로 실시간 기록을 만들지 않는다(첫 기록은 첫 배포 배치에서 시작).
+- 저장소에는 `data/fx.sqlite`와 `data/live_forecasts.csv`(실시간 예측 기록)를 커밋해 기록이 유지되도록 한다. `data/raw/`, `.env`는 커밋하지 않는다.
+
+## 구조
+
+```
+py/   common.py fetch.py prep.py models.py backtest.py radar.py build.py run_daily.py
+tests/test_fxodds.py          확률·데이터·동조화·산출물 자동 검증
+web/  React+TS+Vite+ECharts+Tailwind (src/components: Forecast, Radar, Scorecard, Methodology)
+data/ fx.sqlite(원시 적재) live_forecasts.csv(append-only)
+docs/METHODOLOGY.md           계산식·한계·변경 이력
+```
+
+## 검증 항목(자동)
+
+확률 0~1·구간 포개짐·CDF 단조·밀도 적분≈1·장벽 확률≥만기 확률·브라운 다리=반사원리·시드 재현성·CRPS 해석해=표본추정·거래일 규칙·방향 통일(EUR 등 역수)·100엔 단위 혼동 방지·달러요인 부호·주말/비양수 제거·부분상관=회귀잔차 상관·이동상관 미래정보 차단·수익률(비수준) 사용·선행 시차 방향·기본 모형 선택이 실현된 예측만 사용.
+
+투자 조언이 아니며, 통계적 확률은 과거 자료에서 추정한 값이다.

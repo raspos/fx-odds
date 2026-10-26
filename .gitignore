@@ -1,0 +1,11 @@
+.env
+data/raw/
+data/bt.pkl
+node_modules/
+web/dist/
+__pycache__/
+.pytest_cache/
+web/public/data/
+data/latest_mu.json
+py/_run_bt.py
+.claude/

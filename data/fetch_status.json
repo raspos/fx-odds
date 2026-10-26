@@ -1,0 +1,45 @@
+{
+ "at": "2026-10-26T12:02:24+00:00",
+ "ecos": {
+  "ecos:KRW_per_USD": 6635,
+  "ecos:KRW_per_CNY": 2660,
+  "ecos:KRW_per_100JPY": 6635,
+  "ecos:KRW_per_TWD": 2909,
+  "ecos:KTB3Y": 6635,
+  "ecos:BASE_RATE": 6995,
+  "ecos:BOP_CURRENT_ACCOUNT": 279,
+  "ecos:BOP_EXPORTS": 320,
+  "ecos:BOP_PORTFOLIO_LIAB": 215
+ },
+ "yahoo": {
+  "yahoo:USDKRW": 5939,
+  "yahoo:USDJPY": 6179,
+  "yahoo:USDCNY": 6031,
+  "yahoo:USDTWD": 5446,
+  "yahoo:EURUSD": 5941,
+  "yahoo:GBPUSD": 5953,
+  "yahoo:AUDUSD": 5317,
+  "yahoo:USDCAD": 6009,
+  "yahoo:USDCHF": 6007,
+  "yahoo:USDSEK": 6027,
+  "yahoo:KOSPI": 5869
+ },
+ "fred": {
+  "fred:USDKRW": 6717,
+  "fred:USDJPY": 6717,
+  "fred:USDCNY": 6718,
+  "fred:USDTWD": 6714,
+  "fred:EURUSD": 6717,
+  "fred:GBPUSD": 6717,
+  "fred:AUDUSD": 6717,
+  "fred:USDCAD": 6717,
+  "fred:USDCHF": 6717,
+  "fred:USDSEK": 6717,
+  "fred:DGS2": 6705,
+  "fred:DGS10": 6705,
+  "fred:DFF": 6994,
+  "fred:VIXCLS": 6776,
+  "fred:DCOILWTICO": 6341,
+  "fred:DFEDTARU": 4659
+ }
+}

@@ -1,0 +1,38 @@
+name: daily
+on:
+  schedule:
+    - cron: "40 9 * * 1-5"   # 평일 18:40 KST (서울 종가·ECOS 반영 이후)
+  workflow_dispatch: {}
+permissions:
+  contents: write
+concurrency: daily
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install -r requirements.txt
+      - name: 테스트
+        run: python -m pytest tests -q -W ignore
+      - name: 수집·분석 (실패 시 이전 데이터 유지)
+        env:
+          ECOS_API_KEY: ${{ secrets.ECOS_API_KEY }}
+        run: python py/run_daily.py
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm, cache-dependency-path: web/package-lock.json }
+      - run: npm ci && npm run build
+        working-directory: web
+      - name: 데이터·실시간 예측 기록 커밋 (덮어쓰기 없이 추가만)
+        run: |
+          git config user.name "fx-odds-bot"; git config user.email "bot@users.noreply.github.com"
+          git add data/fx.sqlite data/live_forecasts.csv data/fetch_status.json
+          git diff --cached --quiet || git commit -m "data: daily update $(date -u +%F)"
+          git push
+      - name: Cloudflare Pages 배포
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy web/dist --project-name=fx-odds
