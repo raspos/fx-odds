@@ -1,6 +1,6 @@
 """시장 사건 타임라인(v0.1): 공식 통계·시장 데이터에서 규칙으로 추출한 사건.
 
-뉴스·보고서 수집 엔진(FX INTELLIGENCE)은 아직 없다. 여기서 다루는 사건은 (1) 한국은행 기준금리 변경, (2) 원화·달러 요인·미국 금리·VIX·유가의 이례적 급변동이며
+뉴스는 news.py(네이버)가 따로 수집하고, 여기서 다루는 사건은 (1) 한국은행 기준금리 변경, (2) 원화·달러 요인·미국 금리·VIX·유가의 이례적 급변동이며
 각 사건에 관측일·이용 가능일·출처 URL을 붙인다. 원인(뉴스)·'예상 대비'는 수집하지 않으므로 '미보유'로 표시한다.
 같은 날 같은 달러 충격으로 묶이는 사건은 하나의 사건 그룹으로 합치고 강도는 합산하지 않는다(max).
 """
@@ -108,5 +108,5 @@ def build(df: pd.DataFrame, since="2023-01-01") -> list[dict]:
                     "direction": "krw_weak" if dirs == {"up"} else "krw_strong" if dirs == {"down"} else "mixed",
                     "direction_note": "원화 약세 압력(환율 상승 쪽)" if dirs == {"up"} else "원화 강세 압력(환율 하락 쪽)" if dirs == {"down"} else "판단 유보(방향 혼재)",
                     "strength": int(g["strength"]), "why": why, "sources": [{"name": SRC[m["src"]][0], "url": SRC[m["src"]][1]} for m in mem],
-                    "expected_vs_actual": "미보유", "cause": "미보유(뉴스·보고서 수집 엔진 미구현)", "n_members": len(mem)})
+                    "expected_vs_actual": "미보유", "cause": "미보유(관련 기사 후보 없음)", "n_members": len(mem)})
     return sorted(out, key=lambda x: x["date"], reverse=True)

@@ -36,6 +36,8 @@ export function Events({ E, asOf, refDate }: { E: J; asOf: string | null; refDat
           <div className="mt-1 text-[15px] font-bold">{e.title}</div>
           <div className="mt-1 text-[13px]"><b style={{ color: DIR[e.direction] }}>{e.direction_note}</b> · 강도 {"●".repeat(e.strength)}{"○".repeat(3 - e.strength)}</div>
           <p className="mt-1 text-[13px] leading-relaxed" style={{ color: "var(--ink-2)" }}>{e.why}</p>
+          {e.news && e.news.length > 0 && <div className="mt-1.5 text-[12px]"><b>관련 기사(전후 1일, 원인 후보)</b>
+            {e.news.map((n: J, i: number) => <div key={i}>· <a href={n.link} target="_blank" rel="noreferrer" className="underline-offset-2 hover:underline">{n.title}</a> <span style={{ color: "var(--ink-3)" }}>({n.press})</span></div>)}</div>}
           <p className="mt-1 text-[11px]" style={{ color: "var(--ink-3)" }}>원인: {e.cause} · 예상 대비: {e.expected_vs_actual} · 출처: {e.sources.map((s: J, i: number) => (<a key={i} href={s.url} target="_blank" rel="noreferrer" className="underline">{s.name}</a>)).reduce((a: J, b: J) => [a, " · ", b])}</p>
         </div>
       ))}

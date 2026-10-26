@@ -242,7 +242,7 @@ def main(skip_bt=False, write_live=True):
         if e["news"]:
             e["cause"] = "관련 기사(전후 1일) 링크 참조 — 인과는 확정이 아니라 후보"
     jdump("news.json", {k: v for k, v in nj.items() if k != "articles"} | {"articles": [{k: a[k] for k in ("id", "title", "link", "press", "published", "date", "topic", "dir", "strength", "why", "status", "official")} for a in arts[:300]]})
-    jdump("events.json", {"events": evs, "cats": EV.CATS, "note": "공식 통계·시장 데이터에서 규칙으로 추출한 사건입니다. 뉴스·보고서 원문 수집(FX INTELLIGENCE)은 미구현이라 원인과 '예상 대비'는 표시하지 않습니다."})
+    jdump("events.json", {"events": evs, "cats": EV.CATS, "note": "공식 통계·시장 데이터에서 규칙으로 추출한 사건입니다. 원인은 전후 1일의 네이버 뉴스·공식 발표 링크를 후보로만 붙였고(확정 아님), 시장 컨센서스가 없어 '예상 대비'는 표시하지 않습니다."})
 
     # ---------- 메타 ----------
     last = {}
