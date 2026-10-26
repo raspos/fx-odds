@@ -1,7 +1,11 @@
 name: daily
 on:
+  push:
+    branches: [main]            # 코드를 푸시하면 자동으로 배포 (봇의 데이터 커밋은 GITHUB_TOKEN 이라 다시 트리거하지 않는다)
+    paths-ignore: ["README.md", "docs/**"]
   schedule:
-    - cron: "40 9 * * 1-5"   # 평일 18:40 KST (서울 종가·ECOS 반영 이후)
+    - cron: "40 9 * * 1-5"      # 평일 18:40 KST (서울 종가·ECOS 반영 이후)
+    - cron: "40 23 * * 0-4"     # 평일 08:40 KST (미국장 마감 후 뉴스·Yahoo·GPR 갱신)
   workflow_dispatch: {}
 permissions:
   contents: write
