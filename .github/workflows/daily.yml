@@ -5,6 +5,8 @@ on:
   workflow_dispatch: {}
 permissions:
   contents: write
+  pages: write
+  id-token: write
 concurrency: daily
 jobs:
   update:
@@ -30,9 +32,12 @@ jobs:
           git add data/fx.sqlite data/live_forecasts.csv data/fetch_status.json
           git diff --cached --quiet || git commit -m "data: daily update $(date -u +%F)"
           git push
-      - name: Cloudflare Pages 배포
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy web/dist --project-name=fx-odds
+      - uses: actions/upload-pages-artifact@v3
+        with: { path: web/dist }
+  deploy:
+    needs: update
+    runs-on: ubuntu-latest
+    environment: { name: github-pages, url: "${{ steps.d.outputs.page_url }}" }
+    steps:
+      - id: d
+        uses: actions/deploy-pages@v4

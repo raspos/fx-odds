@@ -52,7 +52,7 @@ export default function App() {
   useEffect(() => { location.hash = tab; }, [tab]);
 
   useEffect(() => {
-    Promise.all(FILES.map((f) => fetch(`/data/${f}.json`).then((r) => { if (!r.ok) throw new Error(f); return r.json(); })))
+    Promise.all(FILES.map((f) => fetch(`data/${f}.json`).then((r) => { if (!r.ok) throw new Error(f); return r.json(); })))
       .then((arr) => setD(Object.fromEntries(FILES.map((f, i) => [f, arr[i]]))))
       .catch((e) => setErr(`데이터를 불러오지 못했습니다: ${e.message}`));
   }, []);

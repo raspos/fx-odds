@@ -78,8 +78,8 @@ export default function Scorecard({ S, base }: { S: J; base: string }) {
         <h3 className="text-lg font-bold">예측 데이터 내려받기</h3>
         <p className="mt-1" style={{ color: "var(--ink-2)" }}>기준일·목표일·중앙값·확률구간·상승확률·실제 환율·모형이 들어 있는 CSV입니다.</p>
         <div className="mt-2 flex flex-wrap gap-2">
-          <a className="btn" href="/data/backtest_forecasts.csv" download>백테스트 전체 (CSV, 약 12MB)</a>
-          {S.live_count > 0 ? <a className="btn" href="/data/live_forecasts.csv" download>실시간 전망 기록 (CSV)</a> : <span className="btn">실시간 기록: 서비스 공개 후 시작</span>}
+          <a className="btn" href="data/backtest_forecasts.csv" download>백테스트 전체 (CSV, 약 12MB)</a>
+          {S.live_count > 0 ? <a className="btn" href="data/live_forecasts.csv" download>실시간 전망 기록 (CSV)</a> : <span className="btn">실시간 기록: 서비스 공개 후 시작</span>}
         </div>
         <p className="mt-2 text-[11px]" style={{ color: "var(--ink-3)" }}>데이터 기준일 {base}. 백테스트와 실시간 기록은 별도 파일로 구분합니다.</p>
       </div>
