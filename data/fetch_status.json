@@ -1,10 +1,10 @@
 {
- "at": "2026-10-27T00:35:38+00:00",
+ "at": "2026-10-27T00:54:52+00:00",
  "ecos": {
   "ecos:KRW_per_USD": 6635,
   "ecos:KRW_per_CNY": 2660,
   "ecos:KRW_per_100JPY": 6635,
-  "ecos:KRW_per_TWD": 2909,
+  "ecos:KRW_per_TWD": 2910,
   "ecos:KTB3Y": 6635,
   "ecos:BASE_RATE": 6995,
   "ecos:BOP_CURRENT_ACCOUNT": 279,
@@ -35,5 +35,25 @@
  },
  "gpr": {
   "gpr:GPRD": 10910
+ },
+ "naver": {
+  "ok": false,
+  "why": "'원달러 환율': HTTPError 401 Client Error: Unauthorized for url: https://naverapihub.apigw.ntru; '원화 약세': HTTPError 401 Client Error: Unauthorized for url: https://naverapihub.apigw.ntru; '원화 강세': HTTPError 401 Client Error: Unauthorized for url: https://naverapihub.apigw.ntru; '달러 강세': HTTPError 401 Cli"
+ },
+ "official": {
+  "ok": true,
+  "received": 60,
+  "errors": []
+ },
+ "ai": {
+  "ok": true,
+  "added": 177,
+  "calls": 9,
+  "tokens_in": 10219,
+  "tokens_out": 36772
+ },
+ "reports": {
+  "ok": true,
+  "added": 0
  }
 }
