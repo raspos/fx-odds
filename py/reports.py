@@ -83,6 +83,25 @@ def extract() -> dict:
     return {"ok": err is None, "added": len(rows), **({"why": err} if err else {})}
 
 
+CANON = [  # (정규식, 표준 기관명) — 위에서부터 먼저 맞는 것을 쓴다. '證' 같은 약칭과 '증권'/'투자증권' 표기를 통일한다
+    (r"한국?투자|한투", "한국투자증권"), (r"신한", "신한투자증권"), (r"유진", "유진투자증권"), (r"미래에셋", "미래에셋증권"), (r"삼성증권|삼성證|^삼성$", "삼성증권"),
+    (r"KB", "KB증권"), (r"NH", "NH투자증권"), (r"키움", "키움증권"), (r"대신", "대신증권"), (r"메리츠", "메리츠증권"), (r"하나", "하나증권"),
+    (r"현대차", "현대차증권"), (r"한화", "한화투자증권"), (r"우리", "우리투자증권"), (r"IBK", "IBK투자증권"), (r"iM|아이엠", "iM증권"), (r"하이투자", "하이투자증권"),
+    (r"DB", "DB금융투자"), (r"교보", "교보증권"), (r"SK", "SK증권"), (r"유안타", "유안타증권"), (r"상상인", "상상인증권"), (r"BNK", "BNK투자증권"),
+    (r"골드만", "골드만삭스"), (r"JP\s?모건|제이피모건", "JP모건"), (r"모건스탠리", "모건스탠리"), (r"씨티", "씨티그룹"), (r"UBS", "UBS"), (r"BoA|뱅크오브아메리카", "뱅크오브아메리카"),
+    (r"바클레이", "바클레이스"), (r"노무라", "노무라"), (r"HSBC", "HSBC"), (r"도이치", "도이치뱅크"), (r"SC제일", "SC제일은행"), (r"IMF", "IMF"), (r"OECD", "OECD"),
+]
+
+
+def canon_institution(name: str) -> str:
+    n = re.sub(r"\s+", "", name or "").replace("證", "증권")
+    for pat, std in CANON:
+        if re.search(pat, n):
+            return std
+    n = re.sub(r"(증권)+$", "증권", n)
+    return n
+
+
 def build_output(spot: float, today) -> dict:
     cache = load_cache()
     items = {i["id"]: i for i in news.load()}
@@ -94,16 +113,22 @@ def build_output(spot: float, today) -> dict:
         lo, hi = c["level_low"], c["level_high"]
         if lo and not (900 <= lo <= 2200 and (not hi or 900 <= hi <= 2200)):
             lo = hi = 0  # 환율 수준으로 보기 어려운 값은 버린다
-        rows.append({"institution": c["institution"], "published": it["published"][:10], "horizon": c["horizon"], "low": lo or None, "high": hi or None,
+        rows.append({"institution": canon_institution(c["institution"]), "published": it["published"][:10], "horizon": c["horizon"], "low": lo or None, "high": hi or None,
                      "view": c["view"], "summary": c["summary"], "title": it["title"], "link": it["link"], "press": it["press"], "verify": True,
                      "source": "언론 보도 인용(원문 미확인)", "by": "AI 추출"})
     if MANUAL.exists():
         m = yaml.safe_load(MANUAL.read_text(encoding="utf-8")) or {}
         for r in m.get("reports", []) or []:
-            rows.append({"institution": r["institution"], "published": str(r["published"]), "horizon": r.get("horizon", ""), "low": r.get("low"), "high": r.get("high", r.get("low")),
+            rows.append({"institution": canon_institution(r["institution"]), "published": str(r["published"]), "horizon": r.get("horizon", ""), "low": r.get("low"), "high": r.get("high", r.get("low")),
                          "view": r.get("view", "none"), "summary": r.get("rationale", ""), "title": r.get("title", ""), "link": r.get("link", ""), "press": r.get("source", ""),
                          "verify": bool(r.get("verify", True)), "source": r.get("source", "수기 입력"), "by": "수기"})
-    rows.sort(key=lambda r: r["published"], reverse=True)
+    seen, dedup = set(), []
+    for r in sorted(rows, key=lambda r: (r["published"], r["by"] == "수기"), reverse=True):  # 같은 기관·날짜·시점·수준 중복 보도는 하나만(수기 우선)
+        k = (r["institution"], r["published"], r["horizon"], r["low"], r["high"])
+        if k in seen:
+            continue
+        seen.add(k); dedup.append(r)
+    rows = dedup
     # 컨센서스: 최근 5영업일, 기관별 최신 1건, 수준이 있는 전망만
     since = news_window_start(today)
     latest = {}

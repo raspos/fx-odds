@@ -237,3 +237,11 @@ def test_daily_runner_modules_import():
     import importlib
     for m in ("run_daily", "build", "news", "ai_news", "reports", "fetch", "fpi", "events"):
         importlib.import_module(m)
+
+
+def test_institution_names_are_unified():
+    import reports
+    for raw in ("신한證", "한투證", "한투증권", "한국투자증권", "유진證", "하나證"):
+        assert reports.canon_institution(raw).endswith(("증권",)), raw
+    assert reports.canon_institution("한투證") == reports.canon_institution("한투증권") == "한국투자증권"
+    assert reports.canon_institution("신한證") == "신한투자증권"
