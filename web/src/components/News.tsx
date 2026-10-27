@@ -41,6 +41,20 @@ export function News({ N, R, H, spot, refDate, asOf }: { N: J; R: J; H: J; spot:
         <div className="relative mt-3 h-3 rounded-full" style={{ background: "linear-gradient(90deg,var(--down),var(--surface-2) 50%,var(--up))" }}>
           <div className="absolute -top-1 h-5 w-1 rounded" style={{ left: `calc(${(npi + 100) / 2}% - 2px)`, background: "var(--ink)" }} /></div>
         <div className="mt-1 flex justify-between text-[11px]" style={{ color: "var(--ink-3)" }}><span>−100 원화 강세 압력</span><span>0</span><span>+100 원화 약세 압력</span></div>
+        {N.ai_comment && (
+          <div className="mt-3 rounded-lg p-3 text-[13px] leading-relaxed" style={{ background: "var(--surface-2)" }}>
+            <div className="mb-1 flex flex-wrap items-center gap-2 text-[11px]">
+              <span className="rounded-full px-2 py-0.5 font-bold" style={{ background: "var(--warn-bg)", color: "var(--warn-ink)" }}>AI 요약 · 참고용</span>
+              <span className="num" style={{ color: "var(--ink-3)" }}>{N.ai_comment.at.replace("T", " ")} 작성{N.ai_comment.fresh ? "" : " · 이후 사건이 바뀌었을 수 있음"}</span>
+            </div>
+            <div>{N.ai_comment.text}</div>
+            <details className="mt-1.5"><summary className="cursor-pointer text-[11px]" style={{ color: "var(--ink-3)" }}>근거 사건 {N.ai_comment.basis.length}건 (펼치기)</summary>
+              <ul className="mt-1 list-disc pl-5 text-[12px]" style={{ color: "var(--ink-2)" }}>
+                {N.ai_comment.basis.map((b: J, i: number) => <li key={i}><span className="num">{b.date}</span> {b.topic} · {b.direction === "krw_weak" ? "약세 압력" : "강세 압력"} · <a href={b.link} target="_blank" rel="noreferrer" className="underline">{b.title}</a></li>)}
+              </ul>
+              <p className="mt-1 text-[11px]" style={{ color: "var(--ink-3)" }}>이미 분류된 사건만 입력으로 쓰고 전망·권유는 하지 않도록 제한했습니다. 문장은 매번 달라질 수 있고 오류가 있을 수 있습니다({N.ai_comment.model}).</p>
+            </details>
+          </div>)}
         {N.npi_rule != null && <p className="mt-1 text-[12px] num" style={{ color: "var(--ink-3)" }}>규칙만 사용한 값 {sgn(N.npi_rule, 0)} · 규칙+AI 보조 {sgn(npi, 0)}
           {N.agreement && N.agreement.n_dir > 0 ? ` · 규칙·AI 방향 일치 ${N.agreement.same}/${N.agreement.n_dir}건(반대 ${N.agreement.opposite}건)` : ""}</p>}
         <div className="mt-3 grid grid-cols-3 gap-2 text-center text-[12px]">

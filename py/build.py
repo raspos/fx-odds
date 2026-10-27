@@ -1,7 +1,7 @@
 """분석 엔진 진입점: 수집 데이터 -> 백테스트 -> 최신 전망 -> 레이더 -> web/public/data/*.json.
 방문자마다 계산하지 않고, 정해진 시간에 한 번 계산해 정적 JSON으로 제공한다."""
 from __future__ import annotations
-import json, sys
+import json, os, sys
 import numpy as np
 import pandas as pd
 from scipy import stats
@@ -230,6 +230,9 @@ def main(skip_bt=False, write_live=True):
     st = json.loads((DATA / "fetch_status.json").read_text(encoding="utf-8")).get("naver") if (DATA / "fetch_status.json").exists() else None
     today = now_kst().date()
     nj = N.build_output(today, st or {})
+    if nj.get("available"):
+        import ai_comment as AC
+        nj["ai_comment"] = AC.get(nj, allow_generate=os.environ.get("FXODDS_AI_COMMENT") == "1")  # 전체 수집 실행에서만 새로 생성
     if nj.get("available") and write_live:
         N.log_npi(today, nj["npi"])
     FAM = {"usd": "dollar", "us_rates": "dollar", "jpy": "dollar", "kr_rates": "krrate", "risk": "risk", "oil": "oil", "krw": None}
