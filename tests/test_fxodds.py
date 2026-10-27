@@ -230,3 +230,10 @@ def test_dxy_aligned_with_own_dollar_factor(df):
         pytest.skip("DXY 미수집 DB(다음 전체 수집에서 채워짐)")
     r = radar.returns_Y(df).dropna().tail(500)
     assert r["USD_FACTOR"].corr(r["DXY"]) > 0.6  # 날짜 정렬이 맞으면 달러 요인과 DXY 는 강하게 같이 움직인다
+
+
+def test_daily_runner_modules_import():
+    """CI 의존성 누락(예: yaml)을 테스트 단계에서 잡는다."""
+    import importlib
+    for m in ("run_daily", "build", "news", "ai_news", "reports", "fetch", "fpi", "events"):
+        importlib.import_module(m)

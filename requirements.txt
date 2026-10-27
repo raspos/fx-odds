@@ -7,3 +7,4 @@ requests>=2.31
 pytest>=8
 xlrd>=2.0
 openpyxl>=3.1
+pyyaml>=6
