@@ -310,6 +310,8 @@ def test_p_model_is_normal_not_bootstrap_branch():
 @needs_data
 def test_barrier_window_starts_at_origin_session_and_outputs_sane():
     import json
+    if not (OUT / "barrier.json").exists():
+        pytest.skip("장벽 보정 결과는 화면에서 제외되어 기본 빌드에서 생성하지 않음")
     Bc = json.loads((OUT / "barrier.json").read_text(encoding="utf-8"))
     assert Bc["n_origins"] > 1000
     for t in Bc["tables"]:

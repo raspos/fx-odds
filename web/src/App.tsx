@@ -11,7 +11,7 @@ import { Events } from "./components/Events";
 import { News } from "./components/News";
 import Volatility from "./components/Volatility";
 
-const FILES = ["latest", "series", "scorecard", "radar", "history", "meta", "fpi", "events", "news", "reports", "vol", "barrier"] as const;
+const FILES = ["latest", "series", "scorecard", "radar", "history", "meta", "fpi", "events", "news", "reports", "vol"] as const;
 
 class Boundary extends Component<{ children: ReactNode }, { err: boolean }> {
   state = { err: false };
@@ -76,7 +76,7 @@ export default function App() {
   useEffect(() => { location.hash = tab; }, [tab]);
 
   useEffect(() => {
-    Promise.all(FILES.map((f) => fetch(`data/${f}.json`, { cache: "no-cache" }).then((r) => { if (!r.ok) throw new Error(f); return r.json(); }).catch((e) => { if (f === "vol" || f === "barrier") return null; throw e; })))
+    Promise.all(FILES.map((f) => fetch(`data/${f}.json`, { cache: "no-cache" }).then((r) => { if (!r.ok) throw new Error(f); return r.json(); }).catch((e) => { if (f === "vol") return null; throw e; })))
       .then((arr) => setD(Object.fromEntries(FILES.map((f, i) => [f, arr[i]]))))
       .catch((e) => setErr(`데이터를 불러오지 못했습니다: ${e.message}`));
   }, []);
@@ -224,7 +224,7 @@ export default function App() {
       </Section>}
 
       {tab === "s7" && <Section id="s7" no="03" title="FX VOLATILITY — 원화는 얼마나 흔들리고 있나" sub="일중 고가·저가로 본 실현 변동성 · FXVI · 장벽 돌파 확률 보정">
-        {D.vol && D.barrier ? <Volatility V={D.vol} S={D.scorecard} BC={D.barrier} /> : <div className="card p-4 text-sm">변동성 자료를 준비 중입니다. 다음 자동 갱신 후 표시됩니다.</div>}
+        {D.vol ? <Volatility V={D.vol} /> : <div className="card p-4 text-sm">변동성 자료를 준비 중입니다. 다음 자동 갱신 후 표시됩니다.</div>}
       </Section>}
       {tab === "s3" && <Section id="s3" no="04" title="원화 동조화 레이더" sub="원화는 최근 엔화·위안화·대만 달러 중 어느 통화와 가장 밀접하게 움직였나">
         <Radar R={D.radar} asOf={histMode ? entry.d : null} />
