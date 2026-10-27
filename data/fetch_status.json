@@ -1,19 +1,19 @@
 {
- "at": "2026-10-26T23:55:56+00:00",
+ "at": "2026-10-27T00:35:38+00:00",
  "ecos": {
-  "ecos:KRW_per_USD": "fail: HTTPSConnectionPool(host='ecos.bok.or.kr', port=443): Max retries exceeded with url: /api/StatisticSearch/***/json/kr/1/",
-  "ecos:KRW_per_CNY": "fail: HTTPSConnectionPool(host='ecos.bok.or.kr', port=443): Max retries exceeded with url: /api/StatisticSearch/***/json/kr/1/",
-  "ecos:KRW_per_100JPY": "fail: HTTPSConnectionPool(host='ecos.bok.or.kr', port=443): Max retries exceeded with url: /api/StatisticSearch/***/json/kr/1/",
-  "ecos:KRW_per_TWD": "fail: HTTPSConnectionPool(host='ecos.bok.or.kr', port=443): Max retries exceeded with url: /api/StatisticSearch/***/json/kr/1/",
-  "ecos:KTB3Y": "fail: HTTPSConnectionPool(host='ecos.bok.or.kr', port=443): Max retries exceeded with url: /api/StatisticSearch/***/json/kr/1/",
-  "ecos:BASE_RATE": "fail: HTTPSConnectionPool(host='ecos.bok.or.kr', port=443): Max retries exceeded with url: /api/StatisticSearch/***/json/kr/1/",
-  "ecos:BOP_CURRENT_ACCOUNT": "fail: HTTPSConnectionPool(host='ecos.bok.or.kr', port=443): Max retries exceeded with url: /api/StatisticSearch/***/json/kr/1/",
-  "ecos:BOP_EXPORTS": "fail: HTTPSConnectionPool(host='ecos.bok.or.kr', port=443): Max retries exceeded with url: /api/StatisticSearch/***/json/kr/1/",
-  "ecos:POLICY_US": "fail: HTTPSConnectionPool(host='ecos.bok.or.kr', port=443): Max retries exceeded with url: /api/StatisticSearch/***/json/kr/1/",
-  "ecos:POLICY_JP": "fail: HTTPSConnectionPool(host='ecos.bok.or.kr', port=443): Max retries exceeded with url: /api/StatisticSearch/***/json/kr/1/",
-  "ecos:POLICY_CN": "fail: HTTPSConnectionPool(host='ecos.bok.or.kr', port=443): Max retries exceeded with url: /api/StatisticSearch/***/json/kr/1/",
-  "ecos:FLOW_FOREIGN_NET": "fail: HTTPSConnectionPool(host='ecos.bok.or.kr', port=443): Max retries exceeded with url: /api/StatisticSearch/***/json/kr/1/",
-  "ecos:BOP_PORTFOLIO_LIAB": "fail: HTTPSConnectionPool(host='ecos.bok.or.kr', port=443): Max retries exceeded with url: /api/StatisticSearch/***/json/kr/1/"
+  "ecos:KRW_per_USD": 6635,
+  "ecos:KRW_per_CNY": 2660,
+  "ecos:KRW_per_100JPY": 6635,
+  "ecos:KRW_per_TWD": 2909,
+  "ecos:KTB3Y": 6635,
+  "ecos:BASE_RATE": 6995,
+  "ecos:BOP_CURRENT_ACCOUNT": 279,
+  "ecos:BOP_EXPORTS": 320,
+  "ecos:POLICY_US": 321,
+  "ecos:POLICY_JP": 121,
+  "ecos:POLICY_CN": 321,
+  "ecos:FLOW_FOREIGN_NET": 154,
+  "ecos:BOP_PORTFOLIO_LIAB": 215
  },
  "yahoo": {
   "yahoo:USDKRW": 5940,
@@ -27,28 +27,13 @@
   "yahoo:USDCHF": 6008,
   "yahoo:USDSEK": 6028,
   "yahoo:KOSPI": 5869,
+  "yahoo:DXY": 6006,
   "yahoo:UST10Y": 5986,
   "yahoo:UST5Y": 5986,
   "yahoo:VIX": 5994,
-  "yahoo:WTI": 5985
+  "yahoo:WTI": 5984
  },
  "gpr": {
   "gpr:GPRD": 10910
- },
- "naver": {
-  "ok": false,
-  "why": "'원달러 환율': HTTPError 401 Client Error: Unauthorized for url: https://naverapihub.apigw.ntru; '원화 약세': HTTPError 401 Client Error: Unauthorized for url: https://naverapihub.apigw.ntru; '원화 강세': HTTPError 401 Client Error: Unauthorized for url: https://naverapihub.apigw.ntru; '달러 강세': HTTPError 401 Cli"
- },
- "official": {
-  "ok": false,
-  "received": 20,
-  "errors": [
-   "한국은행 보도자료: ReadTimeout"
-  ]
- },
- "ai": {
-  "ok": false,
-  "why": "RuntimeError 출력 한도 초과",
-  "added": 20
  }
 }

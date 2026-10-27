@@ -254,6 +254,12 @@ def main(skip_bt=False, write_live=True):
     stale_days = (now_kst().date() - base.date()).days
     status = json.loads((DATA / "fetch_status.json").read_text(encoding="utf-8")) if (DATA / "fetch_status.json").exists() else {}
     thresholds = {"ecos:KRW_per_USD": ("한국은행 ECOS 원/달러", 4), "yahoo:USDJPY": ("Yahoo Finance 일봉(비공식)", 4), "yahoo:UST10Y": ("Yahoo Finance 미국 금리·VIX·유가", 4), "ecos:BOP_CURRENT_ACCOUNT": ("ECOS 국제수지(월)", 75)}
+    # 갱신 시각 = 자료 수집·분석이 마지막으로 끝난 시각(코드만 바꿔 다시 빌드한 때가 아니라). 수집 기록이 없으면 지금.
+    try:
+        from datetime import datetime as _dt
+        collected_at = _dt.fromisoformat(status["at"]).astimezone(__import__("common").KST).isoformat(timespec="seconds")
+    except Exception:
+        collected_at = now_kst().isoformat(timespec="seconds")
     srcs = []
     for s_, (nm, th) in thresholds.items():
         row = df[df.series == s_]
@@ -261,7 +267,7 @@ def main(skip_bt=False, write_live=True):
         age = (now_kst().date() - lo.date()).days
         srcs.append({"series": s_, "name": nm, "last_obs": lo.strftime("%Y-%m-%d"), "last_available": la.strftime("%Y-%m-%d"), "age_days": age, "threshold_days": th, "stale": age > th})
     failed = [k for grp in ("ecos", "yahoo", "gpr") for k, v_ in (status.get(grp) or {}).items() if isinstance(v_, str) and v_.startswith("fail")]
-    jdump("meta.json", {"sources": srcs, "failed_series": failed, "updated_at": now_kst().isoformat(timespec="seconds"), "latest_obs": last, "stale_days": stale_days,
+    jdump("meta.json", {"sources": srcs, "failed_series": failed, "updated_at": collected_at, "latest_obs": last, "stale_days": stale_days,
                         "stale_warning": stale_days > 4, "cross_check": prep.cross_check_krw(df), "fetch_status": status,
                         "version": "v0.2.0", "model_names": MODEL_NAMES})
     print("ok", base.date(), len(hist["origins"]))
