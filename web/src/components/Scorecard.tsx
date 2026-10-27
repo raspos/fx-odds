@@ -4,7 +4,7 @@ import { J, fmt, sgn, MODEL_SHORT } from "../lib";
 
 const COLORS: Record<string, string> = { A: "#7a7974", B: "#2a78d6", C: "#eb6834", D: "#2f9e6b", P: "#9b59b6" };
 
-export default function Scorecard({ S, base }: { S: J; base: string }) {
+export default function Scorecard({ S, base, LV }: { S: J; base: string; LV?: J }) {
   const [hz, setHz] = useState<7 | 30>(30);
   const [period, setPeriod] = useState<"all" | "recent3y">("all");
   const P = usePalette();
@@ -48,6 +48,22 @@ export default function Scorecard({ S, base }: { S: J; base: string }) {
   const gain = best && best.model !== "A" ? best.crps_vs_rw_pct : 0;
   return (
     <div className="space-y-4">
+      {LV && (
+        <div className="card p-4 sm:p-5">
+          <h3>실시간 예측 성적표 <span className="text-[12px] font-normal" style={{ color: "var(--ink-3)" }}>· 공개 후 실제로 기록한 전망만(백테스트와 별도)</span></h3>
+          {LV.n_total === 0 ? <p className="mt-2 text-[13px]" style={{ color: "var(--ink-3)" }}>아직 기록된 전망이 없습니다. 전체 갱신이 돌 때마다 그날의 7일·30일 전망을 덮어쓰기 없이 추가로 기록합니다.</p> : (<>
+            <p className="mt-2 text-[13px] leading-relaxed">{LV.since} 부터 <b className="num">{LV.n_total}건</b>을 기록했고, 목표일이 지나 채점한 것은 <b className="num">{LV.n_eval}건</b>입니다.{LV.note_small && <span style={{ color: "var(--warn-ink)" }}> 평가된 표본이 30건 미만이라 아래 비율은 통계적 의미가 거의 없습니다. 기록이 쌓일수록 신뢰도가 올라갑니다.</span>}</p>
+            <div className="scrollx mt-2"><table className="t"><thead><tr><th>기간</th><th>기록</th><th>평가</th><th>50% 구간 포함</th><th>80% 구간 포함</th><th>90% 구간 포함</th><th>평균 오차(원)</th><th>평균 80% 폭(원)</th></tr></thead>
+              <tbody>{LV.by_horizon.map((h: J) => (<tr key={h.horizon}><td>{h.horizon}일 후</td><td className="num">{h.n_recorded}</td><td className="num">{h.n_eval}</td>
+                {h.n_eval ? (<><td className="num">{(h.cov50 * 100).toFixed(0)}%</td><td className="num">{(h.cov80 * 100).toFixed(0)}%</td><td className="num">{(h.cov90 * 100).toFixed(0)}%</td><td className="num">{fmt(h.mean_abs_err, 1)}</td><td className="num">{fmt(h.mean_width80, 1)}</td></>) : <td colSpan={5} style={{ textAlign: "left", color: "var(--ink-3)" }}>목표일 전(채점 대기)</td>}</tr>))}</tbody></table></div>
+            <p className="mt-1 text-[11px] leading-relaxed" style={{ color: "var(--ink-3)" }}>포함률은 명목 수준(50/80/90%)에 가까울수록 정직합니다. 평균 오차는 전망 중앙값(=기준일 환율)과 실제 환율의 차이입니다. 목표일이 휴장이면 직전 거래일의 매매기준율로 채점합니다. 환율 급등기에 구간이 얼마나 자주 벗어났는지, 안정기에 구간이 불필요하게 넓지 않았는지는 표본이 충분해지면 구분해 공개합니다.</p>
+            <details className="mt-2"><summary className="cursor-pointer text-[12px] font-semibold" style={{ color: "var(--ink-2)" }}>최근 기록 {Math.min(LV.recent.length, 12)}건 (펼치기)</summary>
+              <div className="scrollx mt-1"><table className="t"><thead><tr><th>기준일</th><th>목표일</th><th>기간</th><th>기준 환율</th><th>80% 구간</th><th>실제(매매기준율)</th><th>결과</th></tr></thead>
+                <tbody>{LV.recent.slice(0, 12).map((r: J, i: number) => (<tr key={i}><td className="num">{r.origin}</td><td className="num">{r.target_date}</td><td>{r.horizon}일</td><td className="num">{fmt(r.spot, 1)}</td>
+                  <td className="num">{fmt(r.pi80[0], 1)}~{fmt(r.pi80[1], 1)}</td><td className="num">{r.realized == null ? "–" : fmt(r.realized, 1)}</td>
+                  <td style={{ color: r.status === "대기" ? "var(--ink-3)" : r.side === "구간 안" ? "inherit" : "var(--warn-ink)" }}>{r.status === "대기" ? "채점 대기" : r.side}</td></tr>))}</tbody></table></div></details>
+          </>)}
+        </div>)}
       <div className="card p-4 sm:p-5">
         <div className="flex flex-wrap items-center gap-2">
           <h3 className="mr-auto text-lg font-bold">모형별 정확도 (Walk-forward 백테스트)</h3>

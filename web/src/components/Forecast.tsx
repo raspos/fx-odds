@@ -231,3 +231,48 @@ export function ModelTable({ L }: { L: J }) {
     </div>
   );
 }
+
+
+/** 실제 환율(1개월·3개월·1년)과 현재 전망 범위(50/80/90%)를 한 차트에서 본다. 범위는 기준일·7일 후·30일 후 값을 직선으로 이은 근사다. */
+export function RangeChart({ S, L, children }: { S: J; L: J; children?: React.ReactNode }) {
+  const [span, setSpan] = useState<"1m" | "3m" | "1y">("3m");
+  const P = usePalette();
+  const option = useMemo(() => {
+    const n = { "1m": 22, "3m": 66, "1y": 252 }[span];
+    const dates: string[] = S.dates.slice(-n), vals: number[] = S.usdkrw.slice(-n);
+    const base = L.base_date as string, H7 = L.horizons["7"], H30 = L.horizons["30"];
+    const m7 = H7.models[H7.selected], m30 = H30.models[H30.selected];
+    const xs = [base, H7.target_date, H30.target_date];
+    const q = (k: "pi50" | "pi80" | "pi90") => ({ lo: [L.spot, m7[k][0], m30[k][0]], hi: [L.spot, m7[k][1], m30[k][1]] });
+    const band = (k: "pi50" | "pi80" | "pi90", color: string, op: number, name: string) => {
+      const b = q(k);
+      return [{ name, type: "line", stack: k, symbol: "none", data: xs.map((x, i) => [x, b.lo[i]]), lineStyle: { opacity: 0 }, tooltip: { show: false } },
+        { name: name + " 폭", type: "line", stack: k, symbol: "none", data: xs.map((x, i) => [x, b.hi[i] - b.lo[i]]), lineStyle: { opacity: 0 }, areaStyle: { color, opacity: op }, tooltip: { show: false } }];
+    };
+    const actual = dates.map((d, i) => [d, vals[i]]);
+    const lastD = dates[dates.length - 1];
+    return {
+      animation: false, grid: { left: 8, right: 14, top: 26, bottom: 24, containLabel: true },
+      legend: { top: 0, data: ["원/달러(매매기준율)"], textStyle: { color: P.ink2 }, selectedMode: false },
+      tooltip: { trigger: "axis", valueFormatter: (v: number) => (v == null ? "" : fmt(v, 1)) },
+      xAxis: { type: "time", min: dates[0], max: H30.target_date, axisLabel: { color: P.ink3 }, axisLine: { lineStyle: { color: P.line } }, splitLine: { show: false } },
+      yAxis: { type: "value", scale: true, axisLabel: { color: P.ink3, formatter: (v: number) => fmt(v, 0) }, splitLine: { lineStyle: { color: P.line } } },
+      series: [
+        ...band("pi90", P.ink3, 0.12, "90%"), ...band("pi80", P.ink3, 0.2, "80%"), ...band("pi50", P.ink3, 0.32, "50%"),
+        { name: "원/달러(매매기준율)", type: "line", symbol: "none", data: actual, lineStyle: { color: P.ink, width: 1.8 },
+          markLine: { silent: true, symbol: "none", lineStyle: { type: "dashed", color: P.ink3 }, label: { color: P.ink3, fontSize: 10, formatter: "기준일" }, data: [{ xAxis: lastD }] } },
+      ],
+    };
+  }, [S, L, span, P]);
+  return (
+    <div className="card p-4 sm:p-5">
+      <div className="flex flex-wrap items-center gap-2">
+        <h3 className="mr-auto">환율 추이와 앞으로의 예상 범위</h3>
+        {(["1m", "3m", "1y"] as const).map((k) => <button key={k} className="btn" aria-pressed={span === k} onClick={() => setSpan(k)}>{{ "1m": "1개월", "3m": "3개월", "1y": "1년" }[k]}</button>)}
+      </div>
+      <EChart option={option} height={300} />
+      <p className="text-[11px] leading-relaxed" style={{ color: "var(--ink-3)" }}>오른쪽의 부채꼴은 오늘 기준 7일·30일 후 50·80·90% 예상 범위(공식 모형 {L.horizons["30"].selected_name})를 직선으로 이은 근사입니다. 방향 예측이 아니라 흔들릴 수 있는 범위입니다.</p>
+      {children}
+    </div>
+  );
+}

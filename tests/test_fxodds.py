@@ -368,3 +368,16 @@ def test_features_json_matches_outputs():
     N = json.loads((OUT / "news.json").read_text(encoding="utf-8"))
     assert F["news"]["n_ai"] == N["counts"]["n_ai"]                 # 구현 상태가 실제 산출물과 같다
     assert F["fpi"]["implemented"] is True and F["llm"]["at_visit"] is False
+
+
+def test_live_scorecard_evaluation_rules():
+    import live
+    fix = pd.Series([1300.0, 1310.0, 1320.0, 1335.0], index=pd.to_datetime(["2026-10-01", "2026-10-02", "2026-10-05", "2026-10-06"]))
+    rec = pd.DataFrame([
+        dict(origin="2026-09-29", target_date="2026-10-04", horizon=5, model="C", spot=1300.0, median=1300.0, pi50_lo=1295, pi50_hi=1305, pi80_lo=1290, pi80_hi=1312, pi90_lo=1285, pi90_hi=1316, p_up=0.5, model_version="v0.3", recorded_at="x"),
+        dict(origin="2026-10-05", target_date="2026-10-20", horizon=15, model="C", spot=1320.0, median=1320.0, pi50_lo=1310, pi50_hi=1330, pi80_lo=1300, pi80_hi=1340, pi90_lo=1295, pi90_hi=1345, p_up=0.5, model_version="v0.3", recorded_at="x")])
+    out = live.evaluate(rec, fix)
+    a, b = out["recent"][1], out["recent"][0]      # 최근 기준일이 앞에 온다
+    assert a["status"] == "평가" and a["eval_date"] == "2026-10-02"        # 일요일 목표 -> 직전 거래일(금) 값으로 평가
+    assert a["realized"] == 1310.0 and a["in80"] is True and a["in50"] is False and a["side"] == "구간 안"   # 1310 은 80% 구간(1290~1312) 안, 50%(1295~1305) 밖
+    assert b["status"] == "대기" and out["n_eval"] == 1 and out["note_small"] is True

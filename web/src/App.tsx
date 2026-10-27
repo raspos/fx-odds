@@ -2,7 +2,7 @@ import { Component, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import { J, fmt, pct, sgn } from "./lib";
 import EChart, { usePalette } from "./components/EChart";
-import { DistributionChart, HorizonCard, ModelTable, ThresholdCalculator, Gauge } from "./components/Forecast";
+import { DistributionChart, HorizonCard, ModelTable, ThresholdCalculator, Gauge, RangeChart } from "./components/Forecast";
 import Radar from "./components/Radar";
 import Scorecard from "./components/Scorecard";
 import Methodology from "./components/Methodology";
@@ -11,7 +11,7 @@ import { Events } from "./components/Events";
 import { News } from "./components/News";
 import Volatility from "./components/Volatility";
 
-const FILES = ["latest", "series", "scorecard", "radar", "history", "meta", "fpi", "events", "news", "reports", "vol", "features"] as const;
+const FILES = ["latest", "series", "scorecard", "radar", "history", "meta", "fpi", "events", "news", "reports", "vol", "features", "live"] as const;
 
 class Boundary extends Component<{ children: ReactNode }, { err: boolean }> {
   state = { err: false };
@@ -47,16 +47,6 @@ function Pending({ title, items, why }: { title: string; items: string[]; why: s
   );
 }
 
-function SpotChart({ S, spot }: { S: J; spot: number }) {
-  const P = usePalette();
-  const opt = useMemo(() => ({
-    animation: false, grid: { left: 4, right: 4, top: 6, bottom: 4, containLabel: false }, tooltip: { trigger: "axis", valueFormatter: (v: number) => fmt(v, 1) + "원" },
-    xAxis: { type: "category", data: S.dates, show: false }, yAxis: { type: "value", show: false, min: "dataMin", max: "dataMax" },
-    series: [{ type: "line", data: S.usdkrw, showSymbol: false, lineStyle: { width: 1.5, color: P.ink }, areaStyle: { color: P.ink3, opacity: 0.1 } }],
-  }), [S, P]);
-  return <EChart option={opt} height={70} />;
-}
-
 function ago(iso: string) {
   const t = new Date(iso).getTime(); if (!isFinite(t)) return "";
   const m = Math.max(0, Math.round((Date.now() - t) / 60000));
@@ -76,7 +66,7 @@ export default function App() {
   useEffect(() => { location.hash = tab; }, [tab]);
 
   useEffect(() => {
-    Promise.all(FILES.map((f) => fetch(`data/${f}.json`, { cache: "no-cache" }).then((r) => { if (!r.ok) throw new Error(f); return r.json(); }).catch((e) => { if (f === "vol" || f === "features") return null; throw e; })))
+    Promise.all(FILES.map((f) => fetch(`data/${f}.json`, { cache: "no-cache" }).then((r) => { if (!r.ok) throw new Error(f); return r.json(); }).catch((e) => { if (f === "vol" || f === "features" || f === "live") return null; throw e; })))
       .then((arr) => setD(Object.fromEntries(FILES.map((f, i) => [f, arr[i]]))))
       .catch((e) => setErr(`데이터를 불러오지 못했습니다: ${e.message}`));
   }, []);
@@ -151,7 +141,7 @@ export default function App() {
       {histMode && <div className="mt-4 rounded-lg p-3 text-sm" style={{ background: "var(--warn-bg)", color: "var(--warn-ink)", border: "1px solid var(--warn-line)" }}>
         <b>과거 자료 재계산 · {entry.d}.</b> 기준일까지의 환율만으로 다시 계산한 값이며, 당시 실제로 공개된 전망이 아닙니다. 당시 보존된 뉴스·보고서·압력 지수는 아직 없어 표시하지 않습니다.</div>}
 
-      {tab === "s1" && <Section id="s1" no="01" title="환율의 미래" sub="7일·30일 뒤 달러당 원화값의 확률분포">
+      {tab === "s1" && <Section id="s1" no="01" title="앞으로 한 달, 환율은 어디까지 움직일 수 있을까?" sub="방향을 맞히는 예측이 아니라 흔들릴 수 있는 범위를 추정합니다 · 과거 환율 변동으로 추정한 통계모형 값이며 옵션시장 내재확률이 아닙니다">
         {(() => {
           // 과거 시점이면 세 카드 모두 선택한 날짜 기준 값을 쓰고, 그 날짜의 값을 복원할 수 없으면 최신 값을 대신 보여 주지 않고 '당시 자료 없음'으로 둔다.
           const d0: string = histMode ? entry.d : L.base_date;
@@ -180,15 +170,13 @@ export default function App() {
         })()}
         <p className="-mt-2 text-[11px]" style={{ color: "var(--ink-3)" }}>세 지표는 서로 다른 개념이라 합산하지 않습니다. 압력 지수는 방향, 변동성 지수는 움직임의 크기, 확률분포는 가능한 환율의 범위를 말합니다.</p>
         <span id="s1-forecast" />
-        <div className="card p-4 sm:p-5">
-          <h3>원/달러 환율 (달러당 원화값) 3년 추이</h3>
-          <div className="mt-1 text-[12px] leading-relaxed" style={{ color: "var(--ink-3)" }}>
-            {!histMode && quote && quote.price && <div className="mb-1 text-[12px]" style={{ color: "var(--ink-2)" }}>참고 시장 호가 <b className="num">{fmt(quote.price, 1)}원</b> <span style={{ color: "var(--ink-3)" }}>({quote.time.slice(5, 10).replace("-", "/")} {quote.time.slice(11, 16)} 기준 · Yahoo 지연 시세 · 공식 기준값과 다를 수 있음{(Date.now() - new Date(quote.time).getTime()) > 3 * 3600000 ? " · 마지막 호가" : ""})</span></div>}
-            관측일 <b className="num">{histMode ? entry.d : L.base_date}</b> · 한국은행 ECOS · {L.definition}. 상승은 달러당 원화값 상승(원화 약세), 하락은 원화 강세입니다.
-          </div>
-          {!histMode && <SpotChart S={D.series} spot={L.spot} />}
-        </div>
-
+        {!histMode && <ThresholdCalculator L={L} />}
+        {!histMode && <RangeChart S={D.series} L={L}>
+          <details className="mt-1"><summary className="cursor-pointer text-[12px] font-semibold" style={{ color: "var(--ink-2)" }}>환율 정의와 출처 (펼치기)</summary>
+            <div className="mt-1 text-[12px] leading-relaxed" style={{ color: "var(--ink-3)" }}>
+              {quote && quote.price && <div className="mb-1" style={{ color: "var(--ink-2)" }}>참고 시장 호가 <b className="num">{fmt(quote.price, 1)}원</b> ({quote.time.slice(5, 10).replace("-", "/")} {quote.time.slice(11, 16)} 기준 · Yahoo 지연 시세 · 공식 기준값과 다를 수 있음{(Date.now() - new Date(quote.time).getTime()) > 3 * 3600000 ? " · 마지막 호가" : ""})</div>}
+              관측일 <b className="num">{L.base_date}</b> · 한국은행 ECOS · {L.definition}. 상승은 달러당 원화값 상승(원화 약세), 하락은 원화 강세입니다.</div></details>
+        </RangeChart>}
         {histMode ? (
           <div className="grid gap-4 md:grid-cols-2">
             {(["h7", "h30"] as const).map((k) => {
@@ -217,7 +205,6 @@ export default function App() {
             </div>
             <DistributionChart L={L} />
             <ModelTable L={L} />
-            <ThresholdCalculator L={L} />
           </>
         )}
         <p className="text-[12px] leading-relaxed" style={{ color: "var(--ink-3)" }}>
@@ -245,7 +232,7 @@ export default function App() {
       
 
       {tab === "s5" && <Section id="s5" no="05" title="예측 성적표" sub="FX SCORECARD — 이 서비스의 전망은 랜덤워크보다 실제로 정확한가">
-        <Scorecard S={D.scorecard} base={L.base_date} />
+        <Scorecard S={D.scorecard} base={L.base_date} LV={D.live} />
       </Section>}
 
       {tab === "s6" && <Section id="s6" no="06" title="방법론" sub="원시자료 · 계산식 · 한계 · 변경 이력">

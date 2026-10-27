@@ -284,6 +284,11 @@ def main(skip_bt=False, write_live=True):
                    "FXVI는 과거 실현 변동성의 역사적 위치이며 환율의 방향이나 미래 변동성을 보장하지 않고, 높다고 해서 환율 상승 압력으로 해석하지 않습니다."]})
     # 장벽 돌파 보정 성적표(barrier_cal.py)와 변동성 모형 비교표는 화면에서 제외(과한 정보). 검증 코드는 남겨 두고 필요할 때만 실행한다.
 
+    # ---------- 실시간 예측 성적표(공개 후 기록) ----------
+    import live as LV
+    lp = DATA / "live_forecasts.csv"
+    jdump("live.json", LV.evaluate(pd.read_csv(lp) if lp.exists() else None, ecos))
+
     # ---------- 구현 상태(features.json): 방법론·README 의 '구현 상태'가 코드와 어긋나지 않도록 실제 산출물에서 만든다 ----------
     fv = F.validate(fres, ecos)
     ai_n = int(nj.get("counts", {}).get("n_ai", 0)) if nj.get("available") else 0
