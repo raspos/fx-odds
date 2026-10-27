@@ -1,14 +1,19 @@
 {
- "at": "2026-10-27T02:23:46+00:00",
+ "at": "2026-10-27T15:32:04+00:00",
  "ecos": {
   "ecos:KRW_per_USD": 6636,
   "ecos:KRW_per_CNY": 2661,
   "ecos:KRW_per_100JPY": 6636,
   "ecos:KRW_per_TWD": 2910,
-  "ecos:KTB3Y": 6635,
+  "ecos:KTB3Y": 6636,
   "ecos:BASE_RATE": 6995,
   "ecos:BOP_CURRENT_ACCOUNT": 279,
   "ecos:BOP_EXPORTS": 320,
+  "ecos:OHLC_OPEN": 6621,
+  "ecos:OHLC_HIGH": 6620,
+  "ecos:OHLC_LOW": 6620,
+  "ecos:OHLC_CLOSE1530": 6621,
+  "ecos:OHLC_CLOSE_FULL": 569,
   "ecos:POLICY_US": 321,
   "ecos:POLICY_JP": 121,
   "ecos:POLICY_CN": 321,
@@ -48,14 +53,12 @@
   ]
  },
  "ai": {
-  "ok": true,
-  "added": 79,
-  "calls": 4,
-  "tokens_in": 4613,
-  "tokens_out": 15072
+  "ok": false,
+  "why": "HTTPError 500 Server Error: Internal Server Error for url: https://api.openai.com/v1/chat/completions",
+  "added": 139
  },
  "reports": {
   "ok": true,
-  "added": 0
+  "added": 1
  }
 }

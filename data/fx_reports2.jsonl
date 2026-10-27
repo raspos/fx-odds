@@ -22,3 +22,4 @@
 {"id": "0f11e8fe67df", "is_forecast": true, "institution": "씨티", "summary": "씨티, 환율 1250원 전망", "forecasts": [{"target_key": "UNSPEC", "target_label": "환율 1250원", "low": 1250, "high": 1250, "view": "krw_strong"}], "model": "gpt-5.4-mini-2026-03-17", "at": "2026-10-27T21:20+09:00"}
 {"id": "8431b0034ce0", "is_forecast": false, "institution": "", "summary": "", "forecasts": [], "model": "gpt-5.4-mini-2026-03-17", "at": "2026-10-27T21:20+09:00"}
 {"id": "bf8ef783e56b", "is_forecast": true, "institution": "씨티", "summary": "씨티, 장기 전망 1250원으로 하향", "forecasts": [{"target_key": "UNSPEC", "target_label": "장기 전망", "low": 1250, "high": 1250, "view": "krw_strong"}], "model": "gpt-5.4-mini-2026-03-17", "at": "2026-10-27T21:20+09:00"}
+{"id": "e0083a6b5aae", "is_forecast": false, "institution": "", "summary": "", "forecasts": [], "model": "gpt-5.4-mini-2026-03-17", "at": "2026-10-28T00:38+09:00"}
