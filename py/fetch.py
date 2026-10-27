@@ -38,6 +38,25 @@ FRED = {"DEXKOUS": "fred:USDKRW", "DEXJPUS": "fred:USDJPY", "DEXCHUS": "fred:USD
         "DFEDTARU": "fred:DFEDTARU"}
 
 
+def _ecos_json(url: str) -> dict:
+    """ECOS 호출. 해외 서버(GitHub Actions)에서 가끔 느리거나 끊기므로 5·15·45초 간격으로 재시도한다. 인증키 오류(INFO-100)는 재시도하지 않는다."""
+    last = None
+    for wait in (0, 5, 15, 45):
+        if wait:
+            time.sleep(wait)
+        try:
+            j = requests.get(url, headers=UA, timeout=(15, 90)).json()
+            code = (j.get("RESULT") or {}).get("CODE", "")
+            if code == "INFO-100":
+                return j
+            if j.get("StatisticSearch") or code.startswith("INFO-200"):
+                return j
+            last = j
+        except Exception as e:
+            last = {"RESULT": {"CODE": "NETWORK", "MESSAGE": type(e).__name__}}
+    return last or {}
+
+
 def _store(rows: pd.DataFrame, name: str, source: str, weekdays_only: bool = True) -> int:
     """rows: DataFrame[observed_date(str), value]. 검증 후 SQLite에 교체 적재."""
     df = rows.copy()
@@ -80,7 +99,7 @@ def fetch_ecos_rates(start="20000101") -> dict:
         try:
             s_, e_ = (start, datetime.now().strftime("%Y%m%d")) if cyc == "D" else (start[:6], datetime.now().strftime("%Y%m"))
             url = f"https://ecos.bok.or.kr/api/StatisticSearch/{key}/json/kr/1/100000/{stat}/{cyc}/{s_}/{e_}/{item}"
-            j = requests.get(url, headers=UA, timeout=60).json()
+            j = _ecos_json(url)
             rows = j.get("StatisticSearch", {}).get("row", [])
             if not rows:
                 res[name] = f"fail: {redact(str(j))[:120]}"; continue
@@ -106,7 +125,7 @@ def fetch_ecos(start="20000101") -> dict:
     for code, (name, _) in ECOS_ITEMS.items():
         try:
             url = f"https://ecos.bok.or.kr/api/StatisticSearch/{key}/json/kr/1/100000/731Y001/D/{start}/{end}/{code}"
-            j = requests.get(url, headers=UA, timeout=60).json()
+            j = _ecos_json(url)
             rows = j.get("StatisticSearch", {}).get("row", [])
             if not rows:
                 res[name] = f"fail: {redact(str(j))[:120]}"; continue

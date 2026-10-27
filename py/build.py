@@ -267,7 +267,15 @@ def main(skip_bt=False, write_live=True):
         age = (now_kst().date() - lo.date()).days
         srcs.append({"series": s_, "name": nm, "last_obs": lo.strftime("%Y-%m-%d"), "last_available": la.strftime("%Y-%m-%d"), "age_days": age, "threshold_days": th, "stale": age > th})
     failed = [k for grp in ("ecos", "yahoo", "gpr") for k, v_ in (status.get(grp) or {}).items() if isinstance(v_, str) and v_.startswith("fail")]
-    jdump("meta.json", {"sources": srcs, "failed_series": failed, "updated_at": collected_at, "latest_obs": last, "stale_days": stale_days,
+    import re as _re
+    reasons = {}
+    for grp in ("ecos", "yahoo", "gpr"):
+        for k, v_ in (status.get(grp) or {}).items():
+            if isinstance(v_, str) and v_.startswith("fail"):
+                m_ = _re.search(r"'CODE': '([^']+)'", v_)
+                reasons[k] = (m_.group(1) if m_ else v_[:40])
+    fail_reason = ("인증키 오류(INFO-100): GitHub 시크릿 ECOS_API_KEY 값 확인" if "INFO-100" in reasons.values() else ("네트워크 오류" if "NETWORK" in reasons.values() else ""))
+    jdump("meta.json", {"sources": srcs, "failed_series": failed, "fail_reason": fail_reason, "updated_at": collected_at, "latest_obs": last, "stale_days": stale_days,
                         "stale_warning": stale_days > 4, "cross_check": prep.cross_check_krw(df), "fetch_status": status,
                         "version": "v0.2.0", "model_names": MODEL_NAMES})
     print("ok", base.date(), len(hist["origins"]))

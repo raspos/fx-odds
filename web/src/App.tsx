@@ -136,7 +136,7 @@ export default function App() {
         ⚠ 자료가 {M.stale_days}일 전 기준입니다. 최근 수집이 실패했을 수 있어 이전 정상 데이터를 표시합니다.</div>}
       {M.sources.filter((x: J) => x.stale).map((x: J) => <div key={x.series} className="mt-3 rounded-lg p-3 text-sm" style={{ background: "var(--warn-bg)", color: "var(--warn-ink)", border: "1px solid var(--warn-line)" }}>
         ⚠ {x.name} 자료가 {x.age_days}일 전({x.last_obs}) 기준입니다(허용 {x.threshold_days}일 초과). 이전 정상 데이터를 표시합니다.</div>)}
-      {M.failed_series.length > 0 && <div className="mt-3 rounded-lg p-3 text-sm" style={{ background: "var(--warn-bg)", color: "var(--warn-ink)" }}>최근 수집 실패: {M.failed_series.join(", ")}</div>}
+      {M.failed_series.length > 0 && <div className="mt-3 rounded-lg p-3 text-sm" style={{ background: "var(--warn-bg)", color: "var(--warn-ink)" }}>최근 수집 실패: {M.failed_series.join(", ")}{M.fail_reason ? ` — 원인: ${M.fail_reason}` : ""}</div>}
       {histMode && <div className="mt-4 rounded-lg p-3 text-sm" style={{ background: "var(--warn-bg)", color: "var(--warn-ink)", border: "1px solid var(--warn-line)" }}>
         <b>과거 자료 재계산 · {entry.d}.</b> 기준일까지의 환율만으로 다시 계산한 값이며, 당시 실제로 공개된 전망이 아닙니다. 당시 보존된 뉴스·보고서·압력 지수는 아직 없어 표시하지 않습니다.</div>}
 
