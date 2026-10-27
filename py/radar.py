@@ -21,7 +21,13 @@ def returns_Y(df_long):
     p = prep.panel_yahoo_or_fred(df_long, "yahoo")
     r = prep.logret(p.dropna()).copy()
     r["USD_FACTOR"] = prep.dollar_factor(r)
-    return r[["KRW"] + CCY + ["USD_FACTOR"]]
+    dx = prep.wide(df_long, ["yahoo:DXY"])
+    if len(dx):  # Yahoo DX-Y.NYB 일봉은 날짜 표기가 다른 환율보다 하루 앞서(뉴욕 시각 기준) 달러 요인과의 상관이 시차 +1일에서 최대(0.80)다. 하루 뒤로 보정한다.
+        lv = dx["yahoo:DXY"].copy(); lv.index = lv.index + pd.offsets.BDay(1)
+        r["DXY"] = np.log(lv).diff().reindex(r.index)  # 참고 지표(엔화 13.6% 포함이라 통제변수로는 쓰지 않는다)
+    else:
+        r["DXY"] = np.nan
+    return r[["KRW"] + CCY + ["USD_FACTOR", "DXY"]]
 
 
 def partial_corr(rk, rx, rf):
@@ -68,7 +74,13 @@ def snapshot(r: pd.DataFrame):
             rows.append({"ccy": c, "name": NAMES[c], "simple": _f(s_now), "partial": _f(p_now), "n": w,
                          "simple_ci": [_f(v) for v in fisher_ci(s_now, w)], "partial_ci": [_f(v) for v in fisher_ci(p_now, w, 1)],
                          "simple_chg_1m": _f(s_now - s_prev), "partial_chg_1m": _f(p_now - p_prev)})
-        res[str(w)] = {"rows": rows, "krw_vs_factor": _f(tab[("FACTOR", "simple")].iloc[-1])}
+        dx = {"simple": None, "ci": [None, None], "factor_corr": None}
+        if "DXY" in r and r["DXY"].notna().sum() > w:
+            mp = int(w * 0.9)  # 달러지수는 휴일이 달라 드물게 결측이 있다
+            sx = r["KRW"].rolling(w, min_periods=mp).corr(r["DXY"]); sxf = r["USD_FACTOR"].rolling(w, min_periods=mp).corr(r["DXY"]); sj = r["JPY"].rolling(w, min_periods=mp).corr(r["DXY"])
+            dx = {"simple": _f(sx.iloc[-1]), "ci": [_f(v) for v in fisher_ci(sx.iloc[-1], w)], "chg_1m": _f(sx.iloc[-1] - sx.iloc[-22]) if len(sx) > 22 else None,
+                  "factor_corr": _f(sxf.iloc[-1]), "jpy_corr": _f(sj.iloc[-1])}
+        res[str(w)] = {"rows": rows, "krw_vs_factor": _f(tab[("FACTOR", "simple")].iloc[-1]), "dxy": dx}
     return res
 
 

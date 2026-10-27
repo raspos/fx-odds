@@ -9,7 +9,7 @@ import { Pressure } from "./components/Pressure";
 import { Events } from "./components/Events";
 import { News } from "./components/News";
 
-const FILES = ["latest", "series", "scorecard", "radar", "history", "meta", "fpi", "events", "news"] as const;
+const FILES = ["latest", "series", "scorecard", "radar", "history", "meta", "fpi", "events", "news", "reports"] as const;
 
 function Section({ id, no, title, sub, children }: { id: string; no: string; title: string; sub: string; children: React.ReactNode }) {
   return (
@@ -97,13 +97,16 @@ export default function App() {
         </nav>
       </header>
 
-      <div className="card mt-4 grid grid-cols-3 gap-3 p-3 text-center sm:p-4">
+      <div className="card mt-4 grid grid-cols-2 gap-3 p-3 text-center sm:grid-cols-4 sm:p-4">
         <div><div className="text-[11px]" style={{ color: "var(--ink-3)" }}>{histMode ? entry.d : L.base_date} 원/달러</div><div className="num text-xl font-black">{fmt(histMode ? entry.spot : L.spot, 1)}</div></div>
         {(["7", "30"] as const).map((h) => {
           const e = histMode ? entry["h" + h] : null; const H = L.horizons[h]; const m = H.models[H.selected];
           const med = e ? e.q[3] : m.median, pu = e ? e.pu : m.p_up;
           return (<div key={h}><div className="text-[11px]" style={{ color: "var(--ink-3)" }}>{h}일 후 80% 범위</div><div className="num text-lg font-black">{fmt(e ? e.q[1] : m.pi80[0], 0)}~{fmt(e ? e.q[5] : m.pi80[1], 0)}</div></div>);
         })}
+        <div><div className="text-[11px]" style={{ color: "var(--ink-3)" }}>뉴스 압력지수 (FSI)</div>
+          {D.news.available && !histMode ? <div className="num text-xl font-black" style={{ color: D.news.npi >= 0 ? "var(--up)" : "var(--down)" }}>{sgn(D.news.npi, 0)} <span className="text-[11px] font-normal" style={{ color: "var(--ink-3)" }}>{D.news.npi > 8 ? "약세 압력" : D.news.npi < -8 ? "강세 압력" : "중립"} · 실험</span></div>
+            : <div className="text-[12px]" style={{ color: "var(--ink-3)" }}>{histMode ? "과거 뉴스 보존본 없음" : "수집 전"}</div>}</div>
       </div>
       {M.stale_warning && <div className="mt-4 rounded-lg p-3 text-sm" style={{ background: "var(--warn-bg)", color: "var(--warn-ink)", border: "1px solid var(--warn-line)" }}>
         ⚠ 자료가 {M.stale_days}일 전 기준입니다. 최근 수집이 실패했을 수 있어 이전 정상 데이터를 표시합니다.</div>}
@@ -166,7 +169,7 @@ export default function App() {
       </Section>}
 
       {tab === "s2" && <Section id="s2" no="02" title="압력·뉴스" sub="뉴스가 환율을 미는 방향(실험) · 통계 압력 지수(FPI) · 시장 사건">
-        <News N={D.news} refDate={L.base_date} asOf={histMode ? entry.d : null} />
+        <News N={D.news} R={D.reports} H={L.horizons["30"]} spot={L.spot} refDate={L.base_date} asOf={histMode ? entry.d : null} />
         <h3 className="pt-2 text-xl font-extrabold">통계로 본 압력 (FPI)</h3>
         <Pressure P={D.fpi} asOf={histMode ? entry.d : null} S={D.series} />
         <details className="card p-4">
@@ -192,7 +195,7 @@ export default function App() {
       <footer className="mt-12 border-t pt-4 text-[12px] leading-relaxed" style={{ borderColor: "var(--line)", color: "var(--ink-3)" }}>
         최종 갱신 {M.updated_at.replace("T", " ").slice(0, 16)} KST · 원·달러 기준 {L.base_date}(ECOS) · Yahoo {M.latest_obs["yahoo:USDKRW"]} · {M.version}<br />
         <p className="mt-2">면책: 이 사이트의 확률·전망은 공개 금리와 언론 보도를 바탕으로 한 모형 추정치이며, 투자 자문이나 특정 금융상품의 매수·매도 권유가 아닙니다. 수치의 정확성·완전성·적시성을 보장하지 않습니다. 기관 전망과 발언은 보도 인용이라 원문과 다를 수 있습니다. 이 정보를 이용하거나 해석해 내린 판단과 그 결과의 책임은 전적으로 이용자에게 있으며, 운영자는 이로 인해 생긴 손해에 책임지지 않습니다.</p>
-        <p className="mt-2">© 2026 databrew · 이 사이트에는 추후 광고가 게재될 수 있습니다.</p>
+        <p className="mt-2">© 2026 <a href="https://raspos.github.io/databrew/" target="_blank" rel="noopener" className="underline">databrew</a> · 이 사이트에는 추후 광고가 게재될 수 있습니다.</p>
       </footer>
     </div>
   );

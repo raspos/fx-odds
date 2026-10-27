@@ -136,6 +136,12 @@ export default function Radar({ R, asOf }: { R: J; asOf: string | null }) {
           </table>
         </div>
         <EChart option={rankOpt} height={190} />
+        {V.snapshot[String(w)].dxy.simple != null && (() => { const d = V.snapshot[String(w)].dxy; return (
+          <div className="mt-2 rounded-lg p-3 text-[12px] leading-relaxed" style={{ background: "var(--surface-2)" }}>
+            <b>참고: 달러 인덱스(DXY)와 원화의 {w}일 상관 {sgn(d.simple)}</b> (95% 신뢰구간 {sgn(d.ci[0])}~{sgn(d.ci[1])}, 한 달 전 대비 {sgn(d.chg_1m)}).
+            DXY는 유로 57.6%·엔 13.6%·파운드 11.9% 등으로 구성돼 엔화가 포함되므로, 엔화와의 비교에 DXY를 통제변수로 쓰면 엔화 효과가 일부 제거됩니다(DXY와 엔화 상관 {sgn(d.jpy_corr)}).
+            그래서 통제에는 한·일·중·대만을 뺀 자체 달러 요인을 쓰고, DXY는 참고용으로 보여 줍니다(자체 요인과 DXY의 상관 {sgn(d.factor_corr)}).
+          </div>); })()}
         {ci && ci[0] != null && ci[0] <= 0 && <p className="text-[12px]" style={{ color: "var(--warn-ink)" }}>※ 1위 통화의 신뢰구간이 0을 포함합니다. 순위 차이가 표본 변동일 수 있습니다.</p>}
         <p className="mt-1 text-[12px] leading-relaxed" style={{ color: "var(--ink-3)" }}>
           가장 높은 상관계수가 곧 가장 큰 인과적 영향을 뜻하지 않습니다. 달러 요인 통제 후 값은 6개 비아시아 통화(EUR·GBP·AUD·CAD·CHF·SEK)로 만든 공통 달러 요인의 영향을 뺀 부분상관계수입니다.

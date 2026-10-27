@@ -1,5 +1,5 @@
 {
- "at": "2026-10-26T23:47:17+00:00",
+ "at": "2026-10-27T00:00:53+00:00",
  "ecos": {
   "ecos:KRW_per_USD": 6635,
   "ecos:KRW_per_CNY": 2660,
@@ -16,32 +16,24 @@
   "ecos:BOP_PORTFOLIO_LIAB": 215
  },
  "yahoo": {
-  "yahoo:USDKRW": 5939,
-  "yahoo:USDJPY": 6179,
-  "yahoo:USDCNY": 6031,
-  "yahoo:USDTWD": 5446,
-  "yahoo:EURUSD": 5941,
-  "yahoo:GBPUSD": 5953,
-  "yahoo:AUDUSD": 5317,
-  "yahoo:USDCAD": 6009,
-  "yahoo:USDCHF": 6007,
-  "yahoo:USDSEK": 6027,
+  "yahoo:USDKRW": 5940,
+  "yahoo:USDJPY": 6180,
+  "yahoo:USDCNY": 6032,
+  "yahoo:USDTWD": 5447,
+  "yahoo:EURUSD": 5942,
+  "yahoo:GBPUSD": 5954,
+  "yahoo:AUDUSD": 5318,
+  "yahoo:USDCAD": 6010,
+  "yahoo:USDCHF": 6008,
+  "yahoo:USDSEK": 6028,
   "yahoo:KOSPI": 5869,
-  "yahoo:UST10Y": 5985,
-  "yahoo:UST5Y": 5985,
-  "yahoo:VIX": 5993,
-  "yahoo:WTI": 5984
+  "yahoo:DXY": 6007,
+  "yahoo:UST10Y": 5986,
+  "yahoo:UST5Y": 5986,
+  "yahoo:VIX": 5994,
+  "yahoo:WTI": 5985
  },
  "gpr": {
   "gpr:GPRD": 10910
- },
- "naver": {
-  "ok": false,
-  "why": "'원달러 환율': HTTPError 401 Client Error: Unauthorized for url: https://naverapihub.apigw.ntru; '원화 약세': HTTPError 401 Client Error: Unauthorized for url: https://naverapihub.apigw.ntru; '원화 강세': HTTPError 401 Client Error: Unauthorized for url: https://naverapihub.apigw.ntru; '달러 강세': HTTPError 401 Cli"
- },
- "official": {
-  "ok": true,
-  "received": 60,
-  "errors": []
  }
 }

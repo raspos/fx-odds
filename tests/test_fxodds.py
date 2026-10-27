@@ -222,3 +222,9 @@ def test_fpi_range_and_coverage():
     assert vals and -100 <= min(vals) and max(vals) <= 100
     assert all(0 <= c <= 1 for c in F["history"]["coverage"])
     assert F["experimental"] is True
+
+
+def test_dxy_aligned_with_own_dollar_factor(df):
+    import radar
+    r = radar.returns_Y(df).dropna().tail(500)
+    assert r["USD_FACTOR"].corr(r["DXY"]) > 0.6  # 날짜 정렬이 맞으면 달러 요인과 DXY 는 강하게 같이 움직인다

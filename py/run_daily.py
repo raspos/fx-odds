@@ -1,7 +1,7 @@
 """하루 1회 정규 배치: 수집 -> 분석 -> 정적 JSON. 수집이 실패해도 이전 정상 데이터로 빌드하며 meta.json 의 stale_warning 으로 알린다."""
 import json, sys, traceback
 from datetime import datetime, timezone
-import fetch, build, news, ai_news
+import fetch, build, news, ai_news, reports
 from common import DATA, redact
 
 
@@ -19,6 +19,7 @@ def main() -> int:
         status["naver"] = {"ok": False, "why": redact(repr(e))[:200]}
     try:
         status["ai"] = ai_news.run()
+        status["reports"] = reports.extract()
     except Exception as e:
         status["ai"] = {"ok": False, "why": redact(repr(e))[:200]}
     (DATA / "fetch_status.json").write_text(json.dumps(status, ensure_ascii=False, indent=1), encoding="utf-8")

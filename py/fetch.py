@@ -27,7 +27,7 @@ YAHOO = {  # 심볼 -> series 이름. 모두 'USD 1단위당 외화' 형태로 �
     "KRW=X": "yahoo:USDKRW", "JPY=X": "yahoo:USDJPY", "CNY=X": "yahoo:USDCNY", "TWD=X": "yahoo:USDTWD",
     "EURUSD=X": "yahoo:EURUSD", "GBPUSD=X": "yahoo:GBPUSD", "AUDUSD=X": "yahoo:AUDUSD",
     "CAD=X": "yahoo:USDCAD", "CHF=X": "yahoo:USDCHF", "SEK=X": "yahoo:USDSEK",
-    "^KS11": "yahoo:KOSPI", "^TNX": "yahoo:UST10Y", "^FVX": "yahoo:UST5Y", "^VIX": "yahoo:VIX", "CL=F": "yahoo:WTI",
+    "^KS11": "yahoo:KOSPI", "DX-Y.NYB": "yahoo:DXY", "^TNX": "yahoo:UST10Y", "^FVX": "yahoo:UST5Y", "^VIX": "yahoo:VIX", "CL=F": "yahoo:WTI",
 }
 FRED = {"DEXKOUS": "fred:USDKRW", "DEXJPUS": "fred:USDJPY", "DEXCHUS": "fred:USDCNY", "DEXTAUS": "fred:USDTWD",
         # 달러 공통요인(아시아 통화 제외) 구성용

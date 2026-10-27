@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { J, sgn } from "../lib";
+import { J, sgn, fmt } from "../lib";
 
 const bd = (d: string, ref: string) => {  // 평일 수 차이
   let n = 0; const a = new Date(d + "T00:00:00Z"), b = new Date(ref + "T00:00:00Z");
@@ -7,7 +7,8 @@ const bd = (d: string, ref: string) => {  // 평일 수 차이
   return n;
 };
 
-export function News({ N, refDate, asOf }: { N: J; refDate: string; asOf: string | null }) {
+export function News({ N, R, H, spot, refDate, asOf }: { N: J; R: J; H: J; spot: number; refDate: string; asOf: string | null }) {
+  const [q, setQ] = useState("");
   const [win, setWin] = useState<"1" | "7" | "30">("7");
   const [topic, setTopic] = useState("all");
   const [dir, setDir] = useState<"all" | "up" | "down">("all");
@@ -55,19 +56,39 @@ export function News({ N, refDate, asOf }: { N: J; refDate: string; asOf: string
         <p className="mt-1 text-[11px]" style={{ color: "var(--ink-3)" }}>수집 {N.counts.n_articles}건 · 판단 {N.counts.n_judged}건 · 유보 {N.counts.n_hold}건 · 분류 불가 {N.counts.n_unclassified}건 · AI 보조 판단 {N.counts.n_ai}건 · 공식 발표 {N.counts.n_official}건 · 마지막 수집 {N.last_collected.replace("T", " ")}</p>
       </div>
       <div className="card p-4 sm:p-5">
-        <h3 className="text-lg font-bold">공식 보고서·발표 (한국은행 · 연준 · BIS)</h3>
-        <p className="mt-1 text-[12px]" style={{ color: "var(--ink-3)" }}>기관이 직접 공개한 보도자료·의사록·발간물의 제목과 원문 링크입니다. 제목만으로 방향을 단정하지 않으며, 원문을 확인해야 합니다.</p>
+        <h3 className="text-lg font-bold">증권사·기관 환율 전망 보고서</h3>
+        <p className="mt-1 text-[12px] leading-relaxed" style={{ color: "var(--ink-3)" }}>{R.note} 원문을 확인하지 못한 항목은 "원문 미확인"으로 표시합니다. 같은 기관은 최신 보도만 컨센서스에 넣고, 최근 5영업일({R.consensus.since} 이후) 자료만 집계합니다.</p>
+        {R.consensus.n > 0 && (
+          <div className="mt-3 grid grid-cols-2 gap-2 text-center text-[12px] sm:grid-cols-4">
+            <div className="rounded-lg p-2" style={{ background: "var(--surface-2)" }}><div style={{ color: "var(--ink-3)" }}>전망 제시 기관</div><div className="num text-lg font-black">{R.consensus.n}곳</div></div>
+            <div className="rounded-lg p-2" style={{ background: "var(--surface-2)" }}><div style={{ color: "var(--ink-3)" }}>전망 수준 중앙</div><div className="num text-lg font-black">{fmt(R.consensus.median)}</div></div>
+            <div className="rounded-lg p-2" style={{ background: "var(--surface-2)" }}><div style={{ color: "var(--ink-3)" }}>범위</div><div className="num text-lg font-black">{fmt(R.consensus.min)}~{fmt(R.consensus.max)}</div></div>
+            <div className="rounded-lg p-2" style={{ background: "var(--surface-2)" }}><div style={{ color: "var(--ink-3)" }}>현재 · 모형 30일 80%</div><div className="num text-sm font-black">{fmt(spot, 1)} · {fmt(H.models[H.selected].pi80[0])}~{fmt(H.models[H.selected].pi80[1])}</div></div>
+          </div>)}
+        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="기관·시점·요약 검색" aria-label="보고서 검색" className="mt-3 w-full rounded-lg border px-3 py-2 text-sm" style={{ background: "var(--surface)", borderColor: "var(--line)", color: "var(--ink)" }} />
+        <div className="scrollx mt-2">
+          <table className="t"><thead><tr><th>기관</th><th>발행(보도)일</th><th>전망 시점</th><th>전망 수준(원)</th><th>방향</th><th>요약(제목 근거)</th><th>출처</th></tr></thead>
+            <tbody>{R.reports.filter((r: J) => !q || (r.institution + r.horizon + r.summary + r.title).includes(q)).slice(0, 40).map((r: J, i: number) => (
+              <tr key={i}><td>{r.institution}</td><td className="num">{r.published}</td><td>{r.horizon || "–"}</td>
+                <td className="num">{r.low ? (r.high && r.high !== r.low ? `${fmt(r.low)}~${fmt(r.high)}` : fmt(r.low)) : "–"}</td>
+                <td style={{ color: r.view === "krw_weak" ? "var(--up)" : r.view === "krw_strong" ? "var(--down)" : "var(--ink-3)" }}>{r.view === "krw_weak" ? "환율 상승(원화 약세)" : r.view === "krw_strong" ? "환율 하락(원화 강세)" : r.view === "range" ? "박스권" : "–"}</td>
+                <td style={{ whiteSpace: "normal", textAlign: "left", minWidth: 220 }}>{r.summary}</td>
+                <td style={{ textAlign: "left" }}>{r.link ? <a href={r.link} target="_blank" rel="noreferrer" className="underline">{r.press || "원문"}</a> : r.press}{r.verify ? <span style={{ color: "var(--warn-ink)" }}> · 원문 미확인</span> : <span> · 원문 확인</span>}</td></tr>))}</tbody></table>
+        </div>
+        {R.reports.length === 0 && <p className="mt-2 text-[13px]" style={{ color: "var(--ink-3)" }}>수집된 증권사 환율 전망 보도가 아직 없습니다.</p>}
+        <p className="mt-2 text-[11px]" style={{ color: "var(--ink-3)" }}>증권사 원문 보고서는 대부분 유료·비공개라 언론 보도 제목에서 추출합니다. 원문을 확인한 전망은 data/reports_manual.yaml에 수기로 추가하면 "원문 확인"으로 표시됩니다.</p>
+      </div>
+      <details className="card p-4 sm:p-5">
+        <summary className="cursor-pointer text-[15px] font-bold">공식 기관 발표 (한국은행 · 연준 · BIS) — 펼치기</summary>
         <div className="mt-2 divide-y" style={{ borderColor: "var(--line)" }}>
           {arts.filter((a) => a.official).slice(0, 12).map((a) => (
             <div key={a.id} className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5 py-1.5 text-[13px]">
               <span className="num w-24 shrink-0 text-[11px]" style={{ color: "var(--ink-3)" }}>{a.date}</span>
               <span className="w-32 shrink-0 text-[11px]" style={{ color: "var(--ink-2)" }}>{a.press}</span>
               <a href={a.link} target="_blank" rel="noreferrer" className="min-w-0 flex-1 underline-offset-2 hover:underline">{a.title}</a>
-              {a.dir !== 0 && <b className="text-[11px]" style={{ color: a.dir > 0 ? "var(--up)" : "var(--down)" }}>{a.dir > 0 ? "원화 약세 압력" : "원화 강세 압력"}</b>}
             </div>))}
-          {arts.filter((a) => a.official).length === 0 && <div className="py-2 text-[13px]" style={{ color: "var(--ink-3)" }}>수집된 공식 발표가 없습니다.</div>}
         </div>
-      </div>
+      </details>
       <div className="card p-4 sm:p-5">
         <div className="flex flex-wrap items-center gap-2">
           <h3 className="mr-auto text-lg font-bold">뉴스 사건 타임라인</h3>
