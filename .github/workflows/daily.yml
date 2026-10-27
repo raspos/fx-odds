@@ -56,6 +56,15 @@ jobs:
           git diff --cached --quiet || git commit -m "data: daily update $(date -u +%F)"
           git pull --rebase -X theirs origin main   # main 이 앞서가면 이 실행이 새로 만든 데이터(바이너리 DB 포함)를 우선해 충돌 없이 얹는다
           git push
+      - name: 시장 호가도 함께 갱신 (전체 실행 때마다 확실히 한 번 — 호가 전용 스케줄이 빠져도 하루 두 번은 갱신된다)
+        if: env.FULL == 'true'
+        continue-on-error: true
+        run: |
+          python py/quote.py quote.json
+          mkdir q && cp quote.json q/ && cd q
+          git init -q -b quote && git config user.name fx-odds-bot && git config user.email bot@users.noreply.github.com
+          git add quote.json && git commit -q -m "quote"
+          git push -f -q "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" quote
       - uses: actions/upload-pages-artifact@v3
         with: { path: web/dist }
   deploy:

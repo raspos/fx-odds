@@ -1,7 +1,7 @@
 name: quote
 on:
   schedule:
-    - cron: "*/10 0-7 * * 1-5"   # 평일 09:00~16:50 KST, 10분마다 (GitHub 실제 실행은 몇 분 밀릴 수 있다)
+    - cron: "*/20 0-7 * * 1-5"   # 평일 09:00~16:40 KST, 20분마다. GitHub 스케줄은 밀리거나 건너뛸 수 있어(10분 주기는 특히 자주 빠짐) 보장되지 않는다
   workflow_dispatch: {}
 permissions:
   contents: write
