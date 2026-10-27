@@ -67,6 +67,10 @@ export default function App() {
   const [D, setD] = useState<Record<string, J> | null>(null);
   const [err, setErr] = useState("");
   const [asOf, setAsOf] = useState<string | null>(null);
+  const [quote, setQuote] = useState<J>(null);
+  useEffect(() => {  // 시장 호가(참고): quote 브랜치의 한 파일. 실패해도 화면은 정상 동작한다
+    fetch("https://raw.githubusercontent.com/raspos/fx-odds/quote/quote.json", { cache: "no-cache" }).then((r) => (r.ok ? r.json() : null)).then(setQuote).catch(() => {});
+  }, []);
   const [tab, setTab] = useState<string>(() => (location.hash.slice(1) || "s1"));
   useEffect(() => { location.hash = tab; }, [tab]);
 
@@ -151,6 +155,7 @@ export default function App() {
               {up ? "▲" : "▼"} {sgn(L.change, 1)}원 ({sgn(L.change_pct, 2)}%) <span className="text-xs font-normal" style={{ color: "var(--ink-3)" }}>전 거래일 {L.prev_date} 대비</span></div>}
           </div>
           <div className="mt-2 text-[12px] leading-relaxed" style={{ color: "var(--ink-3)" }}>
+            {!histMode && quote && quote.price && <div className="mb-1 text-[12px]" style={{ color: "var(--ink-2)" }}>참고 시장 호가 <b className="num">{fmt(quote.price, 1)}원</b> <span style={{ color: "var(--ink-3)" }}>({quote.time.slice(5, 10).replace("-", "/")} {quote.time.slice(11, 16)} 기준 · Yahoo 지연 시세 · 공식 기준값과 다를 수 있음{(Date.now() - new Date(quote.time).getTime()) > 3 * 3600000 ? " · 마지막 호가" : ""})</span></div>}
             관측일 <b className="num">{histMode ? entry.d : L.base_date}</b> · 한국은행 ECOS · {L.definition}. 상승은 달러당 원화값 상승(원화 약세), 하락은 원화 강세입니다.
           </div>
           {!histMode && <SpotChart S={D.series} spot={L.spot} />}
