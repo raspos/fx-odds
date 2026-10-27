@@ -180,11 +180,13 @@ export function ThresholdCalculator({ L }: { L: J }) {
           </table>
         </div>
       )}
+      <details className="mt-3"><summary className="cursor-pointer text-[12px] font-semibold" style={{ color: "var(--ink-2)" }}>만기 확률과 기간 중 돌파 확률의 차이 · 한계 (펼치기)</summary>
       <ul className="mt-3 list-disc space-y-1 pl-5 text-[12px] leading-relaxed" style={{ color: "var(--ink-3)" }}>
         <li><b>만기 시점 확률</b>은 목표일 한 날의 환율이 기준을 넘을 확률이고, <b>기간 중 돌파 확률</b>은 기간 안에 한 번이라도 넘을 확률이라 항상 더 큽니다.</li>
         <li>일별 종가만 시뮬레이션하면 거래일 사이의 돌파를 놓쳐 확률이 낮게 나옵니다(이산 시뮬레이션 열). 브라운 다리 보정으로 이를 근사한 값을 기본으로 표시합니다. 일중 고점(장중가) 돌파와는 다릅니다.</li>
         <li>사용 모형: 7일 {L.horizons["7"].selected_name}, 30일 {L.horizons["30"].selected_name}. 정규분포 꼬리는 극단 사건을 과소평가할 수 있습니다.</li>
       </ul>
+      </details>
     </div>
   );
 }

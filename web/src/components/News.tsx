@@ -14,6 +14,7 @@ export function News({ N, R, H, spot, refDate, asOf }: { N: J; R: J; H: J; spot:
   const [dir, setDir] = useState<"all" | "up" | "down">("all");
   const [showHold, setShowHold] = useState(false);
   const [more, setMore] = useState(false);
+  const [moreR, setMoreR] = useState(false);
   const arts: J[] = useMemo(() => (N.available ? N.articles : []), [N]);
   const list = useMemo(() => arts.filter((a) => {
     const age = bd(a.date, refDate);
@@ -60,7 +61,10 @@ export function News({ N, R, H, spot, refDate, asOf }: { N: J; R: J; H: J; spot:
       </div>
       <div className="card p-4 sm:p-5">
         <h3 className="text-lg font-bold">증권사·기관 환율 전망 보고서</h3>
+        <details className="mt-1"><summary className="cursor-pointer text-[12px] font-semibold" style={{ color: "var(--ink-2)" }}>이 표는 어떻게 만들었나 (펼치기)</summary>
         <p className="mt-1 text-[12px] leading-relaxed" style={{ color: "var(--ink-3)" }}>{R.note} 원문을 확인하지 못한 항목은 "원문 미확인"으로 표시합니다. 같은 기관은 최신 보도만 컨센서스에 넣고, 최근 5영업일({R.consensus.since} 이후) 자료만 집계합니다.</p>
+        <p className="mt-2 text-[11px]" style={{ color: "var(--ink-3)" }}>증권사 원문 보고서는 대부분 유료·비공개라 언론 보도 제목에서 추출합니다. 원문을 확인한 전망은 data/reports_manual.yaml에 수기로 추가하면 "원문 확인"으로 표시됩니다.</p>
+        </details>
         {R.consensus.n > 0 && (
           <div className="mt-3 grid grid-cols-2 gap-2 text-center text-[12px] sm:grid-cols-4">
             <div className="rounded-lg p-2" style={{ background: "var(--surface-2)" }}><div style={{ color: "var(--ink-3)" }}>전망 제시 기관</div><div className="num text-lg font-black">{R.consensus.n}곳</div></div>
@@ -71,15 +75,16 @@ export function News({ N, R, H, spot, refDate, asOf }: { N: J; R: J; H: J; spot:
         <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="기관·시점·요약 검색" aria-label="보고서 검색" className="mt-3 w-full rounded-lg border px-3 py-2 text-sm" style={{ background: "var(--surface)", borderColor: "var(--line)", color: "var(--ink)" }} />
         <div className="scrollx mt-2">
           <table className="t"><thead><tr><th>기관</th><th>발행(보도)일</th><th>전망 시점</th><th>전망 수준(원)</th><th>방향</th><th>요약(제목 근거)</th><th>출처</th></tr></thead>
-            <tbody>{R.reports.filter((r: J) => !q || (r.institution + r.horizon + r.summary + r.title).includes(q)).slice(0, 40).map((r: J, i: number) => (
+            <tbody>{R.reports.filter((r: J) => !q || (r.institution + r.horizon + r.summary + r.title).includes(q)).slice(0, moreR || q ? 40 : 3).map((r: J, i: number) => (
               <tr key={i}><td>{r.institution}</td><td className="num">{r.published}</td><td>{r.horizon || "–"}</td>
                 <td className="num">{r.low ? (r.high && r.high !== r.low ? `${fmt(r.low)}~${fmt(r.high)}` : fmt(r.low)) : "–"}</td>
                 <td style={{ color: r.view === "krw_weak" ? "var(--up)" : r.view === "krw_strong" ? "var(--down)" : "var(--ink-3)" }}>{r.view === "krw_weak" ? "환율 상승(원화 약세)" : r.view === "krw_strong" ? "환율 하락(원화 강세)" : r.view === "range" ? "박스권" : "–"}</td>
                 <td style={{ whiteSpace: "normal", textAlign: "left", minWidth: 220 }}>{r.summary}</td>
                 <td style={{ textAlign: "left" }}>{r.link ? <a href={r.link} target="_blank" rel="noreferrer" className="underline">{r.press || "원문"}</a> : r.press}{r.verify ? <span style={{ color: "var(--warn-ink)" }}> · 원문 미확인</span> : <span> · 원문 확인</span>}</td></tr>))}</tbody></table>
         </div>
+        {R.reports.length > 3 && !q && <button className="btn mt-2" onClick={() => setMoreR(!moreR)}>{moreR ? "접기 (최신 3건만)" : `나머지 ${Math.min(R.reports.length, 40) - 3}건 더 보기`}</button>}
         {R.reports.length === 0 && <p className="mt-2 text-[13px]" style={{ color: "var(--ink-3)" }}>수집된 증권사 환율 전망 보도가 아직 없습니다.</p>}
-        <p className="mt-2 text-[11px]" style={{ color: "var(--ink-3)" }}>증권사 원문 보고서는 대부분 유료·비공개라 언론 보도 제목에서 추출합니다. 원문을 확인한 전망은 data/reports_manual.yaml에 수기로 추가하면 "원문 확인"으로 표시됩니다.</p>
+
       </div>
       <details className="card p-4 sm:p-5">
         <summary className="cursor-pointer text-[15px] font-bold">공식 기관 발표 (한국은행 · 연준 · BIS) — 펼치기</summary>

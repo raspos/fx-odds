@@ -108,10 +108,12 @@ export default function Radar({ R, asOf }: { R: J; asOf: string | null }) {
   return (
     <div className="space-y-4">
       <div className="card p-4 sm:p-5">
+        <details><summary className="cursor-pointer text-[12px] font-semibold" style={{ color: "var(--ink-2)" }}>자료·계산 기준 (펼치기) — 마지막 관측일 <span className="num">{V.last_date}</span></summary>
         <p className="text-[12px] leading-relaxed" style={{ color: "var(--ink-3)" }}>
           자료: Yahoo Finance 일봉 마감(비공식) 단일 출처. 원·엔·위안·대만 달러가 같은 시각(런던 자정 마감)에 관측돼 시각 불일치가 없습니다. 자료 마지막 관측일 <b className="num">{V.last_date}</b>, 표본 {fmt(V.n_obs)}일.
           모든 계산은 가격 수준이 아닌 일별 로그수익률(USD 1단위당 외화, 상승=외화 약세) 기준입니다. 전망 모형의 기준 환율(한국은행 ECOS 매매기준율)과는 관측 시각·출처가 달라 일 단위 값이 다를 수 있습니다.
         </p>
+        </details>
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <span className="text-sm font-semibold">창</span>
           {WINDOWS.map((x) => <button key={x} className="btn" aria-pressed={w === x} onClick={() => setW(x)}>{x}거래일</button>)}
@@ -193,10 +195,12 @@ export default function Radar({ R, asOf }: { R: J; asOf: string | null }) {
 
       <div className="card p-4 sm:p-5">
         <h3 className="text-lg font-bold">⑤ 예측 기여도 — 이 통화를 넣으면 실제로 더 잘 맞히는가</h3>
+        <details className="mt-1"><summary className="cursor-pointer text-[12px] font-semibold" style={{ color: "var(--ink-2)" }}>검증 방법 (펼치기)</summary>
         <p className="mt-1 text-[12px] leading-relaxed" style={{ color: "var(--ink-3)" }}>
           Walk-forward(2012~): 원·달러 단독 모형(과거 5·20일 수익률 릿지)과 각 통화의 과거 5·20일 수익률을 추가한 모형의 CRPS를 비교합니다. 해외 통화는 서울 기준일 직전 영업일 마감까지만 사용, 계수는 목표일이 기준일 이전인 표본으로만 추정.
           양(+)은 단독 모형보다 개선, 음(−)은 악화. p값은 Newey-West HAC 보정 Diebold-Mariano 검정입니다.
         </p>
+        </details>
         <div className="scrollx mt-2">
           <table className="t">
             <thead><tr><th>추가 변수</th><th>7일 CRPS 개선</th><th>7일 p</th><th>30일 CRPS 개선</th><th>30일 p</th><th>30일 방향 적중</th></tr></thead>
@@ -223,10 +227,11 @@ export default function Radar({ R, asOf }: { R: J; asOf: string | null }) {
         </ul>
       </div>
 
-      <div className="card p-4 text-[12px] leading-relaxed sm:p-5" style={{ color: "var(--ink-2)" }}>
+      <details className="card p-4 text-[12px] leading-relaxed sm:p-5" style={{ color: "var(--ink-2)" }}>
+        <summary className="cursor-pointer text-[13px] font-semibold">공통 달러 요인의 한계 (펼치기)</summary>
         <b>공통 달러 요인의 한계.</b> 요인은 EUR·GBP·AUD·CAD·CHF·SEK의 USD당 로그수익률 단순평균으로, 한·일·중·대만 통화를 포함하지 않아 기계적 중복은 없습니다. 다만 유럽·원자재 통화 편향이 있고, 일반 달러인덱스(DXY)는 엔화를 포함(13.6%)하므로 쓰지 않았습니다. 요인과 원화의 상관은 {sgn(V.snapshot[String(w)].krw_vs_factor)}입니다.
         {" "}<b>예측 기여도</b>는 {Object.keys(MODEL_SHORT).filter((k) => k.startsWith("E")).map((k) => MODEL_SHORT[k]).join(", ")} 모형의 비교입니다.
-      </div>
+      </details>
     </div>
   );
 }
