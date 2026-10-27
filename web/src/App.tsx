@@ -119,22 +119,28 @@ export default function App() {
           </label>
           {asOf && <button className="btn" onClick={() => setAsOf(null)}>최신으로</button>}
         </div>
-        <nav className="mt-2 flex gap-1.5 overflow-x-auto text-[13px]" role="tablist">
+        <nav className="tabs" role="tablist">
           {[["s1", "환율의 미래"], ["s2", "압력·뉴스"], ["s3", "동조화 레이더"], ["s5", "예측 성적표"], ["s6", "방법론"]].map(([id, t]) => (
-            <button key={id} role="tab" aria-selected={tab === id} className="btn whitespace-nowrap" aria-pressed={tab === id} onClick={() => { setTab(id); window.scrollTo(0, 0); }}>{t}</button>))}
+            <button key={id} role="tab" aria-selected={tab === id} className="tab" onClick={() => { setTab(id); window.scrollTo(0, 0); }}>{t}</button>))}
         </nav>
       </header>
 
-      <div className="card mt-4 grid grid-cols-2 gap-3 p-3 text-center sm:grid-cols-4 sm:p-4">
-        <div><div className="text-[11px]" style={{ color: "var(--ink-3)" }}>{histMode ? entry.d : L.base_date} 원/달러</div><div className="num text-xl font-black">{fmt(histMode ? entry.spot : L.spot, 1)}</div></div>
+      <div className="tiles">
+        <div className="tile main"><div className="k">{histMode ? entry.d : L.base_date} 원/달러 (달러당 원화값)</div>
+          <div className="v">{fmt(histMode ? entry.spot : L.spot, 1)}<small>원</small></div>
+          <div className="s">{histMode ? "과거 자료 재계산" : <span style={{ color: L.change >= 0 ? "var(--up)" : "var(--down)" }}>{L.change >= 0 ? "▲" : "▼"} {sgn(L.change, 1)}원 ({sgn(L.change_pct, 2)}%) 전 거래일 대비</span>}</div></div>
         {(["7", "30"] as const).map((h) => {
           const e = histMode ? entry["h" + h] : null; const H = L.horizons[h]; const m = H.models[H.selected];
-          const med = e ? e.q[3] : m.median, pu = e ? e.pu : m.p_up;
-          return (<div key={h}><div className="text-[11px]" style={{ color: "var(--ink-3)" }}>{h}일 후 80% 범위</div><div className="num text-lg font-black">{fmt(e ? e.q[1] : m.pi80[0], 0)}~{fmt(e ? e.q[5] : m.pi80[1], 0)}</div></div>);
+          const lo = e ? e.q[1] : m.pi80[0], hi = e ? e.q[5] : m.pi80[1], sp = histMode ? entry.spot : L.spot;
+          return (<div key={h} className="tile"><div className="k">{h}일 후 80% 범위</div>
+            <div className="v">{fmt(lo, 0)}<small>~</small>{fmt(hi, 0)}</div>
+            <div className="s">현재 대비 {sgn((lo / sp - 1) * 100, 1)}% ~ {sgn((hi / sp - 1) * 100, 1)}%</div></div>);
         })}
-        <div><div className="text-[11px]" style={{ color: "var(--ink-3)" }}>뉴스 압력지수 (FSI)</div>
-          {D.news.available && !histMode ? <div className="num text-xl font-black" style={{ color: D.news.npi >= 0 ? "var(--up)" : "var(--down)" }}>{sgn(D.news.npi, 0)} <span className="text-[11px] font-normal" style={{ color: "var(--ink-3)" }}>{D.news.npi > 8 ? "약세 압력" : D.news.npi < -8 ? "강세 압력" : "중립"} · 실험</span></div>
-            : <div className="text-[12px]" style={{ color: "var(--ink-3)" }}>{histMode ? "과거 뉴스 보존본 없음" : "수집 전"}</div>}</div>
+        <div className="tile"><div className="k">뉴스 압력지수 (FSI) · 실험</div>
+          {D.news.available && !histMode ? (<>
+            <div className="v" style={{ color: D.news.npi >= 0 ? "var(--up)" : "var(--down)" }}>{sgn(D.news.npi, 0)}</div>
+            <div className="s">{D.news.npi > 8 ? "원화 약세 압력 우세" : D.news.npi < -8 ? "원화 강세 압력 우세" : "뚜렷한 방향 없음"} · 확률 아님</div></>)
+            : (<><div className="v" style={{ color: "var(--ink-3)" }}>–</div><div className="s">{histMode ? "과거 뉴스 보존본 없음" : "수집 전"}</div></>)}</div>
       </div>
       {M.stale_warning && <div className="mt-4 rounded-lg p-3 text-sm" style={{ background: "var(--warn-bg)", color: "var(--warn-ink)", border: "1px solid var(--warn-line)" }}>
         ⚠ 자료가 {M.stale_days}일 전 기준입니다. 최근 수집이 실패했을 수 있어 이전 정상 데이터를 표시합니다.</div>}
@@ -146,15 +152,8 @@ export default function App() {
 
       {tab === "s1" && <Section id="s1" no="01" title="환율의 미래" sub="7일·30일 뒤 달러당 원화값의 확률분포">
         <div className="card p-4 sm:p-5">
-          <div className="flex flex-wrap items-end gap-x-6 gap-y-2">
-            <div>
-              <div className="text-xs" style={{ color: "var(--ink-3)" }}>{histMode ? `${entry.d} 원·달러 환율 (달러당 원화값)` : "최신 원·달러 환율 (달러당 원화값)"}</div>
-              <div className="num text-4xl font-black">{fmt(histMode ? entry.spot : L.spot, 1)}<span className="ml-1 text-lg font-bold">원</span></div>
-            </div>
-            {!histMode && <div className="num pb-1 text-lg font-bold" style={{ color: up ? "var(--up)" : "var(--down)" }}>
-              {up ? "▲" : "▼"} {sgn(L.change, 1)}원 ({sgn(L.change_pct, 2)}%) <span className="text-xs font-normal" style={{ color: "var(--ink-3)" }}>전 거래일 {L.prev_date} 대비</span></div>}
-          </div>
-          <div className="mt-2 text-[12px] leading-relaxed" style={{ color: "var(--ink-3)" }}>
+          <h3>원/달러 환율 (달러당 원화값) 3년 추이</h3>
+          <div className="mt-1 text-[12px] leading-relaxed" style={{ color: "var(--ink-3)" }}>
             {!histMode && quote && quote.price && <div className="mb-1 text-[12px]" style={{ color: "var(--ink-2)" }}>참고 시장 호가 <b className="num">{fmt(quote.price, 1)}원</b> <span style={{ color: "var(--ink-3)" }}>({quote.time.slice(5, 10).replace("-", "/")} {quote.time.slice(11, 16)} 기준 · Yahoo 지연 시세 · 공식 기준값과 다를 수 있음{(Date.now() - new Date(quote.time).getTime()) > 3 * 3600000 ? " · 마지막 호가" : ""})</span></div>}
             관측일 <b className="num">{histMode ? entry.d : L.base_date}</b> · 한국은행 ECOS · {L.definition}. 상승은 달러당 원화값 상승(원화 약세), 하락은 원화 강세입니다.
           </div>

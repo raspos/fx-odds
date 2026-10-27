@@ -31,3 +31,44 @@ table.t th { text-align: right; font-weight: 600; color: var(--ink-3); padding: 
 table.t td { text-align: right; padding: 7px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
 table.t th:first-child, table.t td:first-child { text-align: left; }
 .scrollx { overflow-x: auto; }
+
+/* ---------- 레이아웃 다듬기 (2026-10) ---------- */
+:root { --shadow: 0 1px 2px rgba(11, 11, 11, .04), 0 4px 14px rgba(11, 11, 11, .04); --r: 14px; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --shadow: 0 1px 2px rgba(0, 0, 0, .35); } }
+:root[data-theme="dark"] { --shadow: 0 1px 2px rgba(0, 0, 0, .35); }
+.card { box-shadow: var(--shadow); border-radius: var(--r); }
+.card h3 { font-size: 16px; font-weight: 800; letter-spacing: -0.01em; }
+.card > h3:first-child, .card > div > h3:first-child { margin-bottom: 2px; }
+h2 { letter-spacing: -0.02em; }
+
+/* 탭: BOK워치처럼 밑줄 방식 */
+.tabs { display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; margin-top: 8px; border-bottom: 1px solid var(--line); }
+.tabs::-webkit-scrollbar { display: none; }
+.tab { border: 0; border-bottom: 2px solid transparent; background: none; padding: 8px 12px; white-space: nowrap; font-size: 14px; color: var(--ink-2); transition: color .15s, border-color .15s; margin-bottom: -1px; }
+.tab:hover { color: var(--ink); }
+.tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--ink); font-weight: 800; }
+
+/* 요약 타일 */
+.tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 16px; }
+@media (min-width: 720px) { .tiles { grid-template-columns: 1.15fr 1fr 1fr 1fr; } }
+.tile { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; box-shadow: var(--shadow); min-width: 0; }
+.tile .k { font-size: 11px; color: var(--ink-3); letter-spacing: .02em; }
+.tile .v { font-size: 24px; font-weight: 900; line-height: 1.15; margin-top: 3px; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; white-space: nowrap; }
+.tile .v small { font-size: 13px; font-weight: 700; margin-left: 2px; }
+.tile .s { font-size: 11px; color: var(--ink-3); margin-top: 3px; font-variant-numeric: tabular-nums; }
+.tile.main .v { font-size: 28px; }
+
+/* 표: 밀도와 가독성 */
+table.t th { font-size: 12px; background: transparent; position: sticky; top: 0; }
+table.t tbody tr { transition: background .12s; }
+table.t tbody tr:hover { background: var(--surface-2); }
+table.t td, table.t th { padding: 8px 10px; }
+
+/* 구간 라벨·보조 문구 */
+details > summary { list-style: none; }
+details > summary::-webkit-details-marker { display: none; }
+details > summary::before { content: "▸"; display: inline-block; margin-right: 6px; color: var(--ink-3); transition: transform .15s; }
+details[open] > summary::before { transform: rotate(90deg); }
+input[type="date"], input[type="search"], input:not([type]) { outline: none; }
+input:focus-visible, button:focus-visible, a:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+@media (max-width: 640px) { .card { border-radius: 12px; } table.t td, table.t th { padding: 7px 8px; } .tile .v { font-size: 21px; } .tile.main .v { font-size: 24px; } }
