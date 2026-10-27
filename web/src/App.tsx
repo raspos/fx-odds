@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { Component, useEffect, useMemo, useState } from "react";
+import type { ReactNode } from "react";
 import { J, fmt, pct, sgn } from "./lib";
 import EChart, { usePalette } from "./components/EChart";
 import { DistributionChart, HorizonCard, ModelTable, ThresholdCalculator, Gauge } from "./components/Forecast";
@@ -11,6 +12,16 @@ import { News } from "./components/News";
 
 const FILES = ["latest", "series", "scorecard", "radar", "history", "meta", "fpi", "events", "news", "reports"] as const;
 
+class Boundary extends Component<{ children: ReactNode }, { err: boolean }> {
+  state = { err: false };
+  static getDerivedStateFromError() { return { err: true }; }
+  render() {
+    if (!this.state.err) return this.props.children;
+    return (<div className="card mt-6 p-4 text-sm">이 탭을 표시하는 중 오류가 났습니다. 예전 화면이 캐시에 남아 있을 때 생길 수 있습니다.
+      <button className="btn ml-2" onClick={() => location.reload()}>새로고침</button></div>);
+  }
+}
+
 function Section({ id, no, title, sub, children }: { id: string; no: string; title: string; sub: string; children: React.ReactNode }) {
   return (
     <section id={id} className="mt-6">
@@ -19,7 +30,7 @@ function Section({ id, no, title, sub, children }: { id: string; no: string; tit
         <h2 className="text-2xl font-extrabold">{title}</h2>
         <p className="text-sm" style={{ color: "var(--ink-2)" }}>{sub}</p>
       </div>
-      <div className="space-y-4">{children}</div>
+      <div className="space-y-4"><Boundary>{children}</Boundary></div>
     </section>
   );
 }
@@ -60,7 +71,7 @@ export default function App() {
   useEffect(() => { location.hash = tab; }, [tab]);
 
   useEffect(() => {
-    Promise.all(FILES.map((f) => fetch(`data/${f}.json`).then((r) => { if (!r.ok) throw new Error(f); return r.json(); })))
+    Promise.all(FILES.map((f) => fetch(`data/${f}.json`, { cache: "no-cache" }).then((r) => { if (!r.ok) throw new Error(f); return r.json(); })))
       .then((arr) => setD(Object.fromEntries(FILES.map((f, i) => [f, arr[i]]))))
       .catch((e) => setErr(`데이터를 불러오지 못했습니다: ${e.message}`));
   }, []);
