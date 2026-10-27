@@ -13,6 +13,7 @@ export function News({ N, R, H, spot, refDate, asOf }: { N: J; R: J; H: J; spot:
   const [topic, setTopic] = useState("all");
   const [dir, setDir] = useState<"all" | "up" | "down">("all");
   const [showHold, setShowHold] = useState(false);
+  const [more, setMore] = useState(false);
   const arts: J[] = useMemo(() => (N.available ? N.articles : []), [N]);
   const list = useMemo(() => arts.filter((a) => {
     const age = bd(a.date, refDate);
@@ -48,11 +49,13 @@ export function News({ N, R, H, spot, refDate, asOf }: { N: J; R: J; H: J; spot:
               <div className="num font-bold"><span style={{ color: "var(--up)" }}>약세 {W[k].up}</span> · <span style={{ color: "var(--down)" }}>강세 {W[k].down}</span></div>
             </div>))}
         </div>
-        <p className="mt-3 text-[12px] leading-relaxed" style={{ color: "var(--ink-2)" }}>
+        <details className="mt-3"><summary className="cursor-pointer text-[12px] font-semibold" style={{ color: "var(--ink-2)" }}>이 지수는 어떻게 계산하나 (펼치기)</summary>
+        <p className="mt-2 text-[12px] leading-relaxed" style={{ color: "var(--ink-2)" }}>
           네이버 뉴스 검색(제목·링크만)에서 수집한 기사를 인과 규칙(예: 외국인 매도 → 원화 약세, 미국 금리 하락 → 원화 강세)으로 분류했습니다. 같은 날 같은 주제의 기사는 하나의 사건으로 묶어 기사 수가 점수를 키우지 않고,
           사건 영향은 반감기 {N.half_life_days}일로 줄어듭니다. 규칙이 놓친 환율 관련 제목은 AI(제목만 입력, 확신 없으면 유보)가 보조 판단하며 카드에 'AI 판단'으로 표시합니다. 상반된 신호나 부정 표현이 있으면 '판단 유보', 환율 결과 보도("환율 하락")는 원인이 아니라서 점수에서 뺍니다.
           <b> 과거 환율과의 관계는 아직 검증되지 않았고</b>(과거 뉴스 보존본 없음) 오늘부터 기록을 쌓아 공개 검증합니다. 확률 전망에는 반영하지 않습니다.
         </p>
+        </details>
         <p className="mt-1 text-[11px]" style={{ color: "var(--ink-3)" }}>수집 {N.counts.n_articles}건 · 판단 {N.counts.n_judged}건 · 유보 {N.counts.n_hold}건 · 분류 불가 {N.counts.n_unclassified}건 · AI 보조 판단 {N.counts.n_ai}건 · 공식 발표 {N.counts.n_official}건 · 마지막 수집 {N.last_collected.replace("T", " ")}</p>
       </div>
       <div className="card p-4 sm:p-5">
@@ -104,7 +107,7 @@ export function News({ N, R, H, spot, refDate, asOf }: { N: J; R: J; H: J; spot:
         </div>
         <p className="mt-2 text-[12px]" style={{ color: "var(--ink-3)" }}>{list.length}건 표시</p>
       </div>
-      {list.slice(0, 60).map((a) => (
+      {list.slice(0, more ? 60 : 5).map((a) => (
         <div key={a.id} className="card p-3.5">
           <div className="flex flex-wrap items-center gap-2 text-[11px]" style={{ color: "var(--ink-3)" }}>
             <span className="num">{a.published.replace("T", " ").slice(0, 16)}</span><span>· {a.press}</span>
@@ -118,7 +121,8 @@ export function News({ N, R, H, spot, refDate, asOf }: { N: J; R: J; H: J; spot:
                 <span style={{ color: "var(--ink-3)" }}> · 강도 {"●".repeat(a.strength)}{"○".repeat(3 - a.strength)} · {a.why}</span></>}
           </div>
         </div>))}
-      {list.length > 60 && <div className="text-center text-[12px]" style={{ color: "var(--ink-3)" }}>상위 60건만 표시</div>}
+      {list.length > 5 && <button className="btn mx-auto block" onClick={() => setMore(!more)}>{more ? "접기 (최신 5건만)" : `나머지 ${Math.min(list.length, 60) - 5}건 더 보기`}</button>}
+      {more && list.length > 60 && <div className="text-center text-[12px]" style={{ color: "var(--ink-3)" }}>상위 60건만 표시</div>}
     </div>
   );
 }
