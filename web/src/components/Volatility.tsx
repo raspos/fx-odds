@@ -29,7 +29,7 @@ export default function Volatility({ V }: { V: J }) {
     series: [["avg5", "5일", P.up], ["avg20", "20일", P.ink], ["avg60", "60일", P.down]].map(([k, n, c], i) => ({ name: n as string, type: "line", showSymbol: false, data: V.range_1y[k as string], lineStyle: { width: 1.6, color: c as string },
       markLine: i === 0 ? { silent: true, symbol: "none", data: brk(V.range_1y.dates) } : undefined })) }), [V, P]);
   const o4 = useMemo(() => ({ ...base, xAxis: xAxis(V.fxvi_3y.dates), yAxis: yAxis("FXVI", { min: 0, max: 100, scale: false }),
-    series: [{ name: "참고용(관측 범위 변경 무시)", type: "line", showSymbol: false, connectNulls: false, data: V.fxvi_3y.ref, lineStyle: { color: P.ink3, width: 1.6, type: "dashed" } },
+    series: [{ name: "참고용(관측 범위 변경 무시)", type: "line", showSymbol: false, connectNulls: false, data: V.fxvi_3y.ref, lineStyle: { color: P.down || "#2a78d6", width: 2.2, type: [6, 4] }, itemStyle: { color: P.down || "#2a78d6" } },
       { name: "FXVI", type: "line", showSymbol: false, connectNulls: false, data: V.fxvi_3y.fxvi, lineStyle: { color: P.ink, width: 1.6 }, areaStyle: { color: P.ink3, opacity: 0.1 },
       markLine: { silent: true, symbol: "none", data: [...brk(V.fxvi_3y.dates), { yAxis: 50, lineStyle: { color: P.line, type: "dotted" }, label: { show: false } }] } }] }), [V, P]);
   const o5 = useMemo(() => ({ ...base, xAxis: xAxis(V.level_vs_vol.dates), yAxis: [yAxis("원/달러(매매기준율)"), yAxis("20일 파킨슨 변동성(연율 %)", { splitLine: { show: false } })],
@@ -111,7 +111,7 @@ export default function Volatility({ V }: { V: J }) {
       <div className="card p-4 sm:p-5"><h3>④ FXVI 최근 3년</h3><EChart option={o4} height={260} />
         <p className="text-[12px] leading-relaxed" style={{ color: "var(--ink-3)" }}>
           <b>실선</b>은 같은 방식으로 잰 과거 252거래일과만 비교한 FXVI입니다. 2024년 7월에 외환시장 마감이 새벽 2시로 늘면서 하루 고가·저가의 재는 범위가 넓어졌고, 새 방식의 과거가 252일 쌓이기 전에는 실선을 그리지 않습니다(원자료는 모두 있습니다).
-          <b> 점선</b>은 그 빈 구간에 재는 방식의 변경을 무시하고 전체 과거와 비교한 <b>참고용</b> 값입니다. 새 방식의 값이 예전 값보다 크게 나오는 효과가 섞여 있어 <b>실제보다 높게 나올 수 있으니</b> 실선과 같은 기준으로 읽지 마세요.</p><Src V={V} /></div>
+          <b> 파란 점선</b>은 그 빈 구간에 재는 방식의 변경을 무시하고 전체 과거와 비교한 <b>참고용</b> 값입니다. 새 방식의 값이 예전 값보다 크게 나오는 효과가 섞여 있어 <b>실제보다 높게 나올 수 있으니</b> 실선과 같은 기준으로 읽지 마세요.</p><Src V={V} /></div>
       <div className="card p-4 sm:p-5"><h3>⑤ 환율 수준과 변동성</h3><EChart option={o5} height={260} /><Src V={V} /></div>
       <div className="card p-4 sm:p-5"><h3>⑥ 연도별 평균 일중 변동폭</h3><EChart option={o6} height={240} />
         <p className="text-[12px] leading-relaxed" style={{ color: "var(--ink-3)" }}>회색: 2023년까지(09:00~15:30 중심 관측), 파랑: 2024년(7월 마감 연장 전후 혼합), 주황: 2025년 이후(연장된 관측 범위). 2024-07 이후의 큰 값은 변동성 증가와 관측 범위 확대가 섞여 있어 직접 비교할 수 없습니다.</p><Src V={V} /></div>
