@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="FX ODDS">
+  <title>FX ODDS</title>
+  <defs>
+    <clipPath id="r"><rect x="42" y="0" width="22" height="64"/></clipPath>
+    <clipPath id="l"><rect x="0" y="0" width="22" height="64"/></clipPath>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="#1d2a44"/>
+  <path d="M9 47 C20 47 23 17 32 17 C41 17 44 47 55 47 Z" fill="#3b4a68"/>
+  <path d="M9 47 C20 47 23 17 32 17 C41 17 44 47 55 47 Z" fill="#ec6a2e" clip-path="url(#r)"/>
+  <path d="M9 47 C20 47 23 17 32 17 C41 17 44 47 55 47 Z" fill="#2a78d6" clip-path="url(#l)"/>
+  <path d="M9 47 C20 47 23 17 32 17 C41 17 44 47 55 47" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="32" y1="15" x2="32" y2="47" stroke="#ffffff" stroke-width="2" stroke-dasharray="2.5 3" stroke-linecap="round"/>
+  <rect x="9" y="50" width="46" height="3" rx="1.5" fill="#3b4a68"/>
+</svg>
