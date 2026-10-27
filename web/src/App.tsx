@@ -45,6 +45,13 @@ function SpotChart({ S, spot }: { S: J; spot: number }) {
   return <EChart option={opt} height={70} />;
 }
 
+function ago(iso: string) {
+  const t = new Date(iso).getTime(); if (!isFinite(t)) return "";
+  const m = Math.max(0, Math.round((Date.now() - t) / 60000));
+  return m < 60 ? `${m}분 전` : m < 1440 ? `${Math.floor(m / 60)}시간 전` : `${Math.floor(m / 1440)}일 전`;
+}
+const mdhm = (iso: string) => `${Number(iso.slice(5, 7))}/${Number(iso.slice(8, 10))} ${iso.slice(11, 16)}`;
+
 export default function App() {
   const [D, setD] = useState<Record<string, J> | null>(null);
   const [err, setErr] = useState("");
@@ -87,6 +94,9 @@ export default function App() {
               <p className="text-xs" style={{ color: "var(--ink-2)" }}>환율의 확률과 압력을 읽다</p>
             </div>
           </a>
+          <div className="text-right text-[11px] leading-tight num" style={{ color: "var(--ink-3)" }} title="자료 수집·분석이 마지막으로 끝난 시각(한국시간)">
+            <div>갱신</div><div className="text-[12px] font-semibold" style={{ color: "var(--ink-2)" }}>{mdhm(M.updated_at)}</div><div>{ago(M.updated_at)}</div>
+          </div>
           <label className="flex items-center gap-2 text-xs" style={{ color: "var(--ink-2)" }}>
             기준일
             <input type="date" min={first} max={last} value={asOf ?? last} onChange={(e) => setAsOf(e.target.value && e.target.value < last ? e.target.value : null)}
