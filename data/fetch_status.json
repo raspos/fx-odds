@@ -1,9 +1,9 @@
 {
- "at": "2026-10-27T00:54:52+00:00",
+ "at": "2026-10-27T02:23:46+00:00",
  "ecos": {
-  "ecos:KRW_per_USD": 6635,
-  "ecos:KRW_per_CNY": 2660,
-  "ecos:KRW_per_100JPY": 6635,
+  "ecos:KRW_per_USD": 6636,
+  "ecos:KRW_per_CNY": 2661,
+  "ecos:KRW_per_100JPY": 6636,
   "ecos:KRW_per_TWD": 2910,
   "ecos:KTB3Y": 6635,
   "ecos:BASE_RATE": 6995,
@@ -26,12 +26,12 @@
   "yahoo:USDCAD": 6010,
   "yahoo:USDCHF": 6008,
   "yahoo:USDSEK": 6028,
-  "yahoo:KOSPI": 5869,
-  "yahoo:DXY": 6006,
+  "yahoo:KOSPI": 5870,
+  "yahoo:DXY": 6007,
   "yahoo:UST10Y": 5986,
   "yahoo:UST5Y": 5986,
   "yahoo:VIX": 5994,
-  "yahoo:WTI": 5984
+  "yahoo:WTI": 5985
  },
  "gpr": {
   "gpr:GPRD": 10910
@@ -41,16 +41,18 @@
   "why": "'원달러 환율': HTTPError 401 Client Error: Unauthorized for url: https://naverapihub.apigw.ntru; '원화 약세': HTTPError 401 Client Error: Unauthorized for url: https://naverapihub.apigw.ntru; '원화 강세': HTTPError 401 Client Error: Unauthorized for url: https://naverapihub.apigw.ntru; '달러 강세': HTTPError 401 Cli"
  },
  "official": {
-  "ok": true,
-  "received": 60,
-  "errors": []
+  "ok": false,
+  "received": 40,
+  "errors": [
+   "미국 연준 보도자료: HTTPError"
+  ]
  },
  "ai": {
   "ok": true,
-  "added": 177,
-  "calls": 9,
-  "tokens_in": 10219,
-  "tokens_out": 36772
+  "added": 79,
+  "calls": 4,
+  "tokens_in": 4613,
+  "tokens_out": 15072
  },
  "reports": {
   "ok": true,
