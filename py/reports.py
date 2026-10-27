@@ -18,7 +18,7 @@ MODEL = os.environ.get("FXODDS_AI_MODEL", "gpt-5.4-mini-2026-03-17")
 BATCH = 20
 MAX_PER_RUN = 120
 
-INST = re.compile(r"證|증권|은행|리서치|연구원|연구소|KB|신한|하나|우리|NH|삼성|한투|키움|메리츠|대신|유진|iM|IBK|BNK|DB금융|DS투자|상상인|한화투자|현대차|SK|LS|IMF|OECD|골드만|JP\s?모건|모건스탠리|씨티|UBS|BoA|바클레이|노무라|HSBC|도이치|BNP|SC제일|웰스파고|맥쿼리|무디스|S&P|피치|ING")
+INST = re.compile(r"證|증권|은행|리서치|연구원|연구소|KB|신한|하나|우리|NH|삼성|한투|키움|메리츠|대신|유진|iM|IBK|BNK|DB금융|DS투자|상상인|한화투자|현대차|SK|LS|IMF|OECD|골드만|JP\s?모건|모건스탠리|씨티|UBS|BoA|바클레이|노무라|HSBC|도이치|BNP|SC제일|웰스파고|맥쿼리|무디스|S&P|피치|ING|MUFG|커먼즈뱅크|코메르츠|맥쿼리|웰스파고|DBS|OCBC|다이와|미즈호|BMO|RBC|TD증권|소시에테|크레디트스위스|ANZ|웨스트팩")
 FORECAST = re.compile(r"전망|예상|관측|내다|제시|예측|상향|하향|목표|내년|연말|분기|연평균|1,?\d{3}원")
 FX = re.compile(r"환율|달러[-/·]?\s*원|원\s*[/·-]\s*달러|원화")
 
@@ -108,8 +108,8 @@ def build_output(spot: float, today) -> dict:
     rows = []
     for id_, c in cache.items():
         it = items.get(id_)
-        if not it or not c["is_forecast"] or not c["institution"]:
-            continue
+        if not it or not c["is_forecast"] or not c["institution"] or re.fullmatch(r"(증권가|증권사|증권업계|외국계|해외\s*IB|IB|투자은행|전문가들?|시장|애널리스트)", re.sub(r"\s+", "", c["institution"])):
+            continue  # 특정 기관이 아닌 일반 표현은 제외
         lo, hi = c["level_low"], c["level_high"]
         if lo and not (900 <= lo <= 2200 and (not hi or 900 <= hi <= 2200)):
             lo = hi = 0  # 환율 수준으로 보기 어려운 값은 버린다
@@ -122,6 +122,13 @@ def build_output(spot: float, today) -> dict:
             rows.append({"institution": canon_institution(r["institution"]), "published": str(r["published"]), "horizon": r.get("horizon", ""), "low": r.get("low"), "high": r.get("high", r.get("low")),
                          "view": r.get("view", "none"), "summary": r.get("rationale", ""), "title": r.get("title", ""), "link": r.get("link", ""), "press": r.get("source", ""),
                          "verify": bool(r.get("verify", True)), "source": r.get("source", "수기 입력"), "by": "수기"})
+    # 같은 기관·날짜·수준에서 시점 표기만 비어 있는 중복은 시점이 있는 쪽만 남긴다
+    best = {}
+    for r in rows:
+        k2 = (r["institution"], r["published"], r["low"], r["high"])
+        if k2 not in best or (not best[k2]["horizon"] and r["horizon"]):
+            best[k2] = r
+    rows = list(best.values())
     seen, dedup = set(), []
     for r in sorted(rows, key=lambda r: (r["published"], r["by"] == "수기"), reverse=True):  # 같은 기관·날짜·시점·수준 중복 보도는 하나만(수기 우선)
         k = (r["institution"], r["published"], r["horizon"], r["low"], r["high"])

@@ -1,6 +1,16 @@
 # 증권사·기관 환율 전망 수기 입력 (BOK워치 reports.yaml 과 같은 방식). 원문을 확인하면 verify: false 로 바꾼다.
 # 예시(주석 처리됨): 아래 형식으로 reports 에 추가하면 화면 표에 '수기'로 표시된다.
-reports: []
+reports:
+  - institution: 코메르츠방크
+    published: "2026-08-28"
+    horizon: 단기
+    low: 1360
+    high: 1400
+    view: range
+    rationale: "한은 연속 인상 이후 원화 상승폭이 완만해지며 1,360~1,400원 박스권 전망(찰리 레이)"
+    source: "FXStreet 8/28 인용(원문 미확인, 발표 후 2개월 경과)"
+    link: "https://www.fxstreet.com/news/south-korean-won-bok-tightening-supports-krw-against-us-dollar-commerzbank-202608282341"
+    verify: true
 #  - institution: 신한투자증권
 #    published: "2026-10-22"
 #    horizon: 연말
