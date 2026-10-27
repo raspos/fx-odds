@@ -95,7 +95,7 @@ export default function App() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 pb-24 sm:px-6">
-      <div className="-mx-4 flex items-center gap-1 border-b px-4 py-1.5 text-[12px] sm:-mx-6 sm:px-6" style={{ borderColor: "var(--line)", background: "var(--surface-2)" }} aria-label="서비스 전환">
+      <div className="-mx-4 flex items-center gap-1 overflow-x-auto whitespace-nowrap border-b px-4 py-1.5 text-[12px] sm:-mx-6 sm:px-6" style={{ borderColor: "var(--line)", background: "var(--surface-2)" }} aria-label="서비스 전환">
         <span style={{ color: "var(--ink-3)" }}>서비스</span>
         <a href="https://bokwatch.pages.dev/" className="rounded-full px-2.5 py-0.5" style={{ color: "var(--ink-2)" }}>BOK워치 · 금통위 금리 결정 ↗</a>
         <span className="rounded-full px-2.5 py-0.5 font-bold" style={{ background: "var(--ink)", color: "var(--bg)" }} aria-current="page">FX ODDS · 환율</span>
@@ -133,7 +133,7 @@ export default function App() {
           const e = histMode ? entry["h" + h] : null; const H = L.horizons[h]; const m = H.models[H.selected];
           const lo = e ? e.q[1] : m.pi80[0], hi = e ? e.q[5] : m.pi80[1], sp = histMode ? entry.spot : L.spot;
           return (<div key={h} className="tile"><div className="k">{h}일 후 80% 범위</div>
-            <div className="v">{fmt(lo, 0)}<small>~</small>{fmt(hi, 0)}</div>
+            <div className="v range">{fmt(lo, 0)}<small>~</small>{fmt(hi, 0)}</div>
             <div className="s">현재 대비 {sgn((lo / sp - 1) * 100, 1)}% ~ {sgn((hi / sp - 1) * 100, 1)}%</div></div>);
         })}
         <div className="tile"><div className="k">뉴스 압력지수 (FSI) · 실험</div>

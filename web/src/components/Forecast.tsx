@@ -47,7 +47,7 @@ export function HorizonCard({ hz, spot, H }: { hz: number; spot: number; H: J })
       </p>
       <div className="mt-3">
         <div className="text-xs" style={{ color: "var(--ink-3)" }}>80% 확률로 이 범위 안</div>
-        <div className="num text-3xl font-extrabold">{fmt(m.pi80[0], 0)} ~ {fmt(m.pi80[1], 0)}<span className="ml-1 text-base font-bold">원</span></div>
+        <div className="num font-extrabold" style={{ fontSize: "clamp(20px, 6.4vw, 30px)", whiteSpace: "nowrap" }}>{fmt(m.pi80[0], 0)} ~ {fmt(m.pi80[1], 0)}<span className="ml-1 text-base font-bold">원</span></div>
         <div className="mt-1.5 text-xs leading-relaxed" style={{ color: "var(--ink-3)" }}>현재 {fmt(spot, 1)}원 · 공식 모형은 방향 정보가 없어 중앙값이 현재 환율과 같습니다(검증된 방향 예측력 없음).</div>
       </div>
       <div className="mt-3"><Gauge pUp={m.p_up} /></div>

@@ -72,3 +72,10 @@ details[open] > summary::before { transform: rotate(90deg); }
 input[type="date"], input[type="search"], input:not([type]) { outline: none; }
 input:focus-visible, button:focus-visible, a:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
 @media (max-width: 640px) { .card { border-radius: 12px; } table.t td, table.t th { padding: 7px 8px; } .tile .v { font-size: 21px; } .tile.main .v { font-size: 24px; } }
+
+/* 좁은 폰(320~390px)에서 범위 숫자가 타일을 넘지 않게 글자 크기를 화면 폭에 맞춘다 */
+.tile { overflow: hidden; }
+.tile .v.range { font-size: clamp(15px, 5vw, 24px); white-space: nowrap; }
+.tile .v.range small { margin: 0 1px; }
+@media (min-width: 720px) { .tile .v.range { font-size: 24px; } }
+@media (max-width: 420px) { .tile { padding: 10px 11px; } .tile .k { font-size: 10.5px; } .tile .v { font-size: clamp(17px, 5.4vw, 22px); } .tile.main .v { font-size: clamp(19px, 6.2vw, 26px); } .tile .s { font-size: 10.5px; } }
