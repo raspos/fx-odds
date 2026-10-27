@@ -31,8 +31,8 @@ jobs:
           path: |
             data/bt.pkl
             data/latest_mu.json
-          key: bt-${{ github.run_id }}
-          restore-keys: bt-
+          key: bt2-${{ github.run_id }}
+          restore-keys: bt2-
       - name: 수집·분석 (전체 — 실패 시 이전 데이터 유지)
         if: env.FULL == 'true'
         env:

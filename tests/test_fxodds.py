@@ -61,7 +61,7 @@ def test_default_model_uses_only_realised_forecasts():
     n = 300
     idx = pd.bdate_range("2013-01-01", periods=n)
     rows = []
-    for m, c in (("A", 3.0), ("B", 2.0), ("C", 1.0), ("D", 2.5)):
+    for m, c in (("A", 3.0), ("B", 2.0), ("C", 1.0), ("D", 2.5), ("P", 1.5)):  # 모든 후보(A~D, P)가 함께 낸 기준일만 비교한다
         for i, d in enumerate(idx):
             rows.append(dict(origin=d, eval_date=d + pd.Timedelta(days=7), horizon=7, model=m, crps=c))
     bt = pd.DataFrame(rows)
@@ -245,3 +245,85 @@ def test_institution_names_are_unified():
         assert reports.canon_institution(raw).endswith(("증권",)), raw
     assert reports.canon_institution("한투證") == reports.canon_institution("한투증권") == "한국투자증권"
     assert reports.canon_institution("신한證") == "신한투자증권"
+
+
+# ---------------- FX VOLATILITY ----------------
+@pytest.fixture(scope="module")
+def ohlc_df(df):
+    import vol
+    if not (df.series == "ecos:OHLC_HIGH").any():
+        pytest.skip("OHLC 미수집 DB")
+    return vol.ohlc(df)
+
+
+def test_ohlc_columns_selected_by_name_not_position(ohlc_df):
+    import vol
+    last = ohlc_df.dropna(subset=["H", "L"]).iloc[-1]
+    assert last.H >= last.L and last.H > 500 and last.FIX > 500  # 고가가 저가보다 높고 모두 원/달러 수준
+
+
+def test_ohlc_consistency_after_cleaning(ohlc_df):
+    import vol
+    v, dropped = vol.clean(ohlc_df)
+    assert (v.H >= v[["O", "C"]].max(axis=1)).all() and (v.L <= v[["O", "C"]].min(axis=1)).all() and (v.H >= v.L).all()
+    assert len(dropped) <= 5  # 2001·2002년 원자료 오류 2건만 제외
+
+
+def test_parkinson_formula_against_synthetic_case():
+    import vol
+    h, l = pd.Series([102.0]), pd.Series([100.0])
+    assert abs(vol.parkinson_var(h, l).iloc[0] - np.log(1.02) ** 2 / (4 * np.log(2))) < 1e-12
+    # 알려진 상수 변동성의 표본: 일 σ=1% 로 만든 브라운 경로의 고저로 추정하면 σ 근처
+    rng = np.random.default_rng(0)
+    steps = rng.standard_normal((4000, 400)) * 0.01 / 20       # 일을 400구간으로 쪼갠 경로
+    path = np.cumsum(steps, axis=1)
+    H, L = 100 * np.exp(path.max(axis=1).clip(min=0)), 100 * np.exp(path.min(axis=1).clip(max=0))
+    est = np.sqrt(vol.parkinson_var(pd.Series(H), pd.Series(L)).mean())
+    assert 0.0085 < est < 0.0105
+
+
+def test_fxvi_range_and_insufficient_history_is_nan():
+    import vol
+    idx = pd.bdate_range("2024-07-01", periods=300)
+    m = pd.DataFrame({"park20_daily": np.linspace(0.004, 0.009, 300)}, index=idx)
+    f = vol.fxvi(m, [pd.Timestamp("2024-07-01")])
+    assert f.dropna().between(0, 100).all()
+    assert f.iloc[:200].isna().all()             # 같은 구간 252거래일이 안 쌓이면 산출하지 않는다
+    assert f.dropna().iloc[-1] > 95              # 계속 오르는 변동성은 백분위가 매우 높다
+
+
+def test_ohlc_available_after_observation(df):
+    g = df[df.series == "ecos:OHLC_HIGH"]
+    if g.empty:
+        pytest.skip("OHLC 미수집 DB")
+    assert (pd.to_datetime(g.available_at) > g.observed_date).all()   # 세션 종료 후에야 확정
+
+
+def test_p_model_is_normal_not_bootstrap_branch():
+    import models as Mo
+    assert "P" in Mo.NORMAL and "PR" in Mo.NORMAL and "D" not in Mo.NORMAL
+    rng = np.random.default_rng(1)
+    x = Mo.sample_returns("P", {"P": 0.004, "C": 0.004}, 5, np.zeros(10), 20000, rng)
+    assert abs(x.std() - 0.004 * np.sqrt(5)) < 0.0005         # 정규 표본(σ√h), 재표본추출 분기로 빠지지 않음
+
+
+@needs_data
+def test_barrier_window_starts_at_origin_session_and_outputs_sane():
+    import json
+    Bc = json.loads((OUT / "barrier.json").read_text(encoding="utf-8"))
+    assert Bc["n_origins"] > 1000
+    for t in Bc["tables"]:
+        for b in t["bins"]:
+            assert 0 <= b["obs"] <= 1 and 0 <= b["pred_bridge"] <= 1 and b["pred_disc"] <= b["pred_bridge"] + 1e-9  # 이산 감시는 보정값보다 작다
+    for s_ in Bc["summary"]:
+        assert s_["mean_end_pred"] <= s_["mean_pred_bridge"] + 1e-9    # 만기 시점 확률 <= 기간 중 돌파 확률
+
+
+@needs_data
+def test_vol_json_integrity():
+    import json
+    V = json.loads((OUT / "vol.json").read_text(encoding="utf-8"))
+    L = V["latest"]
+    assert L["H"] >= L["L"] and L["range_won"] == round(L["H"] - L["L"], 1)
+    assert L["fxvi"] is None or 0 <= L["fxvi"] <= 100
+    assert V["asof"] < V["available_at"]

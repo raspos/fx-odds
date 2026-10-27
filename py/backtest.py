@@ -43,10 +43,25 @@ def build_features(df_long: pd.DataFrame, fpi_series: pd.Series | None = None):
     return ecos, r, X
 
 
+def park_sigmas(df_long: pd.DataFrame, dates: pd.DatetimeIndex, r: pd.Series) -> pd.DataFrame:
+    """기준일 j 에 쓸 수 있는 고저가 기반 일 변동성. 매매기준율 FIX(j)는 세션 j-1 을 반영하므로 세션 j-1 의 고저(이용 가능일=j)까지만 쓴다.
+    PR = sqrt(최근 20세션 평균 파킨슨 분산), P = PR x sqrt(k), k = 직전 250일 var(FIX 수익률) / 평균 파킨슨 분산(밤사이 갭·관측범위 차이를 걷는 스케일, 기준일까지 자료만)."""
+    import vol as V
+    v, _ = V.clean(V.ohlc(df_long))
+    pv = V.parkinson_var(v.H, v.L).reindex(dates).shift(1)          # 인덱스 j 의 값 = 세션 j-1 분산
+    r2 = (r.fillna(0.0) ** 2).where(pv.notna())                      # 인덱스 j 의 수익률 = FIX(j-1)->FIX(j) = 세션 j-1 구간
+    m20 = pv.rolling(20, min_periods=15).mean()
+    k = r2.rolling(250, min_periods=200).mean() / pv.rolling(250, min_periods=200).mean()
+    return pd.DataFrame({"sig_PR": np.sqrt(m20), "sig_P": np.sqrt(k * m20), "k": k}, index=dates)
+
+
 def run(df_long: pd.DataFrame, seed=7, n_paths=3000, fpi_series: pd.Series | None = None):
     ecos, r, X = build_features(df_long, fpi_series)
     dates = ecos.index
     vol = M.vol_series(r.fillna(0.0))
+    psig = park_sigmas(df_long, dates, r)
+    sigC = vol.sig_C.values
+    spike = np.array([bool(i >= 250 and np.isfinite(sigC[i]) and sigC[i] >= np.nanquantile(sigC[max(0, i - 750):i + 1], 0.8)) for i in range(len(dates))])  # 사전(기준일까지) 정의
     rng = np.random.default_rng(seed)
     start_i = dates.searchsorted(START)
     rows = []
@@ -94,6 +109,9 @@ def run(df_long: pd.DataFrame, seed=7, n_paths=3000, fpi_series: pd.Series | Non
         sig = {"A": vol.sig_A.iloc[j], "B": vol.sig_B.iloc[j], "C": vol.sig_C.iloc[j]}
         if not np.isfinite(list(sig.values())).all():
             continue
+        for pk, col in (("P", "sig_P"), ("PR", "sig_PR")):
+            if np.isfinite(psig[col].iloc[j]) and psig[col].iloc[j] > 0:
+                sig[pk] = float(psig[col].iloc[j])
         pool = M.std_resid_pool(r.fillna(0.0), vol, j)
         for hz in HZ:
             T, y_arr = tgt[hz]
@@ -101,26 +119,29 @@ def run(df_long: pd.DataFrame, seed=7, n_paths=3000, fpi_series: pd.Series | Non
                 continue
             h = M.horizon_bd(base, hz); y = float(y_arr[j]); big = BIG[hz]
             res = {}
-            for m in "ABCD":
+            for m in ("A", "B", "C", "D", "P", "PR"):
+                if m not in sig and m != "D":
+                    continue
                 q, pup, smp = M.dist_summary(m, sig, h, pool, rng, n_paths)
-                if m in "ABC":
+                if m in M.NORMAL:
                     s = sig[m] * np.sqrt(h)
-                    crps = float(M.crps_normal(0.0, s, y)); pb = 1 - stats.norm.cdf(big / s)
+                    crps = float(M.crps_normal(0.0, s, y)); pb = 1 - stats.norm.cdf(big / s); lg = float(stats.norm.logpdf(y, 0.0, s))
                 else:
                     crps = M.crps_sample(smp, y); pb = float((smp >= big).mean())
-                res[m] = (q, pup, crps, pb, 0.0)
+                    lg = float(np.log(max(stats.gaussian_kde(smp[::4])(y)[0], 1e-12)))  # 표본 밀도(KDE)의 로그
+                res[m] = (q, pup, crps, pb, 0.0, lg)
             for k in COND:
                 mu = mu_hat[(hz, k)][j]
                 if not np.isfinite(mu):
                     continue
                 s = sig["C"] * np.sqrt(h)
                 res[k] = (mu + stats.norm.ppf(M.QS) * s, float(1 - stats.norm.cdf(-mu / s)), float(M.crps_normal(mu, s, y)),
-                          float(1 - stats.norm.cdf((big - mu) / s)), mu)
-            for m, (q, pup, crps, pb, mu) in res.items():
+                          float(1 - stats.norm.cdf((big - mu) / s)), mu, float(stats.norm.logpdf(y, mu, s)))
+            for m, (q, pup, crps, pb, mu, lg) in res.items():
                 rows.append((base, base + pd.Timedelta(days=hz), dates[T[j]], hz, h, m, s0, y, q[0], q[1], q[2], q[3], q[4], q[5], q[6],
-                             pup, crps, pb, mu))
+                             pup, crps, pb, mu, lg, bool(spike[j])))
     cols = ["origin", "target_date", "eval_date", "horizon", "h_bd", "model", "spot", "y", "q05", "q10", "q25", "q50", "q75", "q90", "q95",
-            "p_up", "crps", "p_big_up", "mu"]
+            "p_up", "crps", "p_big_up", "mu", "logs", "spike"]
     return pd.DataFrame(rows, columns=cols)
 
 
@@ -152,7 +173,7 @@ def scorecard(bt: pd.DataFrame, since: str | None = None) -> list[dict]:
             up = (g.y > 0).astype(float)
             bs = float(((g.p_up - up) ** 2).mean())
             bsb = float(((g.p_big_up - (g.y >= BIG[hz]).astype(float)) ** 2).mean())
-            directional = m not in "ABCD" and bool(g.p_up.std() > 0.01)  # A~D 는 drift=0 이라 방향 주장이 없다
+            directional = m not in ("A", "B", "C", "D", "P", "PR") and bool(g.p_up.std() > 0.01)  # A~D 는 drift=0 이라 방향 주장이 없다
             hit = float(((g.p_up > 0.5) == (g.y > 0)).mean()) if directional else None
             common = a.index.intersection(g.index)
             la, lg = a.loc[common, "crps"].values, g.loc[common, "crps"].values
@@ -167,9 +188,53 @@ def scorecard(bt: pd.DataFrame, since: str | None = None) -> list[dict]:
     return out
 
 
-def default_model_asof(bt: pd.DataFrame, asof: pd.Timestamp, hz: int, cands="ABCD") -> str:
-    """asof 시점에 이미 실현이 확정된(eval_date<=asof) 예측만으로 평균 CRPS가 가장 낮은 모형. 표본이 부족하면 C."""
-    g = bt[(bt.horizon == hz) & (bt.eval_date <= asof) & (bt.model.isin(list(cands)))]
-    if len(g) == 0 or g.groupby("model").size().min() < 250:
+CANDS = ("A", "B", "C", "D", "P")  # 공식 후보(PR 은 진단용). 모두 같은 기준일 표본에서만 비교한다
+
+
+def selection_table(bt: pd.DataFrame, hz: int, cands=CANDS):
+    """모든 후보가 예측을 낸 기준일만 남겨 평가일 순으로 누적 CRPS 를 만든다(모형마다 시작 시점이 달라도 공정하게 비교)."""
+    g = bt[(bt.horizon == hz) & bt.model.isin(cands)].pivot_table(index=["origin", "eval_date"], columns="model", values="crps")
+    g = g.dropna(subset=list(cands)).reset_index().sort_values("eval_date")
+    return g["eval_date"].values, {m: np.cumsum(g[m].values) for m in cands}
+
+
+def select_asof(table, asof) -> str:
+    ed, cs = table
+    i = int(np.searchsorted(ed, np.datetime64(asof), side="right"))
+    if i < 250:
         return "C"
-    return g.groupby("model").crps.mean().idxmin()
+    vals = {m: cs[m][i - 1] / i for m in cs}
+    return min(vals, key=vals.get)
+
+
+def default_model_asof(bt: pd.DataFrame, asof: pd.Timestamp, hz: int, cands=CANDS) -> str:
+    """asof 시점에 이미 실현이 확정된(eval_date<=asof) 예측만으로, 모든 후보가 함께 낸 기준일의 평균 CRPS 가 가장 낮은 모형. 표본이 부족하면 C."""
+    return select_asof(selection_table(bt, hz, cands), asof)
+
+
+def vol_comparison(bt: pd.DataFrame) -> list[dict]:
+    """변동성 모형(A~D, P, PR)을 같은 기준일 표본에서 비교: CRPS, 구간 포함률, 로그 점수, 랜덤워크·EWMA 대비 개선율. 부분표본: 전체/변동성 급등기/2024-07 전·후."""
+    out = []
+    ms = ["A", "B", "C", "D", "P", "PR"]
+    for hz in HZ:
+        g = bt[(bt.horizon == hz) & bt.model.isin(ms)].pivot_table(index="origin", columns="model", values="crps")
+        common = g.dropna().index
+        meta = bt[(bt.horizon == hz) & (bt.model == "A")].set_index("origin")
+        subsets = {"전체": common, "변동성 급등기(사전 정의: 20일 변동성 상위 20%)": common[meta.loc[common, "spike"].values],
+                   "2024-07 이전": common[common < pd.Timestamp("2024-07-01")], "2024-07 이후": common[common >= pd.Timestamp("2024-07-01")]}
+        for sname, idx in subsets.items():
+            if len(idx) < 60:
+                continue
+            for m in ms:
+                x = bt[(bt.horizon == hz) & (bt.model == m)].set_index("origin").loc[idx]
+                def cov(lo, hi):
+                    return float(((x.y >= x[lo]) & (x.y <= x[hi])).mean())
+                c_m = g.loc[idx, m].values
+                row = {"horizon": hz, "subset": sname, "model": m, "n": int(len(idx)), "crps_pct": float(c_m.mean() * 100), "logscore": float(x.logs.mean()),
+                       "cov50": cov("q25", "q75"), "cov80": cov("q10", "q90"), "cov90": cov("q05", "q95"),
+                       "vs_rw_pct": float((1 - c_m.mean() / g.loc[idx, "A"].mean()) * 100), "vs_ewma_pct": float((1 - c_m.mean() / g.loc[idx, "C"].mean()) * 100)}
+                if m != "C":
+                    dm = nw_dm(c_m - g.loc[idx, "C"].values, lag=int(meta.loc[idx, "h_bd"].iloc[0]))
+                    row["dm_p_vs_ewma"] = dm[2]
+                out.append(row)
+    return out

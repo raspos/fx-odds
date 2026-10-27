@@ -15,7 +15,8 @@ LAMBDA = 0.94
 WIN_B = 252
 POOL_D = 1500
 QS = np.array([0.05, 0.10, 0.25, 0.50, 0.75, 0.90, 0.95])
-MODELS = {"A": "랜덤워크(장기변동성)", "B": "역사적 변동성", "C": "EWMA", "D": "역사적 재표본추출(FHS)"}
+MODELS = {"A": "랜덤워크(장기변동성)", "B": "역사적 변동성", "C": "EWMA", "D": "역사적 재표본추출(FHS)", "P": "파킨슨(고저가, 스케일 보정)", "PR": "파킨슨(원시, 참고)"}
+NORMAL = {"A", "B", "C", "P", "PR"}   # 정규분포 모형. 나머지(D)는 재표본추출. 문자열 포함 검사(in "ABC")를 쓰지 않는다
 
 
 def horizon_bd(base: pd.Timestamp, cal_days: int) -> int:
@@ -57,7 +58,7 @@ def std_resid_pool(r: pd.Series, vol: pd.DataFrame, upto: int) -> np.ndarray:
 
 def sample_returns(model: str, sig_d: dict, h: int, pool: np.ndarray, n: int, rng) -> np.ndarray:
     """h영업일 합 로그수익률 표본 (n개)."""
-    if model in "ABC":
+    if model in NORMAL:
         return rng.standard_normal(n) * sig_d[model] * np.sqrt(h)
     idx = rng.integers(0, len(pool), size=(n, h))
     return pool[idx].sum(axis=1) * sig_d["C"]
@@ -65,7 +66,7 @@ def sample_returns(model: str, sig_d: dict, h: int, pool: np.ndarray, n: int, rn
 
 def dist_summary(model: str, sig_d: dict, h: int, pool: np.ndarray | None, rng, n=4000):
     """분위수(로그수익률), 상승확률, 표본(D 전용)."""
-    if model in "ABC":
+    if model in NORMAL:
         s = sig_d[model] * np.sqrt(h)
         return stats.norm.ppf(QS) * s, 0.5, None
     x = sample_returns("D", sig_d, h, pool, n, rng)
@@ -89,7 +90,7 @@ def crps_sample(x: np.ndarray, y: float) -> float:
 # ---- 장벽(기간 중 돌파) 확률 -----------------------------------------------------------------
 def simulate_paths(model: str, sig_d: dict, h: int, pool, n: int, rng) -> np.ndarray:
     """누적 로그수익률 경로 (n, h). 일별 이산 관측."""
-    if model in "ABC":
+    if model in NORMAL:
         steps = rng.standard_normal((n, h)) * sig_d[model]
     else:
         steps = pool[rng.integers(0, len(pool), size=(n, h))] * sig_d["C"]

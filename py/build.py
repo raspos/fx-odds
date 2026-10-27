@@ -15,6 +15,10 @@ MODEL_NAMES = {**M.MODELS, **{k: "조건부(릿지) " + v[0] for k, v in B.COND.
 OFFICIAL_RULE = "공식 전망 = 지금까지 실현이 확정된 예측의 평균 CRPS가 가장 낮은 모형(A~D). 조건부 모형은 랜덤워크 대비 유의한 개선이 확인되기 전에는 공식 전망에 쓰지 않는다."
 
 
+def avail_next(d):
+    return (pd.Timestamp(d) + pd.offsets.BDay(1)).strftime("%Y-%m-%d")
+
+
 def jdump(name, obj):
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / name).write_text(json.dumps(obj, ensure_ascii=False, separators=(",", ":"), allow_nan=False), encoding="utf-8")
@@ -24,16 +28,20 @@ def rnd(x, n=2):
     return None if x is None or not np.isfinite(x) else round(float(x), n)
 
 
-def forecast_at(j, ecos, r, vol, hz, rng, n=40000):
+def forecast_at(j, ecos, r, vol, hz, rng, n=40000, psig=None):
     """원천 데이터 인덱스 j(기준일) 시점의 4개 모형 분포. 반환: {모형: 요약 dict}."""
     base = ecos.index[j]; s0 = float(ecos.iloc[j])
     h = M.horizon_bd(base, hz)
     sig = {"A": vol.sig_A.iloc[j], "B": vol.sig_B.iloc[j], "C": vol.sig_C.iloc[j]}
+    if psig is not None:
+        for pk, col in (("P", "sig_P"), ("PR", "sig_PR")):
+            if np.isfinite(psig[col].iloc[j]) and psig[col].iloc[j] > 0:
+                sig[pk] = float(psig[col].iloc[j])
     pool = M.std_resid_pool(r, vol, j)
     out = {}
-    for m in "ABCD":
+    for m in [k for k in ("A", "B", "C", "D", "P", "PR") if k in sig or k == "D"]:
         smp = None
-        if m in "ABC":
+        if m in M.NORMAL:
             s = sig[m] * np.sqrt(h)
             q = stats.norm.ppf(M.QS) * s
             paths = M.simulate_paths(m, sig, h, pool, 20000, rng)
@@ -48,7 +56,7 @@ def forecast_at(j, ecos, r, vol, hz, rng, n=40000):
 def dens_pack(m, d, s0):
     """가격 격자 위의 pdf/cdf. 정규모형은 해석해, D 는 표본(커널밀도·경험분포)."""
     h = d["h"]
-    if m in "ABC":
+    if m in M.NORMAL:
         sg = d["sig_daily"] * np.sqrt(h)
         xs = np.linspace(-4.2 * sg, 4.2 * sg, 241)
         pdf_r = stats.norm.pdf(xs, 0, sg); cdf = stats.norm.cdf(xs, 0, sg)
@@ -90,6 +98,7 @@ def main(skip_bt=False, write_live=True):
     ecos, r, X = B.build_features(df, fres["panel"]["fpi"])
     rr = r.fillna(0.0)
     vol = M.vol_series(rr)
+    psig = B.park_sigmas(df, ecos.index, rr)
     dates = ecos.index
     if skip_bt and (DATA / "bt.pkl").exists():
         bt = pd.read_pickle(DATA / "bt.pkl")
@@ -107,7 +116,7 @@ def main(skip_bt=False, write_live=True):
               "direction_note": "달러당 원화값 상승 = 원화 약세, 하락 = 원화 강세", "horizons": {}}
     lm = json.loads((DATA / "latest_mu.json").read_text()) if (DATA / "latest_mu.json").exists() else {}
     for hz in (7, 30):
-        fc = forecast_at(j, ecos, rr, vol, hz, rng)
+        fc = forecast_at(j, ecos, rr, vol, hz, rng, psig=psig)
         sel = B.default_model_asof(bt, base, hz)
         tdate = base + pd.Timedelta(days=hz)
         latest["horizons"][str(hz)] = {
@@ -115,8 +124,8 @@ def main(skip_bt=False, write_live=True):
             "target_weekday": "토" if tdate.dayofweek == 5 else "일" if tdate.dayofweek == 6 else "",
             "evaluation_rule": "목표일이 휴장일·주말이면 그 이전 마지막 거래일의 매매기준율로 평가", "selected": sel, "selected_name": MODEL_NAMES[sel],
             "experimental_point": {k: (None if lm.get(f"{hz}:{k}") is None else {"mu_pct": rnd(lm[f"{hz}:{k}"] * 100, 3), "value": rnd(spot * float(np.exp(lm[f"{hz}:{k}"])), 1)}) for k in ("E0", "EP")},
-            "models": {m: model_card(m, fc[m]) for m in "ABCD"}, "density": {m: dens_pack(m, fc[m], spot) for m in "ABCD"},
-            "barrier": {m: barrier_pack(m, fc[m]) for m in "ABCD"}}
+            "models": {m: model_card(m, fc[m]) for m in fc}, "density": {m: dens_pack(m, fc[m], spot) for m in fc},
+            "barrier": {m: barrier_pack(m, fc[m]) for m in fc}}
     jdump("latest.json", latest)
 
     # ---------- 시계열 ----------
@@ -131,31 +140,16 @@ def main(skip_bt=False, write_live=True):
     live_path = DATA / "live_forecasts.csv"
     live_n = int(len(pd.read_csv(live_path))) if live_path.exists() else 0
     yearly = []
-    for (y, hz, m), g in bt[bt.model.isin(list("ABCD"))].groupby([bt.origin.dt.year, "horizon", "model"]):
+    for (y, hz, m), g in bt[bt.model.isin(["A", "B", "C", "D", "P", "PR"])].groupby([bt.origin.dt.year, "horizon", "model"]):
         yearly.append({"year": int(y), "horizon": int(hz), "model": m, "n": int(len(g)), "crps_pct": rnd(g.crps.mean() * 100, 4)})
     jdump("scorecard.json", {"all": sc_all, "recent3y": sc_3y, "yearly": yearly, "period": [bt.origin.min().strftime("%Y-%m-%d"), bt.origin.max().strftime("%Y-%m-%d")],
-                              "live_count": live_n, "rule": OFFICIAL_RULE, "model_names": MODEL_NAMES})
+                              "live_count": live_n, "rule": OFFICIAL_RULE, "model_names": MODEL_NAMES, "vol_comparison": B.vol_comparison(bt)})
 
     # ---------- 과거 시점 재현(HISTORICAL MODE): 정보는 기준일까지만 ----------
     hist = {"rule": "과거 자료 재계산: 기준일까지의 환율만으로 다시 계산한 값입니다. 당시 실제로 발표된 전망이 아닙니다.", "origins": []}
-    srt = {hz: bt[(bt.horizon == hz) & bt.model.isin(list("ABCD"))] for hz in (7, 30)}
-    # 모형별 eval_date 기준 누적 평균 CRPS (as-of 선택용)
-    cum = {}
-    for hz in (7, 30):
-        cum[hz] = {}
-        for m in "ABCD":
-            g = srt[hz][srt[hz].model == m].sort_values("eval_date")
-            cum[hz][m] = (g.eval_date.values, np.cumsum(g.crps.values))
+    tabs = {hz: B.selection_table(bt, hz) for hz in (7, 30)}   # 모든 후보가 함께 낸 기준일만으로 비교(공정)
     def sel_asof(hz, asof):
-        best, bv = "C", None
-        ok = True; vals = {}
-        for m in "ABCD":
-            ed, cs = cum[hz][m]
-            i = np.searchsorted(ed, np.datetime64(asof), side="right")
-            if i < 250:
-                ok = False; break
-            vals[m] = cs[i - 1] / i
-        return min(vals, key=vals.get) if ok else "C"
+        return B.select_asof(tabs[hz], asof)
     bt_idx = bt.set_index(["horizon", "model", "origin"]).sort_index()
     cols_start = dates.searchsorted(B.START)
     recent_cut = len(dates) - 45
@@ -171,7 +165,7 @@ def main(skip_bt=False, write_live=True):
                 entry[f"h{hz}"] = {"m": sel, "q": q, "pu": rnd(row.p_up, 3), "td": row.eval_date.strftime("%Y-%m-%d"), "real": rnd(row.spot * np.exp(row.y))}
             else:
                 if jj >= recent_cut:
-                    fc = forecast_at(jj, ecos, rr, vol, hz, np.random.default_rng(jj), n=8000)[sel]
+                    fc = forecast_at(jj, ecos, rr, vol, hz, np.random.default_rng(jj), n=8000, psig=psig)[sel]
                     pr = fc["s0"] * np.exp(fc["q"])
                     entry[f"h{hz}"] = {"m": sel, "q": [rnd(v) for v in pr], "pu": rnd(model_card(sel, fc)["p_up"], 3), "td": None, "real": None}
         hist["origins"].append(entry)
@@ -189,7 +183,7 @@ def main(skip_bt=False, write_live=True):
             h_ = latest["horizons"][str(hz)]; m_ = h_["models"][h_["selected"]]
             new.append({"origin": base.strftime("%Y-%m-%d"), "target_date": h_["target_date"], "horizon": hz, "model": h_["selected"], "spot": spot,
                         "median": m_["median"], "pi50_lo": m_["pi50"][0], "pi50_hi": m_["pi50"][1], "pi80_lo": m_["pi80"][0], "pi80_hi": m_["pi80"][1],
-                        "pi90_lo": m_["pi90"][0], "pi90_hi": m_["pi90"][1], "p_up": m_["p_up"], "model_version": "v0.2", "recorded_at": now_kst().isoformat(timespec="seconds")})
+                        "pi90_lo": m_["pi90"][0], "pi90_hi": m_["pi90"][1], "p_up": m_["p_up"], "model_version": "v0.3", "recorded_at": now_kst().isoformat(timespec="seconds")})
         out_df = pd.concat([exist, pd.DataFrame(new)], ignore_index=True)
         out_df["horizon"] = out_df["horizon"].astype(int)
         out_df.to_csv(live_path, index=False)
@@ -249,6 +243,45 @@ def main(skip_bt=False, write_live=True):
     jdump("reports.json", RP.build_output(spot, today))
     jdump("events.json", {"events": evs, "cats": EV.CATS, "note": "공식 통계·시장 데이터에서 규칙으로 추출한 사건입니다. 원인은 전후 1일의 네이버 뉴스·공식 발표 링크를 후보로만 붙였고(확정 아님), 시장 컨센서스가 없어 '예상 대비'는 표시하지 않습니다."})
 
+    # ---------- FX VOLATILITY (ECOS 731Y003 고가·저가) ----------
+    import vol as V, barrier_cal as BC
+    ov, dropped = V.clean(V.ohlc(df))
+    vm = V.metrics(ov)
+    vtest = V.regime_test(vm)
+    vstarts = V.regime_starts(vm, vtest)
+    fxv = V.fxvi(vm, vstarts)
+    last = vm.index[-1]
+    def arr(series, n, d=2):
+        return [rnd(x, d) for x in series.iloc[-n:]]
+    fx_last = fxv.dropna()
+    fx_prev = fxv.iloc[-2] if len(fxv) > 1 else np.nan
+    cur = fxv.iloc[-1]
+    y = vm[vm.index >= "2005-01-01"]
+    yearly_v = [{"year": int(yr), "n": int(len(g)), "mean_range_won": rnd(g.range_won.mean(), 2), "median_range_pct": rnd(g.range_pct.median(), 3), "mean_range_pct": rnd(g.range_pct.mean(), 3)} for yr, g in y.groupby(y.index.year)]
+    jdump("vol.json", {
+        "source": "한국은행 ECOS 731Y003 원/달러 시가·고가·저가·종가(일별)", "series_codes": {"시가": "0000002", "고가": "0000005", "저가": "0000004", "종가(15:30)": "0000003", "종가(연장 포함, 2024-07~)": "0000013"},
+        "asof": last.strftime("%Y-%m-%d"), "available_at": avail_next(last), "n_sessions": int(len(vm)), "dropped_invalid": dropped,
+        "definition": {"parkinson": "σ²_일 = ln(H/L)² / (4 ln 2). 20일 파킨슨 변동성 = √(최근 20세션 σ²_일 평균) (일 단위), 연율화 = ×√252 (거래일 252일 가정)",
+                      "range_pct": "(고가−저가) ÷ ((고가+저가)/2) × 100", "fxvi": "최근 20일 파킨슨 변동성이 '같은 관측 구간(레짐)' 안 과거 252거래일에서 차지하는 백분위(0~100). 실현 변동성 기반이며 옵션 내재변동성(VIX형)이 아니다.",
+                      "scale_k": "예측 모형 P는 밤사이 갭을 반영하려고 파킨슨 분산에 k=직전 250일 var(매매기준율 수익률)÷평균 파킨슨 분산을 곱해 쓴다."},
+        "latest": {"date": last.strftime("%Y-%m-%d"), "H": rnd(vm.H.iloc[-1], 1), "L": rnd(vm.L.iloc[-1], 1), "O": rnd(vm.O.iloc[-1], 1), "C": rnd(vm.C.iloc[-1], 1),
+                   "range_won": rnd(vm.range_won.iloc[-1], 1), "range_pct": rnd(vm.range_pct.iloc[-1], 3), "avg5": rnd(vm.avg5.iloc[-1], 2), "avg20": rnd(vm.avg20.iloc[-1], 2), "avg60": rnd(vm.avg60.iloc[-1], 2),
+                   "park20_daily_pct": rnd(vm.park20_daily.iloc[-1] * 100, 3), "park20_ann_pct": rnd(vm.park20_ann.iloc[-1], 2),
+                   "fxvi": rnd(cur, 1), "fxvi_prev": rnd(fx_prev, 1), "fxvi_change": rnd(cur - fx_prev, 1) if np.isfinite(cur) and np.isfinite(fx_prev) else None,
+                   "regime": V.regime_of(last), "fxvi_note": None if np.isfinite(cur) else "같은 관측 구간의 기초 자료(252거래일)가 부족해 산출하지 않음"},
+        "breaks": V.BREAKS, "regime_test_2026_07_06": vtest,
+        "ohlc_recent": {"dates": [d.strftime("%Y-%m-%d") for d in vm.index[-120:]], "O": arr(vm.O, 120, 1), "H": arr(vm.H, 120, 1), "L": arr(vm.L, 120, 1), "C": arr(vm.C, 120, 1)},
+        "range_1y": {"dates": [d.strftime("%Y-%m-%d") for d in vm.index[-252:]], "range_won": arr(vm.range_won, 252, 1), "avg5": arr(vm.avg5, 252), "avg20": arr(vm.avg20, 252), "avg60": arr(vm.avg60, 252)},
+        "fxvi_3y": {"dates": [d.strftime("%Y-%m-%d") for d in vm.index[-756:]], "fxvi": arr(fxv, 756, 1)},
+        "level_vs_vol": {"dates": [d.strftime("%Y-%m-%d") for d in vm.index[-756:]], "fix": arr(vm.FIX, 756, 1), "park20_ann": arr(vm.park20_ann, 756, 2)},
+        "yearly": yearly_v, "commentary": V.commentary(vm, fxv, vtest),
+        "scale_k_latest": rnd(psig.k.dropna().iloc[-1], 3) if psig.k.notna().any() else None,
+        "limits": ["관측 범위가 2024-07-01에 09:00~15:30에서 ~02:00으로 넓어져 그 전후의 일중 변동폭을 단순 비교하면 변동성 증가처럼 보일 수 있습니다.",
+                   "2026-07-06 24시간 거래 개시일은 언론 보도로 확인했고 공식 발표 원문은 확인하지 못했습니다. 개시 후 표본이 아직 적습니다(약 80세션).",
+                   "고가·저가는 한국은행이 제공하는 은행간 시장 집계이며 야간 해외시장·NDF의 일중 가격은 포함되지 않습니다.",
+                   "FXVI는 과거 실현 변동성의 역사적 위치이며 환율의 방향이나 미래 변동성을 보장하지 않고, 높다고 해서 환율 상승 압력으로 해석하지 않습니다."]})
+    jdump("barrier.json", BC.run(df))
+
     # ---------- 메타 ----------
     last = {}
     lng = df.groupby("series").observed_date.max()
@@ -280,7 +313,7 @@ def main(skip_bt=False, write_live=True):
     fail_reason = ("인증키 오류(INFO-100): GitHub 시크릿 ECOS_API_KEY 값 확인" if "INFO-100" in reasons.values() else ("네트워크 오류" if "NETWORK" in reasons.values() else ""))
     jdump("meta.json", {"sources": srcs, "failed_series": failed, "fail_reason": fail_reason, "updated_at": collected_at, "latest_obs": last, "stale_days": stale_days,
                         "stale_warning": stale_days > 4, "cross_check": prep.cross_check_krw(df), "fetch_status": status,
-                        "version": "v0.2.0", "model_names": MODEL_NAMES})
+                        "version": "v0.3.0", "model_names": MODEL_NAMES})
     print("ok", base.date(), len(hist["origins"]))
 
 

@@ -108,7 +108,7 @@ export function DistributionChart({ L }: { L: J }) {
         {[7, 30].map((h) => <button key={h} className="btn" aria-pressed={hz === h} onClick={() => { setHz(h as 7 | 30); setModel(""); }}>{h}일 후</button>)}
       </div>
       <div className="mt-2 flex flex-wrap gap-1.5">
-        {["A", "B", "C", "D"].map((m) => (
+        {["A", "B", "C", "D", "P"].map((m) => (
           <button key={m} className="btn" aria-pressed={mk === m} onClick={() => setModel(m)}>{MODEL_SHORT[m]}{m === H.selected ? " ★공식" : ""}</button>
         ))}
       </div>
@@ -204,7 +204,7 @@ export function ModelTable({ L }: { L: J }) {
         <table className="t">
           <thead><tr><th>모형</th><th>중앙값</th><th>상승확률</th><th>80% 구간</th><th>90% 구간</th></tr></thead>
           <tbody>
-            {(["A", "B", "C", "D"] as const).map((m) => {
+            {(["A", "B", "C", "D", "P", "PR"] as const).filter((m) => H.models[m]).map((m) => {
               const c = H.models[m];
               return (<tr key={m} style={m === H.selected ? { background: "var(--surface-2)", fontWeight: 700 } : undefined}>
                 <td>{MODEL_SHORT[m]}{m === H.selected ? " ★" : ""}</td><td className="num">{fmt(c.median, 1)}</td><td className="num">{pct(c.p_up)}</td>

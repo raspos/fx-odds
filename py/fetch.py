@@ -84,6 +84,8 @@ ECOS_RATES = {  # (stat, cycle, item) -> 이름
     ("817Y002", "D", "010200000"): "ecos:KTB3Y", ("722Y001", "D", "0101000"): "ecos:BASE_RATE",
     ("301Y017", "M", "SA000"): "ecos:BOP_CURRENT_ACCOUNT",       # 경상수지(월, 백만달러)
     ("301Y017", "M", "SA110"): "ecos:BOP_EXPORTS",
+    ("731Y003", "D", "0000002"): "ecos:OHLC_OPEN", ("731Y003", "D", "0000005"): "ecos:OHLC_HIGH", ("731Y003", "D", "0000004"): "ecos:OHLC_LOW",  # 원/달러 일별 시가·고가·저가(731Y003)
+    ("731Y003", "D", "0000003"): "ecos:OHLC_CLOSE1530", ("731Y003", "D", "0000013"): "ecos:OHLC_CLOSE_FULL",              # 종가(15:30) / 종가(2024-07~, 연장거래 포함 마감)
     ("902Y006", "M", "US"): "ecos:POLICY_US", ("902Y006", "M", "JP"): "ecos:POLICY_JP", ("902Y006", "M", "CN"): "ecos:POLICY_CN",  # 주요국 중앙은행 정책금리(월)
     ("901Y055", "M", "S22CC"): "ecos:FLOW_FOREIGN_NET",             # 외국인 주식 순매수(월, 백만원)
     ("301Y013", "M", "BOPF22000000"): "ecos:BOP_PORTFOLIO_LIAB",  # 증권투자(부채) = 외국인의 국내 증권투자 순유입(월)

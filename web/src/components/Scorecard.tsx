@@ -2,15 +2,16 @@ import { useMemo, useState } from "react";
 import EChart, { usePalette } from "./EChart";
 import { J, fmt, sgn, MODEL_SHORT } from "../lib";
 
-const COLORS: Record<string, string> = { A: "#7a7974", B: "#2a78d6", C: "#eb6834", D: "#2f9e6b" };
+const COLORS: Record<string, string> = { A: "#7a7974", B: "#2a78d6", C: "#eb6834", D: "#2f9e6b", P: "#9b59b6" };
 
 export default function Scorecard({ S, base }: { S: J; base: string }) {
   const [hz, setHz] = useState<7 | 30>(30);
   const [period, setPeriod] = useState<"all" | "recent3y">("all");
   const P = usePalette();
   const rows: J[] = S[period].filter((r: J) => r.horizon === hz);
-  const official = rows.filter((r) => "ABCD".includes(r.model));
-  const cond = rows.filter((r) => !"ABCD".includes(r.model));
+  const OFF = ["A", "B", "C", "D", "P", "PR"];
+  const official = rows.filter((r) => OFF.includes(r.model));
+  const cond = rows.filter((r) => !OFF.includes(r.model));
   const best = [...official].sort((a, b) => a.crps_pct - b.crps_pct)[0];
   const rw = rows.find((r) => r.model === "A");
   const yearly = S.yearly.filter((y: J) => y.horizon === hz);
@@ -20,7 +21,7 @@ export default function Scorecard({ S, base }: { S: J; base: string }) {
     tooltip: { trigger: "axis", valueFormatter: (v: number) => v.toFixed(3) + "%" },
     xAxis: { type: "category", data: years, axisLabel: { color: P.ink3 } },
     yAxis: { type: "value", name: "평균 CRPS(%, 낮을수록 좋음)", nameTextStyle: { color: P.ink3 }, axisLabel: { color: P.ink3 }, splitLine: { lineStyle: { color: P.line } } },
-    series: ["A", "B", "C", "D"].map((m) => ({ name: MODEL_SHORT[m], type: "line", showSymbol: false, lineStyle: { color: COLORS[m], width: 2 },
+    series: ["A", "B", "C", "D", "P"].map((m) => ({ name: MODEL_SHORT[m], type: "line", showSymbol: false, lineStyle: { color: COLORS[m], width: 2 },
       itemStyle: { color: COLORS[m] }, data: years.map((y) => yearly.find((r: J) => r.year === y && r.model === m)?.crps_pct ?? null) })),
   }), [yearly, years, P]);
 

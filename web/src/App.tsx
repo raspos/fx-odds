@@ -9,8 +9,9 @@ import Methodology from "./components/Methodology";
 import { Pressure } from "./components/Pressure";
 import { Events } from "./components/Events";
 import { News } from "./components/News";
+import Volatility from "./components/Volatility";
 
-const FILES = ["latest", "series", "scorecard", "radar", "history", "meta", "fpi", "events", "news", "reports"] as const;
+const FILES = ["latest", "series", "scorecard", "radar", "history", "meta", "fpi", "events", "news", "reports", "vol", "barrier"] as const;
 
 class Boundary extends Component<{ children: ReactNode }, { err: boolean }> {
   state = { err: false };
@@ -75,7 +76,7 @@ export default function App() {
   useEffect(() => { location.hash = tab; }, [tab]);
 
   useEffect(() => {
-    Promise.all(FILES.map((f) => fetch(`data/${f}.json`, { cache: "no-cache" }).then((r) => { if (!r.ok) throw new Error(f); return r.json(); })))
+    Promise.all(FILES.map((f) => fetch(`data/${f}.json`, { cache: "no-cache" }).then((r) => { if (!r.ok) throw new Error(f); return r.json(); }).catch((e) => { if (f === "vol" || f === "barrier") return null; throw e; })))
       .then((arr) => setD(Object.fromEntries(FILES.map((f, i) => [f, arr[i]]))))
       .catch((e) => setErr(`데이터를 불러오지 못했습니다: ${e.message}`));
   }, []);
@@ -120,7 +121,7 @@ export default function App() {
           {asOf && <button className="btn" onClick={() => setAsOf(null)}>최신으로</button>}
         </div>
         <nav className="tabs" role="tablist">
-          {[["s1", "환율의 미래"], ["s2", "압력·뉴스"], ["s3", "동조화 레이더"], ["s5", "예측 성적표"], ["s6", "방법론"]].map(([id, t]) => (
+          {[["s1", "환율의 미래"], ["s2", "압력·뉴스"], ["s7", "변동성"], ["s3", "동조화 레이더"], ["s5", "예측 성적표"], ["s6", "방법론"]].map(([id, t]) => (
             <button key={id} role="tab" aria-selected={tab === id} className="tab" onClick={() => { setTab(id); window.scrollTo(0, 0); }}>{t}</button>))}
         </nav>
       </header>
@@ -151,6 +152,22 @@ export default function App() {
         <b>과거 자료 재계산 · {entry.d}.</b> 기준일까지의 환율만으로 다시 계산한 값이며, 당시 실제로 공개된 전망이 아닙니다. 당시 보존된 뉴스·보고서·압력 지수는 아직 없어 표시하지 않습니다.</div>}
 
       {tab === "s1" && <Section id="s1" no="01" title="환율의 미래" sub="7일·30일 뒤 달러당 원화값의 확률분포">
+        <div className="grid gap-3 md:grid-cols-3">
+          <button className="card p-4 text-left" onClick={() => { const e = document.getElementById("s1-forecast"); e?.scrollIntoView({ behavior: "smooth" }); }}>
+            <div className="text-[11px] font-bold tracking-widest" style={{ color: "var(--ink-3)" }}>FX PROBABILITY</div>
+            <div className="num mt-1 text-2xl font-black">{fmt(L.horizons["30"].models[L.horizons["30"].selected].pi80[0], 0)}~{fmt(L.horizons["30"].models[L.horizons["30"].selected].pi80[1], 0)}</div>
+            <div className="mt-0.5 text-[12px]" style={{ color: "var(--ink-2)" }}>30일 후 환율의 80% 확률 범위 · 미래 환율의 확률분포</div></button>
+          <button className="card p-4 text-left" onClick={() => setTab("s2")}>
+            <div className="text-[11px] font-bold tracking-widest" style={{ color: "var(--ink-3)" }}>FX PRESSURE INDEX (실험)</div>
+            <div className="num mt-1 text-2xl font-black" style={{ color: D.fpi.latest.fpi >= 0 ? "var(--up)" : "var(--down)" }}>{sgn(D.fpi.latest.fpi, 1)}</div>
+            <div className="mt-0.5 text-[12px]" style={{ color: "var(--ink-2)" }}>환율 상승·하락 압력 · 확률 아님 · 자료 충족률 {fmt(D.fpi.latest.coverage * 100)}%</div></button>
+          {D.vol && <button className="card p-4 text-left" onClick={() => setTab("s7")}>
+            <div className="text-[11px] font-bold tracking-widest" style={{ color: "var(--ink-3)" }}>FX VOLATILITY INDEX</div>
+            <div className="num mt-1 text-2xl font-black">{D.vol.latest.fxvi == null ? "산출 보류" : fmt(D.vol.latest.fxvi, 0)}<span className="ml-1 text-sm font-bold" style={{ color: "var(--ink-3)" }}>/ 100</span></div>
+            <div className="mt-0.5 text-[12px]" style={{ color: "var(--ink-2)" }}>환율 변동성의 역사적 수준 · 일중 변동폭 {fmt(D.vol.latest.range_won, 1)}원</div></button>}
+        </div>
+        <p className="-mt-2 text-[11px]" style={{ color: "var(--ink-3)" }}>세 지표는 서로 다른 개념이라 합산하지 않습니다. 압력 지수는 방향, 변동성 지수는 움직임의 크기, 확률분포는 가능한 환율의 범위를 말합니다.</p>
+        <span id="s1-forecast" />
         <div className="card p-4 sm:p-5">
           <h3>원/달러 환율 (달러당 원화값) 3년 추이</h3>
           <div className="mt-1 text-[12px] leading-relaxed" style={{ color: "var(--ink-3)" }}>
@@ -206,17 +223,20 @@ export default function App() {
         </details>
       </Section>}
 
-      {tab === "s3" && <Section id="s3" no="03" title="원화 동조화 레이더" sub="원화는 최근 엔화·위안화·대만 달러 중 어느 통화와 가장 밀접하게 움직였나">
+      {tab === "s7" && <Section id="s7" no="03" title="FX VOLATILITY — 원화는 얼마나 흔들리고 있나" sub="일중 고가·저가로 본 실현 변동성 · FXVI · 장벽 돌파 확률 보정">
+        {D.vol && D.barrier ? <Volatility V={D.vol} S={D.scorecard} BC={D.barrier} /> : <div className="card p-4 text-sm">변동성 자료를 준비 중입니다. 다음 자동 갱신 후 표시됩니다.</div>}
+      </Section>}
+      {tab === "s3" && <Section id="s3" no="04" title="원화 동조화 레이더" sub="원화는 최근 엔화·위안화·대만 달러 중 어느 통화와 가장 밀접하게 움직였나">
         <Radar R={D.radar} asOf={histMode ? entry.d : null} />
       </Section>}
 
       
 
-      {tab === "s5" && <Section id="s5" no="04" title="예측 성적표" sub="FX SCORECARD — 이 서비스의 전망은 랜덤워크보다 실제로 정확한가">
+      {tab === "s5" && <Section id="s5" no="05" title="예측 성적표" sub="FX SCORECARD — 이 서비스의 전망은 랜덤워크보다 실제로 정확한가">
         <Scorecard S={D.scorecard} base={L.base_date} />
       </Section>}
 
-      {tab === "s6" && <Section id="s6" no="05" title="방법론" sub="원시자료 · 계산식 · 한계 · 변경 이력">
+      {tab === "s6" && <Section id="s6" no="06" title="방법론" sub="원시자료 · 계산식 · 한계 · 변경 이력">
         <Methodology meta={M} />
       </Section>}
 

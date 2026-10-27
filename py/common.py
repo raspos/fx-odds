@@ -60,6 +60,8 @@ def avail_date(series: str, obs: pd.Timestamp) -> pd.Timestamp:
     """
     obs = pd.Timestamp(obs).normalize()
     src, _, name = series.partition(":")
+    if src == "ecos" and name.startswith("OHLC_"):  # 일중 시가·고가·저가·종가는 세션 종료 후(연장 마감 02:00) 확정 -> 다음 영업일부터 이용
+        return obs + pd.offsets.BDay(1)
     if src == "ecos":
         return obs + pd.Timedelta(days=MONTHLY_LAG_DAYS) if name.startswith(("BOP_", "POLICY_", "FLOW_")) else obs
     if src == "gpr":  # GPR 지수는 사후 수정되므로 2일 보수적 지연
