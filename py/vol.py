@@ -96,6 +96,11 @@ def fxvi(m: pd.DataFrame, starts: list[pd.Timestamp], win=252) -> pd.Series:
     return out
 
 
+def fxvi_ref(m: pd.DataFrame, win=252) -> pd.Series:
+    """참고용: 관측 범위가 바뀐 것을 무시하고 직전 252거래일 전체와 비교한 백분위. 단절 직후에는 새 방식의 값이 예전 값보다 커서 실제보다 높게 나오는 편향이 있다."""
+    return fxvi(m, [], win)
+
+
 def regime_of(d: pd.Timestamp) -> str:
     return "2024-07 이후(02:00 마감)" if d >= pd.Timestamp(BREAKS[0]["date"]) else "2024-07 이전(09:00~15:30)"
 

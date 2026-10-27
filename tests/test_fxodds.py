@@ -329,3 +329,13 @@ def test_vol_json_integrity():
     assert L["H"] >= L["L"] and L["range_won"] == round(L["H"] - L["L"], 1)
     assert L["fxvi"] is None or 0 <= L["fxvi"] <= 100
     assert V["asof"] < V["available_at"]
+
+
+def test_fxvi_reference_series_in_range_and_only_where_main_missing():
+    import vol
+    idx = pd.bdate_range("2024-01-01", periods=600)
+    m = pd.DataFrame({"park20_daily": np.abs(np.sin(np.arange(600) / 40)) * 0.005 + 0.002}, index=idx)
+    f = vol.fxvi(m, [pd.Timestamp("2024-07-01")]); ref = vol.fxvi_ref(m)
+    shown = ref.where(f.isna())
+    assert shown.dropna().between(0, 100).all() and shown.notna().sum() > 0
+    assert shown[f.notna()].isna().all()   # 실선이 있는 날에는 참고용을 겹쳐 그리지 않는다

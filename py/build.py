@@ -250,6 +250,7 @@ def main(skip_bt=False, write_live=True):
     vtest = V.regime_test(vm)
     vstarts = V.regime_starts(vm, vtest)
     fxv = V.fxvi(vm, vstarts)
+    fxr = V.fxvi_ref(vm)
     last = vm.index[-1]
     def arr(series, n, d=2):
         return [rnd(x, d) for x in series.iloc[-n:]]
@@ -272,7 +273,7 @@ def main(skip_bt=False, write_live=True):
         "breaks": V.BREAKS, "regime_test_2026_07_06": vtest,
         "ohlc_recent": {"dates": [d.strftime("%Y-%m-%d") for d in vm.index[-120:]], "O": arr(vm.O, 120, 1), "H": arr(vm.H, 120, 1), "L": arr(vm.L, 120, 1), "C": arr(vm.C, 120, 1)},
         "range_1y": {"dates": [d.strftime("%Y-%m-%d") for d in vm.index[-252:]], "range_won": arr(vm.range_won, 252, 1), "avg5": arr(vm.avg5, 252), "avg20": arr(vm.avg20, 252), "avg60": arr(vm.avg60, 252)},
-        "fxvi_3y": {"dates": [d.strftime("%Y-%m-%d") for d in vm.index[-756:]], "fxvi": arr(fxv, 756, 1)},
+        "fxvi_3y": {"dates": [d.strftime("%Y-%m-%d") for d in vm.index[-756:]], "fxvi": arr(fxv, 756, 1), "ref": arr(fxr.where(fxv.isna()), 756, 1)},  # ref: FXVI 가 없는 날의 참고용(구간 무시) 값
         "level_vs_vol": {"dates": [d.strftime("%Y-%m-%d") for d in vm.index[-756:]], "fix": arr(vm.FIX, 756, 1), "park20_ann": arr(vm.park20_ann, 756, 2)},
         "yearly": yearly_v, "commentary": V.commentary(vm, fxv, vtest),
         "scale_k_latest": rnd(psig.k.dropna().iloc[-1], 3) if psig.k.notna().any() else None,
