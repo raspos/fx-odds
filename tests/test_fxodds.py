@@ -339,3 +339,32 @@ def test_fxvi_reference_series_in_range_and_only_where_main_missing():
     shown = ref.where(f.isna())
     assert shown.dropna().between(0, 100).all() and shown.notna().sum() > 0
     assert shown[f.notna()].isna().all()   # 실선이 있는 날에는 참고용을 겹쳐 그리지 않는다
+
+
+# ---------------- 증권사 전망: 시점 분리 / 과거 시점 / 구현 상태 ----------------
+def test_reports_never_merge_different_target_dates():
+    import reports, datetime
+    o = reports.build_output(1324.0, datetime.date(2026, 10, 27))
+    keys = {(r["institution"], r["target_key"]) for r in o["reports"]}
+    assert len(keys) >= 1
+    for r in o["reports"]:
+        assert r["high"] is None or r["high"] > r["low"]          # 범위는 같은 시점 안에서 명시된 경우뿐
+    for g in o["consensus"]["groups"]:
+        assert g["target_key"] != "UNSPEC"                          # 시점 불명 전망은 컨센서스에 쓰지 않는다
+        assert (g["n"] >= 2) == (g["median"] is not None)           # 기관 2곳 미만이면 컨센서스 없음
+
+
+def test_target_key_validation():
+    import reports
+    assert reports.TARGET_RE.match("2027-END") and reports.TARGET_RE.match("2026-Q4") and reports.TARGET_RE.match("UNSPEC")
+    assert not reports.TARGET_RE.match("내년") and not reports.TARGET_RE.match("2027")
+    assert reports.target_name("2027-AVG") == "2027년 연평균" and reports.target_name("2026-Q4") == "2026년 4분기"
+
+
+@needs_data
+def test_features_json_matches_outputs():
+    import json
+    F = json.loads((OUT / "features.json").read_text(encoding="utf-8"))
+    N = json.loads((OUT / "news.json").read_text(encoding="utf-8"))
+    assert F["news"]["n_ai"] == N["counts"]["n_ai"]                 # 구현 상태가 실제 산출물과 같다
+    assert F["fpi"]["implemented"] is True and F["llm"]["at_visit"] is False

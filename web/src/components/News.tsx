@@ -79,18 +79,20 @@ export function News({ N, R, H, spot, refDate, asOf }: { N: J; R: J; H: J; spot:
         <p className="mt-1 text-[12px] leading-relaxed" style={{ color: "var(--ink-3)" }}>{R.note} 원문을 확인하지 못한 항목은 "원문 미확인"으로 표시합니다. 같은 기관은 최신 보도만 컨센서스에 넣고, 최근 5영업일({R.consensus.since} 이후) 자료만 집계합니다.</p>
         <p className="mt-2 text-[11px]" style={{ color: "var(--ink-3)" }}>증권사 원문 보고서는 대부분 유료·비공개라 언론 보도 제목에서 추출합니다. 원문을 확인한 전망은 data/reports_manual.yaml에 수기로 추가하면 "원문 확인"으로 표시됩니다.</p>
         </details>
-        {R.consensus.n > 0 && (
-          <div className="mt-3 grid grid-cols-2 gap-2 text-center text-[12px] sm:grid-cols-4">
-            <div className="rounded-lg p-2" style={{ background: "var(--surface-2)" }}><div style={{ color: "var(--ink-3)" }}>전망 제시 기관</div><div className="num text-lg font-black">{R.consensus.n}곳</div></div>
-            <div className="rounded-lg p-2" style={{ background: "var(--surface-2)" }}><div style={{ color: "var(--ink-3)" }}>전망 수준 중앙</div><div className="num text-lg font-black">{fmt(R.consensus.median)}</div></div>
-            <div className="rounded-lg p-2" style={{ background: "var(--surface-2)" }}><div style={{ color: "var(--ink-3)" }}>범위</div><div className="num text-lg font-black">{fmt(R.consensus.min)}~{fmt(R.consensus.max)}</div></div>
-            <div className="rounded-lg p-2" style={{ background: "var(--surface-2)" }}><div style={{ color: "var(--ink-3)" }}>현재 · 모형 30일 80%</div><div className="num text-sm font-black">{fmt(spot, 1)} · {fmt(H.models[H.selected].pi80[0])}~{fmt(H.models[H.selected].pi80[1])}</div></div>
-          </div>)}
+        <div className="mt-3 rounded-lg p-3 text-[12px] leading-relaxed" style={{ background: "var(--surface-2)" }}>
+          <div className="mb-1 font-bold">목표 시점별 비교 <span className="font-normal" style={{ color: "var(--ink-3)" }}>· 현재 {fmt(spot, 1)}원 · 같은 시점끼리만 비교합니다(시점이 다른 전망은 합치거나 평균내지 않음)</span></div>
+          {R.consensus.groups.length === 0 ? <div style={{ color: "var(--ink-3)" }}>최근 5영업일({R.consensus.since} 이후)에 목표 시점이 분명한 전망이 없습니다.</div> : (
+            <ul className="space-y-1">{R.consensus.groups.map((g: J) => (
+              <li key={g.target_key}><b>{g.target}</b>: {g.n >= 2
+                ? <><span className="num font-bold">중앙 {fmt(g.median)}원 (범위 {fmt(g.min)}~{fmt(g.max)}원)</span> · {g.n}곳 ({g.institutions.join(", ")})</>
+                : <><span className="num">{fmt(g.single)}원</span> · {g.institutions[0]} 단독 제시 — 기관이 2곳 미만이라 컨센서스를 만들지 않았습니다</>}</li>))}</ul>)}
+          <div className="mt-1" style={{ color: "var(--ink-3)" }}>모두 잠정값(기사 제목에서 추출, 원문 미확인)입니다. 우리 모형의 30일 80% 범위는 {fmt(H.models[H.selected].pi80[0])}~{fmt(H.models[H.selected].pi80[1])}원입니다.</div>
+        </div>
         <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="기관·시점·요약 검색" aria-label="보고서 검색" className="mt-3 w-full rounded-lg border px-3 py-2 text-sm" style={{ background: "var(--surface)", borderColor: "var(--line)", color: "var(--ink)" }} />
         <div className="scrollx mt-2">
-          <table className="t"><thead><tr><th>기관</th><th>발행(보도)일</th><th>전망 시점</th><th>전망 수준(원)</th><th>방향</th><th>요약(제목 근거)</th><th>출처</th></tr></thead>
-            <tbody>{R.reports.filter((r: J) => !q || (r.institution + r.horizon + r.summary + r.title).includes(q)).slice(0, moreR || q ? 40 : 3).map((r: J, i: number) => (
-              <tr key={i}><td>{r.institution}</td><td className="num">{r.published}</td><td>{r.horizon || "–"}</td>
+          <table className="t"><thead><tr><th>기관</th><th>발행(보도)일</th><th>목표 시점</th><th>전망 수준(원)</th><th>방향</th><th>요약(제목 근거)</th><th>출처</th></tr></thead>
+            <tbody>{R.reports.filter((r: J) => !q || (r.institution + r.target + r.summary + r.title).includes(q)).slice(0, moreR || q ? 40 : 3).map((r: J, i: number) => (
+              <tr key={i}><td>{r.institution}</td><td className="num">{r.published}</td><td>{r.target || "–"}</td>
                 <td className="num">{r.low ? (r.high && r.high !== r.low ? `${fmt(r.low)}~${fmt(r.high)}` : fmt(r.low)) : "–"}</td>
                 <td style={{ color: r.view === "krw_weak" ? "var(--up)" : r.view === "krw_strong" ? "var(--down)" : "var(--ink-3)" }}>{r.view === "krw_weak" ? "환율 상승(원화 약세)" : r.view === "krw_strong" ? "환율 하락(원화 강세)" : r.view === "range" ? "박스권" : "–"}</td>
                 <td style={{ whiteSpace: "normal", textAlign: "left", minWidth: 220 }}>{r.summary}</td>

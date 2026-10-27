@@ -240,7 +240,8 @@ def main(skip_bt=False, write_live=True):
             e["cause"] = "관련 기사(전후 1일) 링크 참조 — 인과는 확정이 아니라 후보"
     jdump("news.json", {k: v for k, v in nj.items() if k != "articles"} | {"articles": [{k: a[k] for k in ("id", "title", "link", "press", "published", "date", "topic", "dir", "strength", "why", "status", "official", "by")} for a in arts[:300]]})
     import reports as RP
-    jdump("reports.json", RP.build_output(spot, today))
+    reports_out = RP.build_output(spot, today)
+    jdump("reports.json", reports_out)
     jdump("events.json", {"events": evs, "cats": EV.CATS, "note": "공식 통계·시장 데이터에서 규칙으로 추출한 사건입니다. 원인은 전후 1일의 네이버 뉴스·공식 발표 링크를 후보로만 붙였고(확정 아님), 시장 컨센서스가 없어 '예상 대비'는 표시하지 않습니다."})
 
     # ---------- FX VOLATILITY (ECOS 731Y003 고가·저가) ----------
@@ -282,6 +283,20 @@ def main(skip_bt=False, write_live=True):
                    "고가·저가는 한국은행이 제공하는 은행간 시장 집계이며 야간 해외시장·NDF의 일중 가격은 포함되지 않습니다.",
                    "FXVI는 과거 실현 변동성의 역사적 위치이며 환율의 방향이나 미래 변동성을 보장하지 않고, 높다고 해서 환율 상승 압력으로 해석하지 않습니다."]})
     # 장벽 돌파 보정 성적표(barrier_cal.py)와 변동성 모형 비교표는 화면에서 제외(과한 정보). 검증 코드는 남겨 두고 필요할 때만 실행한다.
+
+    # ---------- 구현 상태(features.json): 방법론·README 의 '구현 상태'가 코드와 어긋나지 않도록 실제 산출물에서 만든다 ----------
+    fv = F.validate(fres, ecos)
+    ai_n = int(nj.get("counts", {}).get("n_ai", 0)) if nj.get("available") else 0
+    jdump("features.json", {
+        "generated": now_kst().isoformat(timespec="minutes"), "version": "v0.3.0",
+        "fpi": {"implemented": True, "experimental": True, "coverage": detail["coverage"], "areas": len(detail["areas"]), "hit_7d": fv["h7"]["hit_all"], "hit_30d": fv["h30"]["hit_all"],
+                "p_30d": fv["h30"]["p_binom"], "predictive": bool(fv["h30"]["p_binom"] < 0.05 and abs(fv["h30"]["t_hac"]) > 2)},
+        "news": {"implemented": bool(nj.get("available")), "experimental": True, "n_articles": nj.get("counts", {}).get("n_articles", 0), "n_judged": nj.get("counts", {}).get("n_judged", 0),
+                 "ai_assisted": ai_n > 0, "n_ai": ai_n, "ai_model": (nj.get("ai_comment") or {}).get("model"), "validated": False},
+        "reports": {"implemented": True, "n_rows": len(reports_out["reports"]), "consensus_groups": len(reports_out["consensus"]["groups"]), "provisional": True},
+        "volatility": {"implemented": True, "fxvi_available": bool(np.isfinite(cur)), "breaks": len(V.BREAKS), "regime_test_significant": vtest.get("significant")},
+        "historical_mode": {"covers": ["확률 전망(재계산)", "동조화 레이더", "FPI", "FXVI(최근 3년 이내)"], "not_covered": ["뉴스(보존본 없음)", "증권사 전망", "변동성 상세 차트"]},
+        "llm": {"at_visit": False, "batch_use": ["뉴스 보조 판단", "뉴스 요약 코멘트", "증권사 전망 추출"], "model": "gpt-5.4-mini-2026-03-17"}})
 
     # ---------- 메타 ----------
     last = {}

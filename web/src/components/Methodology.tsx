@@ -10,27 +10,40 @@ const Code = ({ children }: { children: React.ReactNode }) => (
   <code className="num block overflow-x-auto rounded-md px-2.5 py-1.5 text-[12px]" style={{ background: "var(--surface-2)", color: "var(--ink)" }}>{children}</code>
 );
 
-export const STATUS: [string, string, string][] = [
+export const STATIC_STATUS: [string, string, string][] = [
   ["USD/KRW 7일·30일 확률 전망 (모형 A~D, P)", "구현", "ECOS 매매기준율, 일별 갱신. P=고저가 파킨슨"],
   ["FX VOLATILITY (일중 변동폭, FXVI, 파킨슨 변동성, 변동성 모형 비교)", "구현", "ECOS 731Y003 고가·저가. 관측 범위 단절 2건 표시"],
   ["장벽 돌파 확률 보정 검증 (예측 vs 실제 고저가)", "내부 검증", "코드(py/barrier_cal.py)와 방법은 공개, 결과표는 화면에서 제외(과한 정보)"],
   ["분포 차트·구간 확률표·도달 확률 계산기·기간 중 돌파 확률", "구현", "브라운 다리 보정 포함"],
   ["원화 동조화 레이더 (20·60·120·252일, 달러요인 통제, 선행·후행, Granger, 예측 기여도)", "구현", "Yahoo 단일 출처(비공식), 전 거래일까지"],
   ["FX SCORECARD (MAE·RMSE·포함률·Brier·CRPS·DM 검정)", "구현", "2012~ Walk-forward, 다운로드 제공"],
-  ["과거 시점 재현 (HISTORICAL MODE)", "일부", "환율 전망·동조화만. 당시 뉴스·FPI는 보존 자료 없음"],
   ["조건부 모형 E (원화+해외통화+달러요인)", "실험", "백테스트에서 개선이 확인되지 않아 공식 전망 미반영"],
   ["금리를 통제한 조건부 모형 (F: 세 통화+달러요인+한미 금리차)", "실험", "백테스트에서 개선 미확인 → 공식 전망 미반영"],
   ["입수 자료 보강: 지정학 위험지수(GPR), 일본·중국·미국 정책금리, 외국인 주식 순매수(월)", "구현", "FPI·사건에 반영. 외국인 일별 수급(주식·채권)·컨센서스는 미보유"],
-  ["FX PRESSURE INDEX (10개 요인, 자료 충족률)", "실험", "규칙 기반. 방향 예측력 미확인 → 확률 전망 미반영"],
   ["시장 사건 타임라인 (정책금리·급변동, 사건 그룹)", "구현", "통계 추출 + 전후 1일 관련 기사 링크(후보)"],
-  ["뉴스 압력 지수(NPI, 네이버 제목 기반 인과 규칙)", "실험", "검증 전 · 확률 전망 미반영 · 매일 기록 중"],
-  ["공식 보고서·발표 목록 (한국은행·연준·BIS)", "구현", "제목·링크만, 방향 단정 없음"],
   ["FX SCENARIO (시나리오 분석기)", "미구현", "추정 계수가 없어 임의 변경하지 않음"],
   ["통합 전망 C (정량+정성)", "미구현", "FPI·뉴스 점수가 생긴 뒤 백테스트로 검증"],
   ["교차검증 (Yahoo ↔ ECOS 원/달러)", "구현", "메타 데이터 참조"],
 ];
 
-export default function Methodology({ meta }: { meta: J }) {
+/** 구현 상태 표: 코드가 만든 features.json 에서 실제 상태를 읽어 만든다(문서와 구현이 어긋나지 않도록). */
+export function statusRows(F: J): [string, string, string][] {
+  const rows: [string, string, string][] = [];
+  if (F) {
+    rows.push(["FX PRESSURE INDEX (FPI, 10개 요인)", F.fpi.implemented ? "구현(실험)" : "미구현",
+      `자료 충족률 ${Math.round(F.fpi.coverage * 100)}%, 이후 7일·30일 방향 적중 ${(F.fpi.hit_7d * 100).toFixed(1)}%·${(F.fpi.hit_30d * 100).toFixed(1)}% → ${F.fpi.predictive ? "예측력 확인(실험)" : "예측력 미확인, 확률 전망 미반영"}`]);
+    rows.push(["뉴스 압력지수 (FSI, 네이버 제목 + 인과 규칙 + AI 보조)", F.news.implemented ? "구현(실험)" : "수집 전",
+      `기사 ${F.news.n_articles}건 중 방향 판단 ${F.news.n_judged}건(AI 보조 ${F.news.n_ai}건), 과거 환율과의 관계 ${F.news.validated ? "검증됨" : "검증 전"} · 확률 전망 미반영`]);
+    rows.push(["AI(LLM) 사용", "배치에서만", `방문자 접속 시 호출 없음. 사용처: ${F.llm.batch_use.join(", ")} (${F.llm.model})`]);
+    rows.push(["증권사·기관 환율 전망 표", "구현(잠정)", `기관 × 목표 시점 ${F.reports.n_rows}건, 같은 시점끼리만 비교(${F.reports.consensus_groups}개 시점). 기사 제목에서 추출한 잠정값`]);
+    rows.push(["FX VOLATILITY / FXVI", "구현", F.volatility.fxvi_available ? "ECOS 731Y003 고가·저가, 관측 범위 단절 표시" : "FXVI 기초 자료 부족으로 산출 보류"]);
+    rows.push(["과거 시점 재현 (HISTORICAL MODE)", "일부", `포함: ${F.historical_mode.covers.join(", ")} / 제외: ${F.historical_mode.not_covered.join(", ")}`]);
+  }
+  rows.push(["공식 보고서·발표 목록 (한국은행·연준·BIS)", "구현", "제목·링크만, 방향 단정 없음"]);
+  return rows;
+}
+
+export default function Methodology({ meta, F }: { meta: J; F?: J }) {
   const cc = meta.cross_check;
   return (
     <div className="space-y-4">
@@ -38,7 +51,7 @@ export default function Methodology({ meta }: { meta: J }) {
         <h3 className="text-lg font-bold">구현 상태</h3>
         <div className="scrollx mt-2">
           <table className="t"><thead><tr><th>기능</th><th>상태</th><th>비고</th></tr></thead>
-            <tbody>{STATUS.map(([a, b, c]) => (<tr key={a}><td style={{ whiteSpace: "normal" }}>{a}</td><td><b>{b}</b></td><td style={{ whiteSpace: "normal", textAlign: "left" }}>{c}</td></tr>))}</tbody></table>
+            <tbody>{[...statusRows(F ?? null), ...STATIC_STATUS].map(([a, b, c]) => (<tr key={a}><td style={{ whiteSpace: "normal" }}>{a}</td><td><b>{b}</b></td><td style={{ whiteSpace: "normal", textAlign: "left" }}>{c}</td></tr>))}</tbody></table>
         </div>
       </div>
       <div className="card p-4 sm:p-5">
@@ -79,8 +92,8 @@ export default function Methodology({ meta }: { meta: J }) {
           <p>공식 전망 = 실현이 확정된 예측의 평균 CRPS가 가장 낮은 모형(A~D). 선택은 기준일마다 그때까지 실현된 예측만으로 다시 하며(과거 날짜 재현 시 미래 정보 배제), 표본이 250개 미만이면 C를 씁니다.</p>
           <p>조건부 모형: 목표(h일 로그수익률)를 [원화 5·20일 수익률, 해외 통화 5·20일 수익률, 달러요인]에 릿지(α = 훈련 표본 수, 강한 수축)로 회귀. 21영업일마다 재추정, 훈련 표본은 목표일이 기준일 이전인 것만. 분산은 EWMA를 그대로 씁니다.</p>
         </Item>
-        <Item n={13} t="FPI 점수 계산"><p><b>미구현.</b> 점수는 확률이 아니며, 가중치가 검증되기 전에는 '실험적 압력 지수'로만 표시할 예정입니다. 결측은 0점으로 채우지 않고 자료 충족률을 함께 표시합니다.</p></Item>
-        <Item n={14} t="보고서·뉴스 분석"><p>네이버 뉴스 검색(제목·링크만 저장)을 인과 규칙(예: 외국인 매도 → 원화 약세)으로 분류합니다. 같은 날 같은 주제는 하나의 사건 그룹(강도 max, 기사 수 무관), 상반 신호·부정 표현은 판단 유보, 환율 결과 보도는 점수 제외. 뉴스 압력 지수 = 100·tanh(Σ방향·강도·0.5^(경과일/7)/15). 과거 뉴스 보존본이 없어 백테스트하지 못했고 매일 기록해 공개 검증합니다. LLM은 사용하지 않습니다. API 키가 없어도 확률 전망과 레이더는 동작합니다.</p></Item>
+        <Item n={13} t="FPI 점수 계산"><p><b>구현(실험).</b> 10개 영역의 20일 변화(월별 자료는 3개월 합)를 과거 756영업일(월별 60개월) 분포로 표준화(±3 절단)해 −100~+100으로 환산하고 동일가중 평균합니다. 확률이 아니며 결측 영역은 0점이 아니라 제외하고 자료 충족률을 함께 표시합니다. 한국 금리는 미국 5년 금리, 엔·위안·대만 달러는 달러 요인을 회귀로 제거한 잔차만 써서 같은 충격을 중복 집계하지 않습니다. 이후 7일·30일 환율과의 관계(상관, HAC t, 부호 적중)는 압력·뉴스 탭에 공개하며 현재 방향 예측력은 확인되지 않아 확률 전망에는 반영하지 않습니다.</p></Item>
+        <Item n={14} t="보고서·뉴스 분석"><p>네이버 뉴스 검색(제목·링크만 저장)을 인과 규칙(예: 외국인 매도 → 원화 약세)으로 분류합니다. 같은 날 같은 주제는 하나의 사건 그룹(강도 max, 기사 수 무관), 상반 신호·부정 표현은 판단 유보, 환율 결과 보도는 점수 제외. 뉴스 압력 지수 = 100·tanh(Σ방향·강도·0.5^(경과일/7)/15). 과거 뉴스 보존본이 없어 백테스트하지 못했고 매일 기록해 공개 검증합니다. 방문자 접속 시에는 LLM을 호출하지 않지만, 배치 실행에서 규칙이 판단하지 못한 환율 관련 제목을 AI가 보조 판단(제목만 입력, 확신 없으면 유보, 결과는 기사 ID로 캐시)하고 두 문장 요약 코멘트와 증권사 전망 추출에도 씁니다. 화면에 규칙 판단과 AI 판단이 구분돼 표시됩니다. 지수 이름은 화면에서 FSI(코드명 NPI)로 통일했습니다. API 키가 없어도 확률 전망과 레이더는 동작합니다.</p></Item>
         <Item n={15} t="백테스트">
           <p>2012-01부터 모든 영업일을 기준일로 Walk-forward. 지표: MAE, RMSE, 방향 적중률, 50/80/90% 포함률, Brier, CRPS(정규모형 해석해·표본모형 에너지 추정), 랜덤워크 대비 개선율, Newey-West DM 검정.</p>
           <p>한계: 과거 자료로 재계산한 결과이며 변동성·모형 형태를 정할 때 이 기간의 경험이 반영되었을 수 있습니다. 실시간 성적은 별도 기록(live_forecasts.csv)에 쌓입니다.</p>
@@ -111,7 +124,7 @@ export default function Methodology({ meta }: { meta: J }) {
           <li><b>상관 ≠ 인과.</b> 높은 상관계수는 함께 움직였다는 뜻일 뿐, 한 통화가 원화를 움직였다는 뜻이 아닙니다.</li>
           <li><b>동시 동조화 ≠ 미래 예측력.</b> 같은 날의 움직임이 같아도 내일의 환율을 맞히는 데는 도움이 되지 않을 수 있습니다(예측 기여도 표 참조).</li>
           <li><b>통계적 확률 ≠ 옵션 내재확률.</b> 여기 확률은 과거 수익률 분포에서 나온 값입니다.</li>
-          <li><b>정성적 압력 ≠ 상승·하락 확률.</b> 압력 지수(미구현)는 확률이 아닙니다.</li>
+          <li><b>정성적 압력 ≠ 상승·하락 확률.</b> 압력 지수(FPI)와 뉴스 압력지수(FSI)는 확률이 아니며 예측력은 검증 전입니다.</li>
           <li><b>백테스트 ≠ 실시간 성적.</b> 두 기록은 분리해 공개합니다.</li>
         </ul>
         <h3 className="mt-4 text-lg font-bold" style={{ color: "var(--ink)" }}>출처 간 교차검증 (최근 2년)</h3>
