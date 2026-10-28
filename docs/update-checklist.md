@@ -18,7 +18,7 @@
 
 ## B. 사람이 보는 것
 
-6. **뉴스·AI**
+6. **뉴스·AI** — 네이버는 **네이버클라우드 NAVER API HUB**(`naverapihub.apigw.ntruss.com`) 키만 쓴다. GitHub 시크릿 `NAVER_CLIENT_ID`(10자)·`NAVER_CLIENT_SECRET`(40자)이 console.ncloud.com 의 검색 API 애플리케이션 값이어야 하고, 401이면 키 종류부터 확인한다(developers.naver.com 키·IAM 키 불가).
    - 압력·뉴스 탭 '수집/판단/유보/분류 불가/AI 보조' 건수가 어제와 비슷한 규모인지(수집이 0건이면 네이버 키·한도 확인).
    - 규칙·AI 방향 일치 건수의 '반대'가 급증하지 않았는지, AI 판단 카드에 환율과 무관한 기사가 섞이지 않았는지.
    - 오분류가 반복되면 `py/news.py`의 규칙(RULES)을 고친다(예: '긴장 완화'를 약세로 본 사례).

@@ -75,7 +75,7 @@ npm run build                              # web/dist (정적 파일)
 
 1. GitHub에서 빈 저장소를 만들고 `git remote add origin <URL>` 후 `git push -u origin main`.
 2. 저장소 Settings → Pages → Source 를 **GitHub Actions** 로 지정.
-3. Settings → Secrets and variables → Actions 에 `ECOS_API_KEY` 등록.
+3. Settings → Secrets and variables → Actions 에 `ECOS_API_KEY`, `OPENAI_API_KEY`, 그리고 **네이버클라우드 NAVER API HUB**(console.ncloud.com) 검색 API 애플리케이션의 `NAVER_CLIENT_ID`(10자)·`NAVER_CLIENT_SECRET`(40자) 등록(developers.naver.com 키는 401).
 4. Actions 탭에서 `daily` 워크플로를 수동 실행(workflow_dispatch). 이후 평일 18:40 KST에 자동 갱신·배포된다.
 - 사이트 주소: `https://<사용자>.github.io/<저장소>/` (상대 경로 `base: "./"` 로 빌드).
 - `data/fx.sqlite`와 `data/live_forecasts.csv`는 배치가 커밋해 기록을 유지한다. 공개 저장소이므로 Yahoo 원시 자료 재배포 약관을 확인할 것.

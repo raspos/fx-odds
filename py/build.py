@@ -337,7 +337,7 @@ def main(skip_bt=False, write_live=True):
         v_ = status.get(key) or {}
         if isinstance(v_, dict) and v_.get("ok") is False:
             why = str(v_.get("why") or "; ".join(v_.get("errors", [])) or "일부 실패")
-            hint = "HTTP 401(인증 실패): GitHub 시크릿 키 값을 확인" if ("401" in why or "403" in why) else ("일시적 서버 오류, 다음 실행에서 재시도" if ("500" in why or "502" in why or "503" in why or "429" in why) else why[:80])
+            hint = "HTTP 401(인증 실패): 네이버클라우드 API HUB(console.ncloud.com) 검색 API 애플리케이션의 Client ID(10자)·Secret(40자)를 GitHub 시크릿에 넣었는지 확인. 기존 developers.naver.com 키는 쓸 수 없음" if ("401" in why or "403" in why) else ("일시적 서버 오류, 다음 실행에서 재시도" if ("500" in why or "502" in why or "503" in why or "429" in why) else why[:80])
             coll.append({"name": label, "reason": hint})
     jdump("meta.json", {"collector_failures": coll, "sources": srcs, "failed_series": failed, "fail_reason": fail_reason, "updated_at": collected_at, "latest_obs": last, "stale_days": stale_days,
                         "stale_warning": stale_days > 4, "cross_check": prep.cross_check_krw(df), "fetch_status": status,
