@@ -1,19 +1,19 @@
 {
- "at": "2026-10-27T15:32:04+00:00",
+ "at": "2026-10-28T01:42:02+00:00",
  "ecos": {
-  "ecos:KRW_per_USD": 6636,
-  "ecos:KRW_per_CNY": 2661,
-  "ecos:KRW_per_100JPY": 6636,
-  "ecos:KRW_per_TWD": 2910,
+  "ecos:KRW_per_USD": 6637,
+  "ecos:KRW_per_CNY": 2662,
+  "ecos:KRW_per_100JPY": 6637,
+  "ecos:KRW_per_TWD": 2911,
   "ecos:KTB3Y": 6636,
   "ecos:BASE_RATE": 6995,
   "ecos:BOP_CURRENT_ACCOUNT": 279,
   "ecos:BOP_EXPORTS": 320,
-  "ecos:OHLC_OPEN": 6621,
-  "ecos:OHLC_HIGH": 6620,
-  "ecos:OHLC_LOW": 6620,
+  "ecos:OHLC_OPEN": 6622,
+  "ecos:OHLC_HIGH": 6621,
+  "ecos:OHLC_LOW": 6621,
   "ecos:OHLC_CLOSE1530": 6621,
-  "ecos:OHLC_CLOSE_FULL": 569,
+  "ecos:OHLC_CLOSE_FULL": 570,
   "ecos:POLICY_US": 321,
   "ecos:POLICY_JP": 121,
   "ecos:POLICY_CN": 321,
@@ -21,44 +21,46 @@
   "ecos:BOP_PORTFOLIO_LIAB": 215
  },
  "yahoo": {
-  "yahoo:USDKRW": 5940,
-  "yahoo:USDJPY": 6180,
-  "yahoo:USDCNY": 6032,
-  "yahoo:USDTWD": 5447,
-  "yahoo:EURUSD": 5942,
-  "yahoo:GBPUSD": 5954,
-  "yahoo:AUDUSD": 5318,
-  "yahoo:USDCAD": 6010,
-  "yahoo:USDCHF": 6008,
-  "yahoo:USDSEK": 6028,
-  "yahoo:KOSPI": 5870,
-  "yahoo:DXY": 6007,
-  "yahoo:UST10Y": 5986,
-  "yahoo:UST5Y": 5986,
-  "yahoo:VIX": 5994,
+  "yahoo:USDKRW": 5941,
+  "yahoo:USDJPY": 6181,
+  "yahoo:USDCNY": 6033,
+  "yahoo:USDTWD": 5448,
+  "yahoo:EURUSD": 5943,
+  "yahoo:GBPUSD": 5955,
+  "yahoo:AUDUSD": 5319,
+  "yahoo:USDCAD": 6011,
+  "yahoo:USDCHF": 6009,
+  "yahoo:USDSEK": 6029,
+  "yahoo:KOSPI": 5871,
+  "yahoo:DXY": 6008,
+  "yahoo:UST10Y": 5987,
+  "yahoo:UST5Y": 5987,
+  "yahoo:VIX": 5995,
   "yahoo:WTI": 5985
  },
  "gpr": {
   "gpr:GPRD": 10910
  },
  "naver": {
-  "ok": false,
-  "why": "'원달러 환율': HTTPError 401 Client Error: Unauthorized for url: https://naverapihub.apigw.ntru; '원화 약세': HTTPError 401 Client Error: Unauthorized for url: https://naverapihub.apigw.ntru; '원화 강세': HTTPError 401 Client Error: Unauthorized for url: https://naverapihub.apigw.ntru; '달러 강세': HTTPError 401 Cli"
+  "ok": true,
+  "received": 3500,
+  "kept": 3536,
+  "errors": []
  },
  "official": {
-  "ok": false,
-  "received": 40,
-  "errors": [
-   "미국 연준 보도자료: HTTPError"
-  ]
+  "ok": true,
+  "received": 60,
+  "errors": []
  },
  "ai": {
-  "ok": false,
-  "why": "HTTPError 500 Server Error: Internal Server Error for url: https://api.openai.com/v1/chat/completions",
-  "added": 139
+  "ok": true,
+  "added": 141,
+  "calls": 8,
+  "tokens_in": 8556,
+  "tokens_out": 28092
  },
  "reports": {
   "ok": true,
-  "added": 1
+  "added": 4
  }
 }

@@ -23,3 +23,7 @@
 {"id": "8431b0034ce0", "is_forecast": false, "institution": "", "summary": "", "forecasts": [], "model": "gpt-5.4-mini-2026-03-17", "at": "2026-10-27T21:20+09:00"}
 {"id": "bf8ef783e56b", "is_forecast": true, "institution": "씨티", "summary": "씨티, 장기 전망 1250원으로 하향", "forecasts": [{"target_key": "UNSPEC", "target_label": "장기 전망", "low": 1250, "high": 1250, "view": "krw_strong"}], "model": "gpt-5.4-mini-2026-03-17", "at": "2026-10-27T21:20+09:00"}
 {"id": "e0083a6b5aae", "is_forecast": false, "institution": "", "summary": "", "forecasts": [], "model": "gpt-5.4-mini-2026-03-17", "at": "2026-10-28T00:38+09:00"}
+{"id": "4a2844b1134d", "is_forecast": false, "institution": "", "summary": "", "forecasts": [], "model": "gpt-5.4-mini-2026-03-17", "at": "2026-10-28T10:47+09:00"}
+{"id": "627aa9e43b35", "is_forecast": false, "institution": "", "summary": "", "forecasts": [], "model": "gpt-5.4-mini-2026-03-17", "at": "2026-10-28T10:47+09:00"}
+{"id": "fcf93d3be94b", "is_forecast": false, "institution": "", "summary": "", "forecasts": [], "model": "gpt-5.4-mini-2026-03-17", "at": "2026-10-28T10:47+09:00"}
+{"id": "da3afeacf83c", "is_forecast": true, "institution": "대신證", "summary": "대신證, 내년 상반기 환율 1,200원대 진입 시도 전망", "forecasts": [{"target_key": "2027-H1", "target_label": "내년 상반기", "low": 1200, "high": 1200, "view": "krw_strong"}], "model": "gpt-5.4-mini-2026-03-17", "at": "2026-10-28T10:47+09:00"}
