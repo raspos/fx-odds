@@ -27,3 +27,6 @@
 {"id": "627aa9e43b35", "is_forecast": false, "institution": "", "summary": "", "forecasts": [], "model": "gpt-5.4-mini-2026-03-17", "at": "2026-10-28T10:47+09:00"}
 {"id": "fcf93d3be94b", "is_forecast": false, "institution": "", "summary": "", "forecasts": [], "model": "gpt-5.4-mini-2026-03-17", "at": "2026-10-28T10:47+09:00"}
 {"id": "da3afeacf83c", "is_forecast": true, "institution": "대신證", "summary": "대신證, 내년 상반기 환율 1,200원대 진입 시도 전망", "forecasts": [{"target_key": "2027-H1", "target_label": "내년 상반기", "low": 1200, "high": 1200, "view": "krw_strong"}], "model": "gpt-5.4-mini-2026-03-17", "at": "2026-10-28T10:47+09:00"}
+{"id": "0360cd893b03", "is_forecast": false, "institution": "", "summary": "교보증권, 에스엘 3분기 부진 전망", "forecasts": [], "model": "gpt-5.4-mini-2026-03-17", "at": "2026-10-29T01:19+09:00"}
+{"id": "35147b5ca79a", "is_forecast": true, "institution": "키움證", "summary": "키움證, 내년 달러-원 평균 1,355원 전망", "forecasts": [{"target_key": "2027-AVG", "target_label": "내년 달러-원 평균", "low": 1355, "high": 1355, "view": "none"}], "model": "gpt-5.4-mini-2026-03-17", "at": "2026-10-29T01:19+09:00"}
+{"id": "381eb24f4197", "is_forecast": false, "institution": "", "summary": "연저점 경신 원/달러 환율, 연말 방향 질문", "forecasts": [], "model": "gpt-5.4-mini-2026-03-17", "at": "2026-10-29T01:19+09:00"}
