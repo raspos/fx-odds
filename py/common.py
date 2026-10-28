@@ -74,3 +74,25 @@ def avail_date(series: str, obs: pd.Timestamp) -> pd.Timestamp:
         # H.10: 관측 주(월~일)의 다음 월요일
         return obs + pd.Timedelta(days=7 - obs.dayofweek)
     return obs
+
+
+def post_json_retry(url: str, *, headers: dict, body: dict, timeout=180, tries=3):
+    """일시적 서버 오류(429·5xx)와 네트워크 오류는 5·20초 간격으로 재시도한다. 4xx(키 오류 등)는 재시도하지 않는다."""
+    import time, requests
+    last = None
+    for wait in (0, 5, 20)[:tries]:
+        if wait:
+            time.sleep(wait)
+        try:
+            r = requests.post(url, headers=headers, json=body, timeout=timeout)
+            if r.status_code in (429, 500, 502, 503, 504):
+                last = r; continue
+            r.raise_for_status()
+            return r
+        except requests.exceptions.RequestException as e:
+            if getattr(getattr(e, "response", None), "status_code", 0) in (400, 401, 403, 404):
+                raise
+            last = e
+    if isinstance(last, requests.Response):
+        last.raise_for_status()
+    raise last

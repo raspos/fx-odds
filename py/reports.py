@@ -11,7 +11,7 @@ import json, os, re
 from datetime import timedelta
 import requests
 import yaml
-from common import DATA, now_kst, redact
+from common import post_json_retry, DATA, now_kst, redact
 import news
 
 CACHE = DATA / "fx_reports2.jsonl"   # v2: 기사 한 건에서 (기관 × 목표 시점)별 전망을 분리해 저장
@@ -74,8 +74,7 @@ def extract() -> dict:
             user = "다음을 처리하라. id 를 그대로 돌려줘라.\n" + "\n".join(f"{x['id']}\t{x['published'][:10]} | {x['title']}" for x in b)
             body = {"model": MODEL, "messages": [{"role": "system", "content": SYSTEM}, {"role": "user", "content": user}], "max_completion_tokens": 8000,
                     "reasoning_effort": "medium", "response_format": {"type": "json_schema", "json_schema": {"name": "fx_reports2", "strict": True, "schema": SCHEMA}}}
-            r = requests.post("https://api.openai.com/v1/chat/completions", headers={"Authorization": "Bearer " + os.environ["OPENAI_API_KEY"]}, json=body, timeout=180)
-            r.raise_for_status()
+            r = post_json_retry("https://api.openai.com/v1/chat/completions", headers={"Authorization": "Bearer " + os.environ["OPENAI_API_KEY"]}, body=body)
             ch = r.json()["choices"][0]
             if ch.get("finish_reason") == "length":
                 raise RuntimeError("출력 한도 초과")

@@ -332,7 +332,14 @@ def main(skip_bt=False, write_live=True):
                 m_ = _re.search(r"'CODE': '([^']+)'", v_)
                 reasons[k] = (m_.group(1) if m_ else v_[:40])
     fail_reason = ("인증키 오류(INFO-100): GitHub 시크릿 ECOS_API_KEY 값 확인" if "INFO-100" in reasons.values() else ("네트워크 오류" if "NETWORK" in reasons.values() else ""))
-    jdump("meta.json", {"sources": srcs, "failed_series": failed, "fail_reason": fail_reason, "updated_at": collected_at, "latest_obs": last, "stale_days": stale_days,
+    coll = []
+    for key, label in (("naver", "네이버 뉴스"), ("official", "공식 발표(한은·연준·BIS)"), ("ai", "AI 보조 판단")):
+        v_ = status.get(key) or {}
+        if isinstance(v_, dict) and v_.get("ok") is False:
+            why = str(v_.get("why") or "; ".join(v_.get("errors", [])) or "일부 실패")
+            hint = "HTTP 401(인증 실패): GitHub 시크릿 키 값을 확인" if ("401" in why or "403" in why) else ("일시적 서버 오류, 다음 실행에서 재시도" if ("500" in why or "502" in why or "503" in why or "429" in why) else why[:80])
+            coll.append({"name": label, "reason": hint})
+    jdump("meta.json", {"collector_failures": coll, "sources": srcs, "failed_series": failed, "fail_reason": fail_reason, "updated_at": collected_at, "latest_obs": last, "stale_days": stale_days,
                         "stale_warning": stale_days > 4, "cross_check": prep.cross_check_krw(df), "fetch_status": status,
                         "version": "v0.3.0", "model_names": MODEL_NAMES})
     print("ok", base.date(), len(hist["origins"]))

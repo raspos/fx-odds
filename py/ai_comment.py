@@ -3,7 +3,7 @@
 from __future__ import annotations
 import hashlib, json, os
 import requests
-from common import DATA, now_kst, redact
+from common import post_json_retry, DATA, now_kst, redact
 
 CACHE = DATA / "ai_comment.jsonl"
 MODEL = os.environ.get("FXODDS_AI_MODEL", "gpt-5.4-mini-2026-03-17")
@@ -55,8 +55,7 @@ def get(nj: dict, allow_generate: bool) -> dict | None:
             user = "사건 목록:\n" + "\n".join(f"- {r['date']} | {r['topic']} | {r['direction']} | 강도{r['strength']} | {r['title']}" for r in rows)
             body = {"model": MODEL, "messages": [{"role": "system", "content": SYSTEM}, {"role": "user", "content": user}], "max_completion_tokens": 1500,
                     "reasoning_effort": "low", "response_format": {"type": "json_schema", "json_schema": {"name": "fx_comment", "strict": True, "schema": SCHEMA}}}
-            r = requests.post("https://api.openai.com/v1/chat/completions", headers={"Authorization": "Bearer " + os.environ["OPENAI_API_KEY"]}, json=body, timeout=120)
-            r.raise_for_status()
+            r = post_json_retry("https://api.openai.com/v1/chat/completions", headers={"Authorization": "Bearer " + os.environ["OPENAI_API_KEY"]}, body=body)
             ch = r.json()["choices"][0]
             if ch.get("finish_reason") == "length":
                 raise RuntimeError("출력 한도 초과")

@@ -7,7 +7,7 @@ from __future__ import annotations
 import csv, json, os
 from datetime import datetime, timedelta
 import requests
-from common import DATA, now_kst, redact
+from common import post_json_retry, DATA, now_kst, redact
 import news
 
 CACHE = DATA / "ai_news.jsonl"
@@ -65,8 +65,7 @@ def call(batch: list[dict]) -> tuple[list[dict], dict]:
     user = "다음 제목들을 판단하라. 각 항목의 id 를 그대로 돌려줘라.\n" + "\n".join(f"{b['id']}\t{b['title']}" for b in batch)
     body = {"model": MODEL, "messages": [{"role": "system", "content": SYSTEM}, {"role": "user", "content": user}], "max_completion_tokens": 6000,
             "reasoning_effort": EFFORT, "response_format": {"type": "json_schema", "json_schema": {"name": "fx_news", "strict": True, "schema": SCHEMA}}}
-    r = requests.post("https://api.openai.com/v1/chat/completions", headers={"Authorization": "Bearer " + os.environ["OPENAI_API_KEY"]}, json=body, timeout=180)
-    r.raise_for_status()
+    r = post_json_retry("https://api.openai.com/v1/chat/completions", headers={"Authorization": "Bearer " + os.environ["OPENAI_API_KEY"]}, body=body)
     j = r.json()
     ch = j["choices"][0]
     if ch.get("finish_reason") == "length":
