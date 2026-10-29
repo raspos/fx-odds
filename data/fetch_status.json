@@ -1,5 +1,5 @@
 {
- "at": "2026-10-29T12:58:43+00:00",
+ "at": "2026-10-29T16:24:12+00:00",
  "ecos": {
   "ecos:KRW_per_USD": 6638,
   "ecos:KRW_per_CNY": 2663,
@@ -44,7 +44,7 @@
  "naver": {
   "ok": true,
   "received": 3500,
-  "kept": 5372,
+  "kept": 5451,
   "errors": []
  },
  "official": {
@@ -54,13 +54,13 @@
  },
  "ai": {
   "ok": true,
-  "added": 179,
+  "added": 180,
   "calls": 18,
-  "tokens_in": 14270,
-  "tokens_out": 44280
+  "tokens_in": 14255,
+  "tokens_out": 40522
  },
  "reports": {
   "ok": true,
-  "added": 16
+  "added": 0
  }
 }
