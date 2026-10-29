@@ -1,18 +1,18 @@
 {
- "at": "2026-10-29T02:48:25+00:00",
+ "at": "2026-10-29T12:58:43+00:00",
  "ecos": {
   "ecos:KRW_per_USD": 6638,
   "ecos:KRW_per_CNY": 2663,
   "ecos:KRW_per_100JPY": 6638,
   "ecos:KRW_per_TWD": 2912,
-  "ecos:KTB3Y": 6637,
-  "ecos:BASE_RATE": 6996,
+  "ecos:KTB3Y": 6638,
+  "ecos:BASE_RATE": 6997,
   "ecos:BOP_CURRENT_ACCOUNT": 279,
   "ecos:BOP_EXPORTS": 320,
   "ecos:OHLC_OPEN": 6623,
   "ecos:OHLC_HIGH": 6622,
   "ecos:OHLC_LOW": 6622,
-  "ecos:OHLC_CLOSE1530": 6622,
+  "ecos:OHLC_CLOSE1530": 6623,
   "ecos:OHLC_CLOSE_FULL": 571,
   "ecos:POLICY_US": 321,
   "ecos:POLICY_JP": 121,
@@ -44,7 +44,7 @@
  "naver": {
   "ok": true,
   "received": 3500,
-  "kept": 4776,
+  "kept": 5372,
   "errors": []
  },
  "official": {
@@ -53,12 +53,14 @@
   "errors": []
  },
  "ai": {
-  "ok": false,
-  "why": "RuntimeError 출력 한도 초과",
-  "added": 40
+  "ok": true,
+  "added": 179,
+  "calls": 18,
+  "tokens_in": 14270,
+  "tokens_out": 44280
  },
  "reports": {
   "ok": true,
-  "added": 2
+  "added": 16
  }
 }
