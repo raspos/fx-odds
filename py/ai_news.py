@@ -14,7 +14,7 @@ CACHE = DATA / "ai_news.jsonl"
 USAGE = DATA / "ai_usage.csv"
 MODEL = os.environ.get("FXODDS_AI_MODEL", "gpt-5.4-mini-2026-03-17")
 EFFORT = "medium"
-BATCH = 20
+BATCH = 10   # 추론 토큰이 출력 한도를 넘지 않도록 작게(넘으면 반으로 쪼개 다시 호출)
 MAX_NEW_PER_RUN = 160   # 실행당 판단 상한(비용 상한)
 AGREE_SAMPLE = 20       # 규칙 판단 기사 중 일치율 점검용 표본
 WINDOW_DAYS = 3
@@ -61,15 +61,31 @@ def log_usage(calls: int, inp: int, out: int, reasoning: int) -> None:
         w.writerow([now_kst().isoformat(timespec="minutes"), MODEL, calls, inp, out, reasoning])
 
 
+class OutputLimit(RuntimeError):
+    pass
+
+
+def call_split(batch: list[dict]):
+    """출력 한도를 넘으면 배치를 반으로 쪼개 다시 부른다(1건짜리도 넘으면 그 건만 건너뛴다)."""
+    try:
+        return call(batch)
+    except OutputLimit:
+        if len(batch) == 1:
+            return [], {}
+        h = len(batch) // 2
+        a, ua = call_split(batch[:h]); b, ub = call_split(batch[h:])
+        return a + b, {k: ua.get(k, 0) + ub.get(k, 0) for k in set(ua) | set(ub) if isinstance(ua.get(k, 0), int) and isinstance(ub.get(k, 0), int)}
+
+
 def call(batch: list[dict]) -> tuple[list[dict], dict]:
     user = "다음 제목들을 판단하라. 각 항목의 id 를 그대로 돌려줘라.\n" + "\n".join(f"{b['id']}\t{b['title']}" for b in batch)
-    body = {"model": MODEL, "messages": [{"role": "system", "content": SYSTEM}, {"role": "user", "content": user}], "max_completion_tokens": 6000,
+    body = {"model": MODEL, "messages": [{"role": "system", "content": SYSTEM}, {"role": "user", "content": user}], "max_completion_tokens": 12000,
             "reasoning_effort": EFFORT, "response_format": {"type": "json_schema", "json_schema": {"name": "fx_news", "strict": True, "schema": SCHEMA}}}
     r = post_json_retry("https://api.openai.com/v1/chat/completions", headers={"Authorization": "Bearer " + os.environ["OPENAI_API_KEY"]}, body=body)
     j = r.json()
     ch = j["choices"][0]
     if ch.get("finish_reason") == "length":
-        raise RuntimeError("출력 한도 초과")
+        raise OutputLimit("출력 한도 초과")
     return json.loads(ch["message"]["content"])["items"], j.get("usage", {})
 
 
@@ -94,7 +110,7 @@ def run() -> dict:
     try:
         for i in range(0, len(todo), BATCH):
             b = todo[i:i + BATCH]
-            res, u = call(b)
+            res, u = call_split(b)
             calls += 1; tin += u.get("prompt_tokens", 0); tout += u.get("completion_tokens", 0)
             tr += (u.get("completion_tokens_details") or {}).get("reasoning_tokens", 0)
             ids = {x["id"] for x in b}

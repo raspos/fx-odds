@@ -17,7 +17,7 @@ import news
 CACHE = DATA / "fx_reports2.jsonl"   # v2: 기사 한 건에서 (기관 × 목표 시점)별 전망을 분리해 저장
 MANUAL = DATA / "reports_manual.yaml"
 MODEL = os.environ.get("FXODDS_AI_MODEL", "gpt-5.4-mini-2026-03-17")
-BATCH = 20
+BATCH = 10
 MAX_PER_RUN = 120
 
 INST = re.compile(r"證|증권|은행|리서치|연구원|연구소|KB|신한|하나|우리|NH|삼성|한투|키움|메리츠|대신|유진|iM|IBK|BNK|DB금융|DS투자|상상인|한화투자|현대차|SK|LS|IMF|OECD|골드만|JP\s?모건|모건스탠리|씨티|UBS|BoA|바클레이|노무라|HSBC|도이치|BNP|SC제일|웰스파고|맥쿼리|무디스|S&P|피치|ING|MUFG|커먼즈뱅크|코메르츠|맥쿼리|웰스파고|DBS|OCBC|다이와|미즈호|BMO|RBC|TD증권|소시에테|크레디트스위스|ANZ|웨스트팩")
@@ -72,12 +72,12 @@ def extract() -> dict:
         for k in range(0, len(todo), BATCH):
             b = todo[k:k + BATCH]
             user = "다음을 처리하라. id 를 그대로 돌려줘라.\n" + "\n".join(f"{x['id']}\t{x['published'][:10]} | {x['title']}" for x in b)
-            body = {"model": MODEL, "messages": [{"role": "system", "content": SYSTEM}, {"role": "user", "content": user}], "max_completion_tokens": 8000,
+            body = {"model": MODEL, "messages": [{"role": "system", "content": SYSTEM}, {"role": "user", "content": user}], "max_completion_tokens": 14000,
                     "reasoning_effort": "medium", "response_format": {"type": "json_schema", "json_schema": {"name": "fx_reports2", "strict": True, "schema": SCHEMA}}}
             r = post_json_retry("https://api.openai.com/v1/chat/completions", headers={"Authorization": "Bearer " + os.environ["OPENAI_API_KEY"]}, body=body)
             ch = r.json()["choices"][0]
             if ch.get("finish_reason") == "length":
-                raise RuntimeError("출력 한도 초과")
+                continue  # 이 묶음은 건너뛴다(캐시에 없으므로 다음 실행에서 다시 시도)
             ids = {x["id"] for x in b}
             rows += [{**x, "model": MODEL, "at": now_kst().isoformat(timespec="minutes")} for x in json.loads(ch["message"]["content"])["items"] if x["id"] in ids]
     except Exception as e:
