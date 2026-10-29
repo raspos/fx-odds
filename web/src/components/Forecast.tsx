@@ -56,8 +56,6 @@ export function HorizonCard({ hz, spot, H }: { hz: number; spot: number; H: J })
         <IntervalRow label="80%" lo={m.pi80[0]} hi={m.pi80[1]} spot={spot} scale={scale} />
         <IntervalRow label="90%" lo={m.pi90[0]} hi={m.pi90[1]} spot={spot} scale={scale} />
       </div>
-      {(H.experimental_point.E0 || H.experimental_point.EP) && <p className="mt-3 rounded-lg p-2 text-[12px] leading-relaxed" style={{ background: "var(--surface-2)" }}>
-        <b>실험적 점추정(공식 아님)</b>: 원·달러 단독 릿지 {H.experimental_point.E0 ? `${fmt(H.experimental_point.E0.value, 1)}원(${sgn(H.experimental_point.E0.mu_pct, 2)}%)` : "–"}{H.experimental_point.EP ? ` · +압력지수 ${fmt(H.experimental_point.EP.value, 1)}원(${sgn(H.experimental_point.EP.mu_pct, 2)}%)` : ""}. 백테스트에서 현재 환율보다 나은 방향·정확도가 확인되지 않았습니다.</p>}
       <p className="mt-3 text-[11px] leading-relaxed" style={{ color: "var(--ink-3)" }}>{H.evaluation_rule}. 막대의 세로선은 기준일 환율입니다.</p>
     </div>
   );

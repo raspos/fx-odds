@@ -2,12 +2,11 @@ import { Component, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import { J, fmt, pct, sgn } from "./lib";
 import EChart, { usePalette } from "./components/EChart";
-import { DistributionChart, HorizonCard, ModelTable, ThresholdCalculator, Gauge, RangeChart } from "./components/Forecast";
+import { HorizonCard, ThresholdCalculator, Gauge, RangeChart } from "./components/Forecast";
 import Radar from "./components/Radar";
 import Scorecard from "./components/Scorecard";
 import Methodology from "./components/Methodology";
 import { Pressure } from "./components/Pressure";
-import { Events } from "./components/Events";
 import { News } from "./components/News";
 import Volatility from "./components/Volatility";
 
@@ -116,23 +115,41 @@ export default function App() {
         </nav>
       </header>
 
-      <div className="tiles">
-        <div className="tile main"><div className="k">{histMode ? entry.d : L.base_date} 원/달러 (달러당 원화값)</div>
-          <div className="v">{fmt(histMode ? entry.spot : L.spot, 1)}<small>원</small></div>
-          <div className="s">{histMode ? "과거 자료 재계산" : <span style={{ color: L.change >= 0 ? "var(--up)" : "var(--down)" }}>{L.change >= 0 ? "▲" : "▼"} {sgn(L.change, 1)}원 ({sgn(L.change_pct, 2)}%) 전 거래일 대비</span>}</div></div>
-        {(["7", "30"] as const).map((h) => {
-          const e = histMode ? entry["h" + h] : null; const H = L.horizons[h]; const m = H.models[H.selected];
-          const lo = e ? e.q[1] : m.pi80[0], hi = e ? e.q[5] : m.pi80[1], sp = histMode ? entry.spot : L.spot;
-          return (<div key={h} className="tile"><div className="k">{h}일 후 80% 범위</div>
-            <div className="v range">{fmt(lo, 0)}<small>~</small>{fmt(hi, 0)}</div>
-            <div className="s">현재 대비 {sgn((lo / sp - 1) * 100, 1)}% ~ {sgn((hi / sp - 1) * 100, 1)}%</div></div>);
-        })}
-        <div className="tile"><div className="k">뉴스 압력지수 (FSI) · 실험</div>
-          {D.news.available && !histMode ? (<>
-            <div className="v" style={{ color: D.news.npi >= 0 ? "var(--up)" : "var(--down)" }}>{sgn(D.news.npi, 0)}</div>
-            <div className="s">{D.news.npi > 8 ? "원화 약세 압력 우세" : D.news.npi < -8 ? "원화 강세 압력 우세" : "뚜렷한 방향 없음"} · 확률 아님</div></>)
-            : (<><div className="v" style={{ color: "var(--ink-3)" }}>–</div><div className="s">{histMode ? "과거 뉴스 보존본 없음" : "수집 전"}</div></>)}</div>
-      </div>
+      {(() => {
+        // 상단 6칸: 모두 선택한 기준일 값을 쓰고, 과거 시점에 복원할 수 없는 값은 '당시 자료 없음'으로 둔다
+        const d0: string = histMode ? entry.d : L.base_date;
+        const at = (dates: string[], arr: (number | null)[]) => { let lo = -1; for (let i = 0; i < dates.length; i++) { if (dates[i] <= d0) lo = i; else break; } return lo >= 0 && dates[lo] === d0 ? arr[lo] : null; };
+        const fpiV = histMode ? at(D.fpi.history.dates, D.fpi.history.fpi) : D.fpi.latest.fpi;
+        const fpiC = histMode ? at(D.fpi.history.dates, D.fpi.history.coverage) : D.fpi.latest.coverage;
+        const fxv = D.vol ? (histMode ? at(D.vol.fxvi_3y.dates, D.vol.fxvi_3y.fxvi) : D.vol.latest.fxvi) : null;
+        const rng = D.vol && !histMode ? D.vol.latest.range_won : null;
+        const dim = { color: "var(--ink-3)" };
+        const qOld = quote && quote.time ? (Date.now() - new Date(quote.time).getTime()) > 3 * 3600000 : false;
+        return (<div className="tiles">
+          <div className="tile main"><div className="k">{d0} 원/달러 (달러당 원화값)</div>
+            <div className="v">{fmt(histMode ? entry.spot : L.spot, 1)}<small>원</small></div>
+            <div className="s">{histMode ? "과거 자료 재계산" : <span style={{ color: L.change >= 0 ? "var(--up)" : "var(--down)" }}>{L.change >= 0 ? "▲" : "▼"} {sgn(L.change, 1)}원 ({sgn(L.change_pct, 2)}%) 전 거래일 대비</span>}</div>
+            {!histMode && quote && quote.price && <div className="s live">실시간 <b className="num">{fmt(quote.price, 1)}</b>원 · {quote.time.slice(5, 10).replace("-", "/")} {quote.time.slice(11, 16)}{qOld ? " 마지막 호가" : ""}</div>}</div>
+          {(["7", "30"] as const).map((h) => {
+            const e = histMode ? entry["h" + h] : null; const H = L.horizons[h]; const m = H.models[H.selected];
+            const lo = e ? e.q[1] : m.pi80[0], hi = e ? e.q[5] : m.pi80[1], sp = histMode ? entry.spot : L.spot;
+            return (<div key={h} className="tile"><div className="k">{h}일 후 80% 범위</div>
+              <div className="v range">{fmt(lo, 0)}<small>~</small>{fmt(hi, 0)}</div>
+              <div className="s">현재 대비 {sgn((lo / sp - 1) * 100, 1)}% ~ {sgn((hi / sp - 1) * 100, 1)}%</div></div>);
+          })}
+          <button className="tile text-left" onClick={() => setTab("s2")}><div className="k">뉴스 압력지수 (FSI) · 실험</div>
+            {D.news.available && !histMode ? (<>
+              <div className="v" style={{ color: D.news.npi >= 0 ? "var(--up)" : "var(--down)" }}>{sgn(D.news.npi, 0)}</div>
+              <div className="s">{D.news.npi > 8 ? "원화 약세 압력 우세" : D.news.npi < -8 ? "원화 강세 압력 우세" : "뚜렷한 방향 없음"} · 확률 아님</div></>)
+              : (<><div className="v" style={dim}>–</div><div className="s">{histMode ? "과거 뉴스 보존본 없음" : "수집 전"}</div></>)}</button>
+          <button className="tile text-left" onClick={() => setTab("s2")}><div className="k">통계 압력지수 (FPI) · 실험</div>
+            <div className="v" style={{ color: fpiV == null ? "var(--ink-3)" : fpiV >= 0 ? "var(--up)" : "var(--down)" }}>{fpiV == null ? "–" : sgn(fpiV, 1)}</div>
+            <div className="s">{fpiV == null ? "당시 자료 없음" : `방향 압력 · 확률 아님${fpiC != null ? ` · 충족률 ${fmt(fpiC * 100)}%` : ""}`}</div></button>
+          {D.vol && <button className="tile text-left last" onClick={() => setTab("s7")}><div className="k">변동성 지수 (FXVI)</div>
+            <div className="v">{fxv == null ? <span style={dim}>–</span> : <>{fmt(fxv, 0)}<small>/ 100</small></>}</div>
+            <div className="s">{fxv == null ? (histMode ? "당시 자료 없음" : "산출 보류") : `변동성의 역사적 수준${rng != null ? ` · 일중 ${fmt(rng, 1)}원` : ""}`}</div></button>}
+        </div>);
+      })()}
       {M.stale_warning && <div className="mt-4 rounded-lg p-3 text-sm" style={{ background: "var(--warn-bg)", color: "var(--warn-ink)", border: "1px solid var(--warn-line)" }}>
         ⚠ 자료가 {M.stale_days}일 전 기준입니다. 최근 수집이 실패했을 수 있어 이전 정상 데이터를 표시합니다.</div>}
       {M.sources.filter((x: J) => x.stale).map((x: J) => <div key={x.series} className="mt-3 rounded-lg p-3 text-sm" style={{ background: "var(--warn-bg)", color: "var(--warn-ink)", border: "1px solid var(--warn-line)" }}>
@@ -144,35 +161,7 @@ export default function App() {
         <b>과거 자료 재계산 · {entry.d}.</b> 기준일까지의 환율만으로 다시 계산한 값이며, 당시 실제로 공개된 전망이 아닙니다. 당시 보존된 뉴스·보고서·압력 지수는 아직 없어 표시하지 않습니다.</div>}
 
       {tab === "s1" && <Section id="s1" no="01" title="앞으로 한 달, 환율은 어디까지 움직일 수 있을까?" sub="방향을 맞히는 예측이 아니라 흔들릴 수 있는 범위를 추정합니다 · 과거 환율 변동으로 추정한 통계모형 값이며 옵션시장 내재확률이 아닙니다">
-        {(() => {
-          // 과거 시점이면 세 카드 모두 선택한 날짜 기준 값을 쓰고, 그 날짜의 값을 복원할 수 없으면 최신 값을 대신 보여 주지 않고 '당시 자료 없음'으로 둔다.
-          const d0: string = histMode ? entry.d : L.base_date;
-          const at = (dates: string[], arr: (number | null)[]) => { let lo = -1; for (let i = 0; i < dates.length; i++) { if (dates[i] <= d0) lo = i; else break; } return lo >= 0 && dates[lo] === d0 ? arr[lo] : null; };
-          const H30 = L.horizons["30"]; const m30 = H30.models[H30.selected];
-          const pr = histMode ? (entry.h30 ? [entry.h30.q[1], entry.h30.q[5]] : null) : [m30.pi80[0], m30.pi80[1]];
-          const fpiV = histMode ? at(D.fpi.history.dates, D.fpi.history.fpi) : D.fpi.latest.fpi;
-          const fpiC = histMode ? at(D.fpi.history.dates, D.fpi.history.coverage) : D.fpi.latest.coverage;
-          const fxv = D.vol ? (histMode ? at(D.vol.fxvi_3y.dates, D.vol.fxvi_3y.fxvi) : D.vol.latest.fxvi) : null;
-          const rng = D.vol ? (histMode ? null : D.vol.latest.range_won) : null;
-          const none = <span className="text-base font-bold" style={{ color: "var(--ink-3)" }}>당시 자료 없음</span>;
-          return (<div className="grid gap-3 md:grid-cols-3">
-            <button className="card p-4 text-left" onClick={() => { const e = document.getElementById("s1-forecast"); e?.scrollIntoView({ behavior: "smooth" }); }}>
-              <div className="text-[11px] font-bold tracking-widest" style={{ color: "var(--ink-3)" }}>FX PROBABILITY · {d0}</div>
-              <div className="num mt-1 text-2xl font-black">{pr ? `${fmt(pr[0], 0)}~${fmt(pr[1], 0)}` : none}</div>
-              <div className="mt-0.5 text-[12px]" style={{ color: "var(--ink-2)" }}>30일 후 환율의 80% 확률 범위 · 통계모형 추정(옵션시장 내재확률 아님)</div></button>
-            <button className="card p-4 text-left" onClick={() => setTab("s2")}>
-              <div className="text-[11px] font-bold tracking-widest" style={{ color: "var(--ink-3)" }}>FX PRESSURE INDEX (실험) · {d0}</div>
-              <div className="num mt-1 text-2xl font-black" style={{ color: fpiV != null && fpiV >= 0 ? "var(--up)" : "var(--down)" }}>{fpiV == null ? none : sgn(fpiV, 1)}</div>
-              <div className="mt-0.5 text-[12px]" style={{ color: "var(--ink-2)" }}>환율 상승·하락 압력 · 확률 아님{fpiC != null ? ` · 자료 충족률 ${fmt(fpiC * 100)}%` : ""}</div></button>
-            {D.vol && <button className="card p-4 text-left" onClick={() => setTab("s7")}>
-              <div className="text-[11px] font-bold tracking-widest" style={{ color: "var(--ink-3)" }}>FX VOLATILITY INDEX · {d0}</div>
-              <div className="num mt-1 text-2xl font-black">{fxv == null ? (histMode && D.vol && d0 < D.vol.fxvi_3y.dates[0] ? none : <span className="text-base font-bold" style={{ color: "var(--ink-3)" }}>산출 보류</span>) : <>{fmt(fxv, 0)}<span className="ml-1 text-sm font-bold" style={{ color: "var(--ink-3)" }}>/ 100</span></>}</div>
-              <div className="mt-0.5 text-[12px]" style={{ color: "var(--ink-2)" }}>환율 변동성의 역사적 수준{rng != null ? ` · 일중 변동폭 ${fmt(rng, 1)}원` : ""}</div></button>}
-          </div>);
-        })()}
-        <p className="-mt-2 text-[11px]" style={{ color: "var(--ink-3)" }}>세 지표는 서로 다른 개념이라 합산하지 않습니다. 압력 지수는 방향, 변동성 지수는 움직임의 크기, 확률분포는 가능한 환율의 범위를 말합니다.</p>
         <span id="s1-forecast" />
-        {!histMode && <ThresholdCalculator L={L} />}
         {!histMode && <RangeChart S={D.series} L={L}>
           <details className="mt-1"><summary className="cursor-pointer text-[12px] font-semibold" style={{ color: "var(--ink-2)" }}>환율 정의와 출처 (펼치기)</summary>
             <div className="mt-1 text-[12px] leading-relaxed" style={{ color: "var(--ink-3)" }}>
@@ -205,10 +194,9 @@ export default function App() {
               <HorizonCard hz={7} spot={L.spot} H={L.horizons["7"]} />
               <HorizonCard hz={30} spot={L.spot} H={L.horizons["30"]} />
             </div>
-            <DistributionChart L={L} />
-            <ModelTable L={L} />
           </>
         )}
+        {!histMode && <ThresholdCalculator L={L} />}
         <p className="text-[12px] leading-relaxed" style={{ color: "var(--ink-3)" }}>
           통계적 환율 전망(A)입니다. 환율 수익률과 변동성만으로 계산했고 방향에 대한 판단은 담지 않았습니다. 정성 압력(B)·통합 전망(C)은 검증 전이라 반영하지 않습니다.
         </p>
@@ -218,10 +206,6 @@ export default function App() {
         <News N={D.news} R={D.reports} H={L.horizons["30"]} spot={L.spot} refDate={L.base_date} asOf={histMode ? entry.d : null} />
         <h3 className="pt-2 text-xl font-extrabold">통계로 본 압력 (FPI)</h3>
         <Pressure P={D.fpi} asOf={histMode ? entry.d : null} S={D.series} />
-        <details className="card p-4">
-          <summary className="cursor-pointer text-[15px] font-bold">참고: 시장 데이터 급변동 목록 (통계 추출 · 펼치기)</summary>
-          <div className="mt-3"><Events E={D.events} asOf={histMode ? entry.d : null} refDate={histMode ? entry.d : L.base_date} /></div>
-        </details>
       </Section>}
 
       {tab === "s7" && <Section id="s7" no="03" title="FX VOLATILITY — 원화는 얼마나 흔들리고 있나" sub="일중 고가·저가로 본 실현 변동성 · FXVI · 장벽 돌파 확률 보정">
@@ -238,7 +222,7 @@ export default function App() {
       </Section>}
 
       {tab === "s6" && <Section id="s6" no="06" title="방법론" sub="원시자료 · 계산식 · 한계 · 변경 이력">
-        <Methodology meta={M} F={D.features} />
+        <Methodology meta={M} F={D.features} L={L} />
       </Section>}
 
       <footer className="mt-12 border-t pt-4 text-[12px] leading-relaxed" style={{ borderColor: "var(--line)", color: "var(--ink-3)" }}>

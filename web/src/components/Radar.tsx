@@ -194,33 +194,7 @@ export default function Radar({ R, asOf }: { R: J; asOf: string | null }) {
       </div>
 
       <div className="card p-4 sm:p-5">
-        <h3 className="text-lg font-bold">⑤ 예측 기여도 — 이 통화를 넣으면 실제로 더 잘 맞히는가</h3>
-        <details className="mt-1"><summary className="cursor-pointer text-[12px] font-semibold" style={{ color: "var(--ink-2)" }}>검증 방법 (펼치기)</summary>
-        <p className="mt-1 text-[12px] leading-relaxed" style={{ color: "var(--ink-3)" }}>
-          Walk-forward(2012~): 원·달러 단독 모형(과거 5·20일 수익률 릿지)과 각 통화의 과거 5·20일 수익률을 추가한 모형의 CRPS를 비교합니다. 해외 통화는 서울 기준일 직전 영업일 마감까지만 사용, 계수는 목표일이 기준일 이전인 표본으로만 추정.
-          양(+)은 단독 모형보다 개선, 음(−)은 악화. p값은 Newey-West HAC 보정 Diebold-Mariano 검정입니다.
-        </p>
-        </details>
-        <div className="scrollx mt-2">
-          <table className="t">
-            <thead><tr><th>추가 변수</th><th>7일 CRPS 개선</th><th>7일 p</th><th>30일 CRPS 개선</th><th>30일 p</th><th>30일 방향 적중</th></tr></thead>
-            <tbody>
-              {(["JPY", "CNY", "TWD", "ALL3", "ALL3+FACTOR", "RATES", "FPI"] as const).map((k) => {
-                const a = R.contribution[k].h7, b = R.contribution[k].h30;
-                const lab = k === "RATES" ? "세 통화+달러요인+한미 금리차(F)" : k === "FPI" ? "압력지수(FPI)" : k === "ALL3" ? "세 통화 모두" : k === "ALL3+FACTOR" ? "세 통화 + 달러요인" : NAME[k];
-                return (<tr key={k}><td>{lab}</td>
-                  <td className="num">{a ? sgn(a.vs_e0_pct, 2) + "%" : "–"}</td><td className="num">{a ? a.p.toFixed(3) : "–"}</td>
-                  <td className="num">{b ? sgn(b.vs_e0_pct, 2) + "%" : "–"}</td><td className="num">{b ? b.p.toFixed(3) : "–"}</td>
-                  <td className="num">{b ? `${(b.hit * 100).toFixed(1)}% (단독 ${(b.hit_e0 * 100).toFixed(1)}%)` : "–"}</td></tr>);
-              })}
-            </tbody>
-          </table>
-        </div>
-        <p className="mt-1 text-[11px]" style={{ color: "var(--ink-3)" }}>'세 통화+달러요인+한미 금리차' 행이 금리를 통제한 조건부 모형(F)입니다(국고채 3년 − 미국 5년 금리의 5·20일 변화).</p>
-      </div>
-
-      <div className="card p-4 sm:p-5">
-        <h3 className="text-lg font-bold">⑥ 현재 동조화 해설</h3>
+        <h3 className="text-lg font-bold">⑤ 현재 동조화 해설</h3>
         <p className="mt-1 text-[11px]" style={{ color: "var(--ink-3)" }}>계산 결과로 자동 생성한 규칙 기반 문장입니다(LLM 미사용). 최신 {V.last_date}.</p>
         <ul className="mt-2 list-disc space-y-1.5 pl-5 text-[14px] leading-relaxed">
           {V.narrative.map((s: string, i: number) => <li key={i}>{s}</li>)}
@@ -230,7 +204,6 @@ export default function Radar({ R, asOf }: { R: J; asOf: string | null }) {
       <details className="card p-4 text-[12px] leading-relaxed sm:p-5" style={{ color: "var(--ink-2)" }}>
         <summary className="cursor-pointer text-[13px] font-semibold">공통 달러 요인의 한계 (펼치기)</summary>
         <b>공통 달러 요인의 한계.</b> 요인은 EUR·GBP·AUD·CAD·CHF·SEK의 USD당 로그수익률 단순평균으로, 한·일·중·대만 통화를 포함하지 않아 기계적 중복은 없습니다. 다만 유럽·원자재 통화 편향이 있고, 일반 달러인덱스(DXY)는 엔화를 포함(13.6%)하므로 쓰지 않았습니다. 요인과 원화의 상관은 {sgn(V.snapshot[String(w)].krw_vs_factor)}입니다.
-        {" "}<b>예측 기여도</b>는 {Object.keys(MODEL_SHORT).filter((k) => k.startsWith("E")).map((k) => MODEL_SHORT[k]).join(", ")} 모형의 비교입니다.
       </details>
     </div>
   );

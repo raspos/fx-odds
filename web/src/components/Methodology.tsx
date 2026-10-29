@@ -1,3 +1,4 @@
+import { DistributionChart, ModelTable } from "./Forecast";
 import { J } from "../lib";
 
 const Item = ({ n, t, children }: { n: number; t: string; children: React.ReactNode }) => (
@@ -43,10 +44,11 @@ export function statusRows(F: J): [string, string, string][] {
   return rows;
 }
 
-export default function Methodology({ meta, F }: { meta: J; F?: J }) {
+export default function Methodology({ meta, F, L }: { meta: J; F?: J; L?: J }) {
   const cc = meta.cross_check;
   return (
     <div className="space-y-4">
+      {L && <><DistributionChart L={L} /><ModelTable L={L} /></>}
       <div className="card p-4 sm:p-5">
         <h3 className="text-lg font-bold">구현 상태</h3>
         <div className="scrollx mt-2">
