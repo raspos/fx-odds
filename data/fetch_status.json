@@ -1,19 +1,19 @@
 {
- "at": "2026-10-28T16:15:30+00:00",
+ "at": "2026-10-29T02:48:25+00:00",
  "ecos": {
-  "ecos:KRW_per_USD": 6637,
-  "ecos:KRW_per_CNY": 2662,
-  "ecos:KRW_per_100JPY": 6637,
-  "ecos:KRW_per_TWD": 2911,
+  "ecos:KRW_per_USD": 6638,
+  "ecos:KRW_per_CNY": 2663,
+  "ecos:KRW_per_100JPY": 6638,
+  "ecos:KRW_per_TWD": 2912,
   "ecos:KTB3Y": 6637,
   "ecos:BASE_RATE": 6996,
   "ecos:BOP_CURRENT_ACCOUNT": 279,
   "ecos:BOP_EXPORTS": 320,
-  "ecos:OHLC_OPEN": 6622,
-  "ecos:OHLC_HIGH": 6621,
-  "ecos:OHLC_LOW": 6621,
+  "ecos:OHLC_OPEN": 6623,
+  "ecos:OHLC_HIGH": 6622,
+  "ecos:OHLC_LOW": 6622,
   "ecos:OHLC_CLOSE1530": 6622,
-  "ecos:OHLC_CLOSE_FULL": 570,
+  "ecos:OHLC_CLOSE_FULL": 571,
   "ecos:POLICY_US": 321,
   "ecos:POLICY_JP": 121,
   "ecos:POLICY_CN": 321,
@@ -21,22 +21,22 @@
   "ecos:BOP_PORTFOLIO_LIAB": 215
  },
  "yahoo": {
-  "yahoo:USDKRW": 5941,
-  "yahoo:USDJPY": 6181,
-  "yahoo:USDCNY": 6033,
-  "yahoo:USDTWD": 5448,
-  "yahoo:EURUSD": 5943,
-  "yahoo:GBPUSD": 5955,
-  "yahoo:AUDUSD": 5319,
-  "yahoo:USDCAD": 6011,
-  "yahoo:USDCHF": 6009,
-  "yahoo:USDSEK": 6029,
-  "yahoo:KOSPI": 5871,
-  "yahoo:DXY": 6008,
-  "yahoo:UST10Y": 5987,
-  "yahoo:UST5Y": 5987,
-  "yahoo:VIX": 5995,
-  "yahoo:WTI": 5986
+  "yahoo:USDKRW": 5942,
+  "yahoo:USDJPY": 6182,
+  "yahoo:USDCNY": 6034,
+  "yahoo:USDTWD": 5449,
+  "yahoo:EURUSD": 5944,
+  "yahoo:GBPUSD": 5956,
+  "yahoo:AUDUSD": 5320,
+  "yahoo:USDCAD": 6012,
+  "yahoo:USDCHF": 6010,
+  "yahoo:USDSEK": 6030,
+  "yahoo:KOSPI": 5872,
+  "yahoo:DXY": 6009,
+  "yahoo:UST10Y": 5988,
+  "yahoo:UST5Y": 5988,
+  "yahoo:VIX": 5996,
+  "yahoo:WTI": 5987
  },
  "gpr": {
   "gpr:GPRD": 10910
@@ -44,7 +44,7 @@
  "naver": {
   "ok": true,
   "received": 3500,
-  "kept": 4205,
+  "kept": 4776,
   "errors": []
  },
  "official": {
@@ -59,6 +59,6 @@
  },
  "reports": {
   "ok": true,
-  "added": 3
+  "added": 2
  }
 }
