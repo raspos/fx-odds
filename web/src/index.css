@@ -82,3 +82,38 @@ input:focus-visible, button:focus-visible, a:focus-visible, summary:focus-visibl
 .tile .v.range small { margin: 0 1px; }
 @media (min-width: 720px) { .tile .v.range { font-size: 24px; } }
 @media (max-width: 420px) { .tile { padding: 10px 11px; } .tile .k { font-size: 10.5px; } .tile .v { font-size: clamp(17px, 5.4vw, 22px); } .tile.main .v { font-size: clamp(19px, 6.2vw, 26px); } .tile .s { font-size: 10.5px; } }
+
+/* ---------- 피그마 스타일 (2026-10): 차가운 중립 회색·헤어라인·작은 반경·세그먼트 컨트롤 ---------- */
+:root {
+  --bg: #f5f5f5; --surface: #ffffff; --surface-2: #f2f2f2; --line: #e6e6e6;
+  --ink: #1e1e1e; --ink-2: #5c5c5c; --ink-3: #8c8c8c;
+  --accent: #0d99ff; --up: #f24822; --down: #0d99ff;
+  --shadow: 0 0 0 0 transparent; --r: 10px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #1e1e1e; --surface: #2c2c2c; --surface-2: #383838; --line: #3d3d3d;
+  --ink: #f5f5f5; --ink-2: #c4c4c4; --ink-3: #8f8f8f; --accent: #3db0ff; --up: #ff6b4a; --down: #3db0ff; } }
+:root[data-theme="dark"] {
+  --bg: #1e1e1e; --surface: #2c2c2c; --surface-2: #383838; --line: #3d3d3d;
+  --ink: #f5f5f5; --ink-2: #c4c4c4; --ink-3: #8f8f8f; --accent: #3db0ff; --up: #ff6b4a; --down: #3db0ff;
+}
+body { font-family: Inter, Pretendard, "Noto Sans KR", system-ui, sans-serif; letter-spacing: -0.005em; }
+.card, .tile { border-radius: var(--r); box-shadow: none; }
+.tile { padding: 12px 14px; }
+.tile .k { font-size: 11px; font-weight: 500; letter-spacing: 0; }
+.tile .v { font-weight: 700; letter-spacing: -0.03em; }
+.tile.main .v { font-weight: 700; }
+button.tile { transition: border-color .12s, background .12s; }
+button.tile:hover { border-color: var(--accent); }
+.card h3 { font-weight: 700; font-size: 15px; }
+/* 세그먼트 컨트롤 */
+.btn { border-radius: 6px; padding: 4px 10px; font-size: 12px; font-weight: 500; background: var(--surface-2); border-color: transparent; color: var(--ink-2); transition: background .12s, color .12s; }
+.btn:hover { color: var(--ink); }
+.btn[aria-pressed="true"] { background: var(--surface); color: var(--ink); border-color: var(--line); box-shadow: 0 1px 2px rgba(0,0,0,.12); font-weight: 600; }
+/* 탭: 활성 탭을 파란 밑줄로 */
+.tab { font-weight: 500; }
+.tab[aria-selected="true"] { border-bottom-color: var(--accent); font-weight: 600; }
+table.t th { font-weight: 500; font-size: 11.5px; text-transform: none; }
+table.t tbody tr:hover { background: var(--surface-2); }
+input[type="date"], select { border-radius: 6px; }
+@media (max-width: 640px) { .card, .tile { border-radius: 8px; } }
