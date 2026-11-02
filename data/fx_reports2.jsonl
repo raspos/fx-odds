@@ -55,3 +55,15 @@
 {"id": "395459c33360", "is_forecast": false, "institution": "", "summary": "", "forecasts": [], "model": "gpt-5.4-mini-2026-03-17", "at": "2026-10-30T12:00+09:00"}
 {"id": "a2deecd58f26", "is_forecast": false, "institution": "", "summary": "", "forecasts": [], "model": "gpt-5.4-mini-2026-03-17", "at": "2026-10-31T01:18+09:00"}
 {"id": "56fa85ff8de3", "is_forecast": false, "institution": "", "summary": "", "forecasts": [], "model": "gpt-5.4-mini-2026-03-17", "at": "2026-10-31T01:18+09:00"}
+{"id": "b46955de18ec", "is_forecast": true, "institution": "씨티", "summary": "씨티, 6~12개월내 1270원 전망", "forecasts": [{"target_key": "UNSPEC", "target_label": "6~12개월내", "low": 1270, "high": 1270, "view": "krw_strong"}], "model": "gpt-5.4-mini-2026-03-17", "at": "2026-11-02T11:49+09:00"}
+{"id": "edd8d0217535", "is_forecast": false, "institution": "", "summary": "", "forecasts": [], "model": "gpt-5.4-mini-2026-03-17", "at": "2026-11-02T11:49+09:00"}
+{"id": "a78254e814b6", "is_forecast": false, "institution": "", "summary": "", "forecasts": [], "model": "gpt-5.4-mini-2026-03-17", "at": "2026-11-02T11:49+09:00"}
+{"id": "4a89a886c4bd", "is_forecast": true, "institution": "iM증권", "summary": "iM증권, 이번주 1310~1350원 박스권", "forecasts": [{"target_key": "UNSPEC", "target_label": "이번주", "low": 1310, "high": 1350, "view": "range"}], "model": "gpt-5.4-mini-2026-03-17", "at": "2026-11-02T11:49+09:00"}
+{"id": "d1eeace4dc38", "is_forecast": true, "institution": "iM증권", "summary": "iM증권, 이번주 1310~1350원 박스권", "forecasts": [{"target_key": "UNSPEC", "target_label": "이번주", "low": 1310, "high": 1350, "view": "range"}], "model": "gpt-5.4-mini-2026-03-17", "at": "2026-11-02T11:49+09:00"}
+{"id": "4175fbedc76b", "is_forecast": false, "institution": "", "summary": "", "forecasts": [], "model": "gpt-5.4-mini-2026-03-17", "at": "2026-11-02T11:49+09:00"}
+{"id": "e0d007c434f4", "is_forecast": false, "institution": "", "summary": "", "forecasts": [], "model": "gpt-5.4-mini-2026-03-17", "at": "2026-11-02T11:49+09:00"}
+{"id": "202534ebec7f", "is_forecast": false, "institution": "", "summary": "", "forecasts": [], "model": "gpt-5.4-mini-2026-03-17", "at": "2026-11-02T11:49+09:00"}
+{"id": "10d3594de3af", "is_forecast": false, "institution": "", "summary": "", "forecasts": [], "model": "gpt-5.4-mini-2026-03-17", "at": "2026-11-02T11:49+09:00"}
+{"id": "72c4c76d3977", "is_forecast": false, "institution": "", "summary": "", "forecasts": [], "model": "gpt-5.4-mini-2026-03-17", "at": "2026-11-02T11:49+09:00"}
+{"id": "817d1d9eaec3", "is_forecast": false, "institution": "", "summary": "", "forecasts": [], "model": "gpt-5.4-mini-2026-03-17", "at": "2026-11-02T11:49+09:00"}
+{"id": "1e7fb1107684", "is_forecast": false, "institution": "", "summary": "", "forecasts": [], "model": "gpt-5.4-mini-2026-03-17", "at": "2026-11-02T11:49+09:00"}
