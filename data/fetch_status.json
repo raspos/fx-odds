@@ -1,19 +1,19 @@
 {
- "at": "2026-11-02T19:44:34+00:00",
+ "at": "2026-11-03T04:00:38+00:00",
  "ecos": {
-  "ecos:KRW_per_USD": 6640,
-  "ecos:KRW_per_CNY": 2665,
-  "ecos:KRW_per_100JPY": 6640,
-  "ecos:KRW_per_TWD": 2914,
+  "ecos:KRW_per_USD": 6641,
+  "ecos:KRW_per_CNY": 2666,
+  "ecos:KRW_per_100JPY": 6641,
+  "ecos:KRW_per_TWD": 2915,
   "ecos:KTB3Y": 6640,
   "ecos:BASE_RATE": 7000,
   "ecos:BOP_CURRENT_ACCOUNT": 279,
   "ecos:BOP_EXPORTS": 320,
-  "ecos:OHLC_OPEN": 6625,
-  "ecos:OHLC_HIGH": 6624,
-  "ecos:OHLC_LOW": 6624,
+  "ecos:OHLC_OPEN": 6626,
+  "ecos:OHLC_HIGH": 6625,
+  "ecos:OHLC_LOW": 6625,
   "ecos:OHLC_CLOSE1530": 6625,
-  "ecos:OHLC_CLOSE_FULL": 573,
+  "ecos:OHLC_CLOSE_FULL": 574,
   "ecos:POLICY_US": 321,
   "ecos:POLICY_JP": 121,
   "ecos:POLICY_CN": 321,
@@ -21,22 +21,22 @@
   "ecos:BOP_PORTFOLIO_LIAB": 215
  },
  "yahoo": {
-  "yahoo:USDKRW": 5944,
-  "yahoo:USDJPY": 6184,
-  "yahoo:USDCNY": 6036,
-  "yahoo:USDTWD": 5451,
-  "yahoo:EURUSD": 5946,
-  "yahoo:GBPUSD": 5958,
-  "yahoo:AUDUSD": 5322,
-  "yahoo:USDCAD": 6014,
-  "yahoo:USDCHF": 6012,
-  "yahoo:USDSEK": 6032,
-  "yahoo:KOSPI": 5874,
-  "yahoo:DXY": 6011,
-  "yahoo:UST10Y": 5990,
-  "yahoo:UST5Y": 5990,
-  "yahoo:VIX": 5998,
-  "yahoo:WTI": 5989
+  "yahoo:USDKRW": 5945,
+  "yahoo:USDJPY": 6185,
+  "yahoo:USDCNY": 6037,
+  "yahoo:USDTWD": 5452,
+  "yahoo:EURUSD": 5947,
+  "yahoo:GBPUSD": 5959,
+  "yahoo:AUDUSD": 5323,
+  "yahoo:USDCAD": 6015,
+  "yahoo:USDCHF": 6013,
+  "yahoo:USDSEK": 6033,
+  "yahoo:KOSPI": 5875,
+  "yahoo:DXY": 6012,
+  "yahoo:UST10Y": 5991,
+  "yahoo:UST5Y": 5991,
+  "yahoo:VIX": 5999,
+  "yahoo:WTI": 5990
  },
  "gpr": {
   "gpr:GPRD": 10915
@@ -44,7 +44,7 @@
  "naver": {
   "ok": true,
   "received": 3500,
-  "kept": 7927,
+  "kept": 8397,
   "errors": []
  },
  "official": {
@@ -54,13 +54,13 @@
  },
  "ai": {
   "ok": true,
-  "added": 176,
-  "calls": 18,
-  "tokens_in": 14346,
-  "tokens_out": 39263
+  "added": 97,
+  "calls": 10,
+  "tokens_in": 7932,
+  "tokens_out": 20636
  },
  "reports": {
   "ok": true,
-  "added": 0
+  "added": 5
  }
 }

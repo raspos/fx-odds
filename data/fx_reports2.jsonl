@@ -67,3 +67,8 @@
 {"id": "72c4c76d3977", "is_forecast": false, "institution": "", "summary": "", "forecasts": [], "model": "gpt-5.4-mini-2026-03-17", "at": "2026-11-02T11:49+09:00"}
 {"id": "817d1d9eaec3", "is_forecast": false, "institution": "", "summary": "", "forecasts": [], "model": "gpt-5.4-mini-2026-03-17", "at": "2026-11-02T11:49+09:00"}
 {"id": "1e7fb1107684", "is_forecast": false, "institution": "", "summary": "", "forecasts": [], "model": "gpt-5.4-mini-2026-03-17", "at": "2026-11-02T11:49+09:00"}
+{"id": "9e6f0b81c442", "is_forecast": true, "institution": "피치", "summary": "내년 연평균 1332원, 연말 1325원 전망", "forecasts": [{"target_key": "2027-AVG", "target_label": "내년 달러-원 연평균", "low": 1332, "high": 1332, "view": "krw_weak"}, {"target_key": "2027-END", "target_label": "연말", "low": 1325, "high": 1325, "view": "krw_weak"}], "model": "gpt-5.4-mini-2026-03-17", "at": "2026-11-03T13:05+09:00"}
+{"id": "c52a6f472da9", "is_forecast": false, "institution": "", "summary": "", "forecasts": [], "model": "gpt-5.4-mini-2026-03-17", "at": "2026-11-03T13:05+09:00"}
+{"id": "0bda9fd6f259", "is_forecast": true, "institution": "피치", "summary": "내년 말 기준 1325원 전망", "forecasts": [{"target_key": "2027-END", "target_label": "내년 말 기준", "low": 1325, "high": 1325, "view": "krw_weak"}], "model": "gpt-5.4-mini-2026-03-17", "at": "2026-11-03T13:05+09:00"}
+{"id": "4199c3056459", "is_forecast": true, "institution": "iM증권", "summary": "11월 말 환율 1320원 전망", "forecasts": [{"target_key": "2026-Q4", "target_label": "11월 말", "low": 1320, "high": 1320, "view": "krw_weak"}], "model": "gpt-5.4-mini-2026-03-17", "at": "2026-11-03T13:05+09:00"}
+{"id": "dab2f115b777", "is_forecast": false, "institution": "", "summary": "", "forecasts": [], "model": "gpt-5.4-mini-2026-03-17", "at": "2026-11-03T13:05+09:00"}
