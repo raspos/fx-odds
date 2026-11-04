@@ -75,3 +75,8 @@
 {"id": "29a9ed8ac0e0", "is_forecast": false, "institution": "", "summary": "", "forecasts": [], "model": "gpt-5.4-mini-2026-03-17", "at": "2026-11-04T12:16+09:00"}
 {"id": "5ce7ea804f84", "is_forecast": false, "institution": "", "summary": "", "forecasts": [], "model": "gpt-5.4-mini-2026-03-17", "at": "2026-11-04T12:16+09:00"}
 {"id": "e7f6663cd1eb", "is_forecast": false, "institution": "", "summary": "", "forecasts": [], "model": "gpt-5.4-mini-2026-03-17", "at": "2026-11-04T12:16+09:00"}
+{"id": "44d635a81e04", "is_forecast": false, "institution": "", "summary": "환율 전망 수치 없음", "forecasts": [], "model": "gpt-5.4-mini-2026-03-17", "at": "2026-11-05T02:35+09:00"}
+{"id": "ef15021fb0c7", "is_forecast": false, "institution": "", "summary": "환율 전망 수치 없음", "forecasts": [], "model": "gpt-5.4-mini-2026-03-17", "at": "2026-11-05T02:35+09:00"}
+{"id": "09517a1f81d2", "is_forecast": true, "institution": "씨티은행", "summary": "씨티은행, 내년 환율 1270원 하락 전망", "forecasts": [{"target_key": "UNSPEC", "target_label": "내년", "low": 1270, "high": 1270, "view": "krw_strong"}], "model": "gpt-5.4-mini-2026-03-17", "at": "2026-11-05T02:35+09:00"}
+{"id": "2d6e05ded86f", "is_forecast": true, "institution": "씨티", "summary": "씨티, 환율 1270원까지 하락 전망", "forecasts": [{"target_key": "UNSPEC", "target_label": "환율", "low": 1270, "high": 1270, "view": "krw_strong"}], "model": "gpt-5.4-mini-2026-03-17", "at": "2026-11-05T02:35+09:00"}
+{"id": "f3d25d388fb1", "is_forecast": true, "institution": "씨티", "summary": "씨티, 6~12개월 내 1270원 하락 전망", "forecasts": [{"target_key": "UNSPEC", "target_label": "6~12개월 내", "low": 1270, "high": 1270, "view": "krw_strong"}], "model": "gpt-5.4-mini-2026-03-17", "at": "2026-11-05T02:35+09:00"}
