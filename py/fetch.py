@@ -38,7 +38,19 @@ FRED = {"DEXKOUS": "fred:USDKRW", "DEXJPUS": "fred:USDJPY", "DEXCHUS": "fred:USD
         "DFEDTARU": "fred:DFEDTARU"}
 
 
+_ECOS_NET_FAILS = 0  # 연속 네트워크 실패 횟수. 3회 이상이면 ECOS 서버 전체가 막힌 것이므로 나머지 계열은 기다리지 않고 건너뛴다(실행 시간 낭비 방지)
+
+
 def _ecos_json(url: str) -> dict:
+    global _ECOS_NET_FAILS
+    if _ECOS_NET_FAILS >= 3:
+        return {"RESULT": {"CODE": "NETWORK", "MESSAGE": "ECOS 연결 연속 실패로 건너뜀"}}
+    j = _ecos_json_try(url)
+    _ECOS_NET_FAILS = _ECOS_NET_FAILS + 1 if (j.get("RESULT") or {}).get("CODE") == "NETWORK" else 0
+    return j
+
+
+def _ecos_json_try(url: str) -> dict:
     """ECOS 호출. 해외 서버(GitHub Actions)에서 가끔 느리거나 끊기므로 5·15·45초 간격으로 재시도한다. 인증키 오류(INFO-100)는 재시도하지 않는다."""
     last = None
     for wait in (0, 5, 15, 45):
