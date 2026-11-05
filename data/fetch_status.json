@@ -1,42 +1,42 @@
 {
- "at": "2026-11-04T17:28:47+00:00",
+ "at": "2026-11-05T03:42:23+00:00",
  "ecos": {
-  "ecos:KRW_per_USD": 6642,
-  "ecos:KRW_per_CNY": 2667,
-  "ecos:KRW_per_100JPY": 6642,
-  "ecos:KRW_per_TWD": 2916,
-  "ecos:KTB3Y": 6642,
-  "ecos:BASE_RATE": 7001,
-  "ecos:BOP_CURRENT_ACCOUNT": 279,
-  "ecos:BOP_EXPORTS": 320,
-  "ecos:OHLC_OPEN": 6627,
-  "ecos:OHLC_HIGH": 6626,
-  "ecos:OHLC_LOW": 6626,
-  "ecos:OHLC_CLOSE1530": 6627,
-  "ecos:OHLC_CLOSE_FULL": 575,
-  "ecos:POLICY_US": 321,
-  "ecos:POLICY_JP": 121,
-  "ecos:POLICY_CN": 321,
-  "ecos:FLOW_FOREIGN_NET": 154,
-  "ecos:BOP_PORTFOLIO_LIAB": 215
+  "ecos:KRW_per_USD": "fail: {'RESULT': {'CODE': 'NETWORK', 'MESSAGE': 'ConnectTimeout'}}",
+  "ecos:KRW_per_CNY": "fail: {'RESULT': {'CODE': 'NETWORK', 'MESSAGE': 'ConnectTimeout'}}",
+  "ecos:KRW_per_100JPY": "fail: {'RESULT': {'CODE': 'NETWORK', 'MESSAGE': 'ConnectTimeout'}}",
+  "ecos:KRW_per_TWD": "fail: {'RESULT': {'CODE': 'NETWORK', 'MESSAGE': 'ConnectTimeout'}}",
+  "ecos:KTB3Y": "fail: {'RESULT': {'CODE': 'NETWORK', 'MESSAGE': 'ConnectTimeout'}}",
+  "ecos:BASE_RATE": "fail: {'RESULT': {'CODE': 'NETWORK', 'MESSAGE': 'ConnectTimeout'}}",
+  "ecos:BOP_CURRENT_ACCOUNT": "fail: {'RESULT': {'CODE': 'NETWORK', 'MESSAGE': 'ConnectTimeout'}}",
+  "ecos:BOP_EXPORTS": "fail: {'RESULT': {'CODE': 'NETWORK', 'MESSAGE': 'ConnectTimeout'}}",
+  "ecos:OHLC_OPEN": "fail: {'RESULT': {'CODE': 'NETWORK', 'MESSAGE': 'ConnectTimeout'}}",
+  "ecos:OHLC_HIGH": "fail: {'RESULT': {'CODE': 'NETWORK', 'MESSAGE': 'ConnectTimeout'}}",
+  "ecos:OHLC_LOW": "fail: {'RESULT': {'CODE': 'NETWORK', 'MESSAGE': 'ConnectTimeout'}}",
+  "ecos:OHLC_CLOSE1530": "fail: {'RESULT': {'CODE': 'NETWORK', 'MESSAGE': 'ConnectTimeout'}}",
+  "ecos:OHLC_CLOSE_FULL": "fail: {'RESULT': {'CODE': 'NETWORK', 'MESSAGE': 'ConnectTimeout'}}",
+  "ecos:POLICY_US": "fail: {'RESULT': {'CODE': 'NETWORK', 'MESSAGE': 'ConnectTimeout'}}",
+  "ecos:POLICY_JP": "fail: {'RESULT': {'CODE': 'NETWORK', 'MESSAGE': 'ConnectTimeout'}}",
+  "ecos:POLICY_CN": "fail: {'RESULT': {'CODE': 'NETWORK', 'MESSAGE': 'ConnectTimeout'}}",
+  "ecos:FLOW_FOREIGN_NET": "fail: {'RESULT': {'CODE': 'NETWORK', 'MESSAGE': 'ConnectTimeout'}}",
+  "ecos:BOP_PORTFOLIO_LIAB": "fail: {'RESULT': {'CODE': 'NETWORK', 'MESSAGE': 'ConnectTimeout'}}"
  },
  "yahoo": {
-  "yahoo:USDKRW": 5946,
-  "yahoo:USDJPY": 6186,
-  "yahoo:USDCNY": 6038,
-  "yahoo:USDTWD": 5453,
-  "yahoo:EURUSD": 5948,
-  "yahoo:GBPUSD": 5960,
-  "yahoo:AUDUSD": 5324,
-  "yahoo:USDCAD": 6016,
-  "yahoo:USDCHF": 6014,
-  "yahoo:USDSEK": 6034,
-  "yahoo:KOSPI": 5876,
-  "yahoo:DXY": 6013,
-  "yahoo:UST10Y": 5992,
-  "yahoo:UST5Y": 5992,
-  "yahoo:VIX": 6000,
-  "yahoo:WTI": 5991
+  "yahoo:USDKRW": 5947,
+  "yahoo:USDJPY": 6187,
+  "yahoo:USDCNY": 6039,
+  "yahoo:USDTWD": 5454,
+  "yahoo:EURUSD": 5949,
+  "yahoo:GBPUSD": 5961,
+  "yahoo:AUDUSD": 5325,
+  "yahoo:USDCAD": 6017,
+  "yahoo:USDCHF": 6015,
+  "yahoo:USDSEK": 6035,
+  "yahoo:KOSPI": 5877,
+  "yahoo:DXY": 6014,
+  "yahoo:UST10Y": 5993,
+  "yahoo:UST5Y": 5993,
+  "yahoo:VIX": 6001,
+  "yahoo:WTI": 5992
  },
  "gpr": {
   "gpr:GPRD": 10915
@@ -44,23 +44,25 @@
  "naver": {
   "ok": true,
   "received": 3500,
-  "kept": 9872,
+  "kept": 10465,
   "errors": []
  },
  "official": {
-  "ok": true,
-  "received": 60,
-  "errors": []
+  "ok": false,
+  "received": 20,
+  "errors": [
+   "한국은행 보도자료: ReadTimeout"
+  ]
  },
  "ai": {
   "ok": true,
-  "added": 116,
-  "calls": 12,
-  "tokens_in": 9577,
-  "tokens_out": 30096
+  "added": 150,
+  "calls": 16,
+  "tokens_in": 12465,
+  "tokens_out": 29691
  },
  "reports": {
   "ok": true,
-  "added": 5
+  "added": 4
  }
 }
