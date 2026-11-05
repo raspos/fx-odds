@@ -1,0 +1,2 @@
+recorded_at,date,base_date,spot,npi,npi_rule,n_judged,n_ai,fpi,fpi_coverage,fxvi,range_won,h7_lo,h7_hi,h30_lo,h30_hi,model_version
+2026-11-05T16:20+09:00,2026-11-05,2026-11-04,1341.2,-21.7,-17.0,1692,946,-2.1,1.0,12.1,9.3,1323.52,1359.12,1304.95,1378.46,v0.3

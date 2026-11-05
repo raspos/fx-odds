@@ -289,6 +289,18 @@ def main(skip_bt=False, write_live=True):
     lp = DATA / "live_forecasts.csv"
     jdump("live.json", LV.evaluate(pd.read_csv(lp) if lp.exists() else None, ecos))
 
+    # ---------- 일별 지표 스냅샷(뉴스 압력지수 등 추이 보관) ----------
+    import snapshots as SN
+    if write_live:
+        h7_, h30_ = latest["horizons"]["7"], latest["horizons"]["30"]
+        m7_, m30_ = h7_["models"][h7_["selected"]], h30_["models"][h30_["selected"]]
+        fin = lambda x: float(x) if x is not None and np.isfinite(x) else None
+        SN.record({"base_date": base.strftime("%Y-%m-%d"), "spot": fin(spot), "npi": nj.get("npi") if nj.get("available") else None, "npi_rule": nj.get("npi_rule") if nj.get("available") else None,
+                   "n_judged": nj["counts"]["n_judged"] if nj.get("available") else None, "n_ai": nj["counts"]["n_ai"] if nj.get("available") else None,
+                   "fpi": fin(detail.get("fpi")), "fpi_coverage": fin(detail.get("coverage")), "fxvi": fin(cur), "range_won": fin(vm.range_won.iloc[-1]),
+                   "h7_lo": m7_["pi80"][0], "h7_hi": m7_["pi80"][1], "h30_lo": m30_["pi80"][0], "h30_hi": m30_["pi80"][1], "model_version": "v0.3"})
+    jdump("snapshots.json", SN.history())
+
     # ---------- 구현 상태(features.json): 방법론·README 의 '구현 상태'가 코드와 어긋나지 않도록 실제 산출물에서 만든다 ----------
     fv = F.validate(fres, ecos)
     ai_n = int(nj.get("counts", {}).get("n_ai", 0)) if nj.get("available") else 0
