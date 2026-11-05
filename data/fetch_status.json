@@ -1,24 +1,24 @@
 {
- "at": "2026-11-05T03:42:23+00:00",
+ "at": "2026-11-05T08:25:24+00:00",
  "ecos": {
-  "ecos:KRW_per_USD": "fail: {'RESULT': {'CODE': 'NETWORK', 'MESSAGE': 'ConnectTimeout'}}",
-  "ecos:KRW_per_CNY": "fail: {'RESULT': {'CODE': 'NETWORK', 'MESSAGE': 'ConnectTimeout'}}",
-  "ecos:KRW_per_100JPY": "fail: {'RESULT': {'CODE': 'NETWORK', 'MESSAGE': 'ConnectTimeout'}}",
-  "ecos:KRW_per_TWD": "fail: {'RESULT': {'CODE': 'NETWORK', 'MESSAGE': 'ConnectTimeout'}}",
-  "ecos:KTB3Y": "fail: {'RESULT': {'CODE': 'NETWORK', 'MESSAGE': 'ConnectTimeout'}}",
-  "ecos:BASE_RATE": "fail: {'RESULT': {'CODE': 'NETWORK', 'MESSAGE': 'ConnectTimeout'}}",
-  "ecos:BOP_CURRENT_ACCOUNT": "fail: {'RESULT': {'CODE': 'NETWORK', 'MESSAGE': 'ConnectTimeout'}}",
-  "ecos:BOP_EXPORTS": "fail: {'RESULT': {'CODE': 'NETWORK', 'MESSAGE': 'ConnectTimeout'}}",
-  "ecos:OHLC_OPEN": "fail: {'RESULT': {'CODE': 'NETWORK', 'MESSAGE': 'ConnectTimeout'}}",
-  "ecos:OHLC_HIGH": "fail: {'RESULT': {'CODE': 'NETWORK', 'MESSAGE': 'ConnectTimeout'}}",
-  "ecos:OHLC_LOW": "fail: {'RESULT': {'CODE': 'NETWORK', 'MESSAGE': 'ConnectTimeout'}}",
-  "ecos:OHLC_CLOSE1530": "fail: {'RESULT': {'CODE': 'NETWORK', 'MESSAGE': 'ConnectTimeout'}}",
-  "ecos:OHLC_CLOSE_FULL": "fail: {'RESULT': {'CODE': 'NETWORK', 'MESSAGE': 'ConnectTimeout'}}",
-  "ecos:POLICY_US": "fail: {'RESULT': {'CODE': 'NETWORK', 'MESSAGE': 'ConnectTimeout'}}",
-  "ecos:POLICY_JP": "fail: {'RESULT': {'CODE': 'NETWORK', 'MESSAGE': 'ConnectTimeout'}}",
-  "ecos:POLICY_CN": "fail: {'RESULT': {'CODE': 'NETWORK', 'MESSAGE': 'ConnectTimeout'}}",
-  "ecos:FLOW_FOREIGN_NET": "fail: {'RESULT': {'CODE': 'NETWORK', 'MESSAGE': 'ConnectTimeout'}}",
-  "ecos:BOP_PORTFOLIO_LIAB": "fail: {'RESULT': {'CODE': 'NETWORK', 'MESSAGE': 'ConnectTimeout'}}"
+  "ecos:KRW_per_USD": 6643,
+  "ecos:KRW_per_CNY": 2668,
+  "ecos:KRW_per_100JPY": 6643,
+  "ecos:KRW_per_TWD": 2917,
+  "ecos:KTB3Y": 6643,
+  "ecos:BASE_RATE": 7002,
+  "ecos:BOP_CURRENT_ACCOUNT": 280,
+  "ecos:BOP_EXPORTS": 321,
+  "ecos:OHLC_OPEN": 6628,
+  "ecos:OHLC_HIGH": 6627,
+  "ecos:OHLC_LOW": 6627,
+  "ecos:OHLC_CLOSE1530": 6628,
+  "ecos:OHLC_CLOSE_FULL": 576,
+  "ecos:POLICY_US": 321,
+  "ecos:POLICY_JP": 121,
+  "ecos:POLICY_CN": 321,
+  "ecos:FLOW_FOREIGN_NET": 154,
+  "ecos:BOP_PORTFOLIO_LIAB": 215
  },
  "yahoo": {
   "yahoo:USDKRW": 5947,
@@ -44,25 +44,18 @@
  "naver": {
   "ok": true,
   "received": 3500,
-  "kept": 10465,
+  "kept": 10883,
   "errors": []
- },
- "official": {
-  "ok": false,
-  "received": 20,
-  "errors": [
-   "한국은행 보도자료: ReadTimeout"
-  ]
  },
  "ai": {
   "ok": true,
-  "added": 150,
-  "calls": 16,
-  "tokens_in": 12465,
-  "tokens_out": 29691
+  "added": 72,
+  "calls": 8,
+  "tokens_in": 6219,
+  "tokens_out": 15201
  },
  "reports": {
   "ok": true,
-  "added": 4
+  "added": 1
  }
 }
