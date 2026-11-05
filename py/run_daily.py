@@ -14,7 +14,6 @@ def main() -> int:
         traceback.print_exc()
     try:
         status["naver"] = news.collect()
-        status["official"] = news.collect_official()
     except Exception as e:
         status["naver"] = {"ok": False, "why": redact(repr(e))[:200]}
     try:

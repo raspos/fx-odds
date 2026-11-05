@@ -333,7 +333,7 @@ def main(skip_bt=False, write_live=True):
                 reasons[k] = (m_.group(1) if m_ else v_[:40])
     fail_reason = ("인증키 오류(INFO-100): GitHub 시크릿 ECOS_API_KEY 값 확인" if "INFO-100" in reasons.values() else ("네트워크 오류" if "NETWORK" in reasons.values() else ""))
     coll = []
-    for key, label in (("naver", "네이버 뉴스"), ("official", "공식 발표(한은·연준·BIS)"), ("ai", "AI 보조 판단")):
+    for key, label in (("naver", "네이버 뉴스"), ("ai", "AI 보조 판단")):
         v_ = status.get(key) or {}
         if isinstance(v_, dict) and v_.get("ok") is False:
             why = str(v_.get("why") or "; ".join(v_.get("errors", [])) or "일부 실패")
