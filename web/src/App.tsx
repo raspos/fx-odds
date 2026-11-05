@@ -88,14 +88,14 @@ export default function App() {
       <div className="-mx-4 flex items-center gap-1 overflow-x-auto whitespace-nowrap border-b px-4 py-1.5 text-[12px] sm:-mx-6 sm:px-6" style={{ borderColor: "var(--line)", background: "var(--surface-2)" }} aria-label="서비스 전환">
         <span style={{ color: "var(--ink-3)" }}>서비스</span>
         <a href="https://bokwatch.pages.dev/" className="rounded-full px-2.5 py-0.5" style={{ color: "var(--ink-2)" }}>BOK워치 · 금통위 금리 결정 ↗</a>
-        <span className="rounded-full px-2.5 py-0.5 font-bold" style={{ background: "var(--ink)", color: "var(--bg)" }} aria-current="page">FX ODDS · 환율</span>
+        <span className="rounded-full px-2.5 py-0.5 font-bold" style={{ background: "var(--ink)", color: "var(--bg)" }} aria-current="page">FX워치 · 환율</span>
       </div>
       <header className="sticky top-0 z-10 -mx-4 border-b px-4 py-3 sm:-mx-6 sm:px-6" style={{ background: "color-mix(in srgb, var(--bg) 92%, transparent)", borderColor: "var(--line)", backdropFilter: "blur(8px)" }}>
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
           <a className="mr-auto flex items-center gap-2.5" href="./" title="처음 화면으로 새로고침" onClick={(e) => { e.preventDefault(); location.href = location.pathname + location.search.split("#")[0]; location.reload(); }} style={{ color: "inherit", textDecoration: "none" }}>
             <img src="logo.svg" alt="" width={40} height={40} style={{ flex: "none", display: "block" }} />
             <div>
-              <h1 className="text-xl font-black tracking-tight">FX ODDS</h1>
+              <h1 className="text-xl font-black tracking-tight">FX워치</h1>
               <p className="text-xs" style={{ color: "var(--ink-2)" }}>환율의 확률과 압력을 읽다</p>
             </div>
           </a>

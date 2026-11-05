@@ -36,7 +36,7 @@ def main():
         d.line([(cx * S, y * S), (cx * S, (y + 11) * S)], fill=WHITE, width=5 * S)
     d.rounded_rectangle([(cx - 250) * S, (base + 22) * S, (cx + 250) * S, (base + 34) * S], radius=6 * S, fill=TRACK)
     f1 = ImageFont.truetype(FB, 112 * S); f2 = ImageFont.truetype(FR, 40 * S); f3 = ImageFont.truetype(FR, 28 * S)
-    d.text((660 * S, 190 * S), "FX ODDS", font=fit("FX ODDS", 112, maxw) if False else f1, fill=WHITE)
+    d.text((660 * S, 190 * S), "FX워치", font=fit("FX워치", 112, maxw) if False else f1, fill=WHITE)
     d.text((664 * S, 340 * S), "환율의 확률과 압력을 읽다", font=f2, fill=WHITE)
     def fit(text, size, maxw):  # 오른쪽 여백 안에 들어오도록 글자 크기를 줄인다
         while size > 16:
