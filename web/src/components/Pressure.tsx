@@ -40,7 +40,6 @@ export function Pressure({ P, asOf, S }: { P: J; asOf: string | null; S: J }) {
           markLine: { silent: true, symbol: "none", data: [{ yAxis: 0 }], lineStyle: { color: pal.ink3, type: "dashed" }, label: { show: false } } },
         { name: "원/달러(오른쪽)", type: "line", yAxisIndex: 1, showSymbol: false, data: krw, lineStyle: { color: pal.ink, width: 1.8 } }] };
   }, [H, idx, pal, S]);
-  const V = P.validation;
   const dir = fpi == null ? "–" : fpi > 5 ? "원화 약세(환율 상승) 압력 우세" : fpi < -5 ? "원화 강세(환율 하락) 압력 우세" : "뚜렷한 방향 없음(중립 부근)";
   return (
     <div className="space-y-4">
@@ -70,15 +69,6 @@ export function Pressure({ P, asOf, S }: { P: J; asOf: string | null; S: J }) {
         <h3 className="text-lg font-bold">FPI 추이와 실제 환율 (최근 2년)</h3>
         <EChart option={tOpt} height={300} />
         <p className="text-[12px] leading-relaxed" style={{ color: "var(--ink-3)" }}>FPI(주황)가 올라갈 때 환율(검정)이 뒤따라 오르면 지수가 방향을 짚은 것입니다.</p>
-      </div>
-      <div className="card p-4 sm:p-5">
-        <h3 className="text-lg font-bold">검증: FPI는 이후 환율을 예고했는가 (2012~)</h3>
-        <div className="scrollx"><table className="t"><thead><tr><th>기간</th><th>표본</th><th>상관</th><th>HAC t</th><th>부호 적중(전체)</th><th>부호 적중(강한 신호 상위 25%)</th><th>적중(비중첩) / 이항검정 p</th></tr></thead>
-          <tbody>{(["h7", "h30"] as const).map((k) => (<tr key={k}><td>{k === "h7" ? "7일 후" : "30일 후"}</td><td className="num">{fmt(V[k].n)}</td><td className="num">{sgn(V[k].corr, 3)}</td><td className="num">{sgn(V[k].t_hac, 2)}</td>
-            <td className="num">{(V[k].hit_all * 100).toFixed(1)}%</td><td className="num">{(V[k].hit_strong * 100).toFixed(1)}%</td><td className="num">{(V[k].hit_nonoverlap * 100).toFixed(1)}% / {V[k].p_binom.toFixed(2)}</td></tr>))}</tbody></table></div>
-        <p className="mt-2 text-[12px] leading-relaxed" style={{ color: "var(--ink-2)" }}>
-          |t| &lt; 2, 적중률 약 50%: 현재 규칙으로는 방향 예측력이 확인되지 않습니다. 연도별 상관도 부호가 일정하지 않습니다. 파라미터를 적합하지 않은 규칙 지수라 look-ahead는 없지만 요인 구성을 사람이 정했기 때문에 완전한 표본 외 검증은 아닙니다. 모든 입력은 기준일에 이미 이용 가능했던 값(available_at ≤ 기준일)입니다.
-        </p>
       </div>
     </div>
   );
