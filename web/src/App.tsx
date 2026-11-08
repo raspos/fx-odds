@@ -6,11 +6,12 @@ import { HorizonCard, ThresholdCalculator, Gauge, RangeChart } from "./component
 import Radar from "./components/Radar";
 import Scorecard from "./components/Scorecard";
 import Methodology from "./components/Methodology";
+import { TrendLines } from "./components/TrendLines";
 import { Pressure } from "./components/Pressure";
 import { News } from "./components/News";
 import Volatility from "./components/Volatility";
 
-const FILES = ["latest", "series", "scorecard", "radar", "history", "meta", "fpi", "events", "news", "reports", "vol", "features", "live"] as const;
+const FILES = ["latest", "series", "scorecard", "radar", "history", "meta", "fpi", "events", "news", "reports", "vol", "features", "live", "snapshots"] as const;
 
 class Boundary extends Component<{ children: ReactNode }, { err: boolean }> {
   state = { err: false };
@@ -65,7 +66,7 @@ export default function App() {
   useEffect(() => { location.hash = tab; }, [tab]);
 
   useEffect(() => {
-    Promise.all(FILES.map((f) => fetch(`data/${f}.json`, { cache: "no-cache" }).then((r) => { if (!r.ok) throw new Error(f); return r.json(); }).catch((e) => { if (f === "vol" || f === "features" || f === "live") return null; throw e; })))
+    Promise.all(FILES.map((f) => fetch(`data/${f}.json`, { cache: "no-cache" }).then((r) => { if (!r.ok) throw new Error(f); return r.json(); }).catch((e) => { if (f === "vol" || f === "features" || f === "live" || f === "snapshots") return null; throw e; })))
       .then((arr) => setD(Object.fromEntries(FILES.map((f, i) => [f, arr[i]]))))
       .catch((e) => setErr(`데이터를 불러오지 못했습니다: ${e.message}`));
   }, []);
@@ -88,7 +89,7 @@ export default function App() {
       <div className="-mx-4 flex items-center gap-1 overflow-x-auto whitespace-nowrap border-b px-4 py-1.5 text-[12px] sm:-mx-6 sm:px-6" style={{ borderColor: "var(--line)", background: "var(--surface-2)" }} aria-label="서비스 전환">
         <span style={{ color: "var(--ink-3)" }}>서비스</span>
         <a href="https://bokwatch.pages.dev/" className="rounded-full px-2.5 py-0.5" style={{ color: "var(--ink-2)" }}>BOK워치 · 금통위 금리 결정 ↗</a>
-        <span className="rounded-full px-2.5 py-0.5 font-bold" style={{ background: "var(--ink)", color: "var(--bg)" }} aria-current="page">FX워치 · 환율</span>
+        <span className="rounded-full px-2.5 py-0.5 font-bold" style={{ background: "var(--ink)", color: "var(--bg)" }} aria-current="page">FX워치 · 환율의 확률과 압력</span>
       </div>
       <header className="sticky top-0 z-10 -mx-4 border-b px-4 py-3 sm:-mx-6 sm:px-6" style={{ background: "color-mix(in srgb, var(--bg) 92%, transparent)", borderColor: "var(--line)", backdropFilter: "blur(8px)" }}>
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
@@ -203,6 +204,7 @@ export default function App() {
       </Section>}
 
       {tab === "s2" && <Section id="s2" no="02" title="압력·뉴스" sub="뉴스가 환율을 미는 방향(실험) · 통계 압력 지수(FPI) · 시장 사건">
+        <TrendLines snap={D.snapshots} fpi={D.fpi} asOf={histMode ? entry.d : null} />
         <News N={D.news} R={D.reports} H={L.horizons["30"]} spot={L.spot} refDate={L.base_date} asOf={histMode ? entry.d : null} />
         <h3 className="pt-2 text-xl font-extrabold">통계로 본 압력 (FPI)</h3>
         <Pressure P={D.fpi} asOf={histMode ? entry.d : null} S={D.series} />

@@ -20,20 +20,25 @@ def record(row: dict) -> None:
 
 
 def history() -> dict:
-    """날짜별 마지막 기록을 열 단위(배열)로 돌려준다. 빈 값은 None."""
-    if not PATH.exists():
-        return {"n": 0, "dates": []}
+    """날짜별 마지막 기록을 열 단위(배열)로 돌려준다. 빈 값은 None. 스냅샷 이전의 뉴스 압력지수는 npi_log.csv 에서 이어 붙인다."""
     last: dict = {}
-    for r in csv.DictReader(PATH.open(encoding="utf-8")):
-        last[r["date"]] = r
+    old = DATA / "npi_log.csv"
+    if old.exists():
+        for r in csv.DictReader(old.open(encoding="utf-8")):
+            last[r["date"]] = {"date": r["date"], "npi": r["npi"], "base_date": ""}
+    if PATH.exists():
+        for r in csv.DictReader(PATH.open(encoding="utf-8")):
+            last[r["date"]] = r
+    if not last:
+        return {"n": 0, "dates": []}
     ds = sorted(last)
     def col(c):
         out = []
         for d in ds:
-            v = last[d].get(c, "")
+            v = last[d].get(c, "") or ""
             try:
                 out.append(float(v))
             except ValueError:
                 out.append(None)
         return out
-    return {"n": len(ds), "dates": ds, **{c: col(c) for c in COLS[3:-1]}, "base_date": [last[d]["base_date"] for d in ds]}
+    return {"n": len(ds), "dates": ds, **{c: col(c) for c in COLS[3:-1]}, "base_date": [last[d].get("base_date", "") for d in ds]}

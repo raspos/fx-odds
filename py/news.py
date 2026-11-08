@@ -66,6 +66,36 @@ def clean(s: str) -> str:
     return " ".join(html.unescape(re.sub(r"<[^>]+>", "", s or "")).split())
 
 
+# 뉴스 압력에 쓰는 매체(허용 47곳). 호스트가 도메인과 같거나 그 하위 도메인이면 통과한다. 목록에 없는 매체(코인·연예·지역지 등)는 수집 단계와 읽기 단계에서 모두 제외한다.
+# 한 도메인에 여러 매체가 얽힌 곳은 정확한 호스트만 허용한다(예: it.chosun.com 은 IT조선이라 제외, biz.chosun.com 은 조선비즈).
+ALLOWED = {
+    "조선일보": ["chosun.com", "www.chosun.com", "news.chosun.com"], "동아일보": ["donga.com"], "중앙일보": ["joongang.co.kr", "joins.com"], "서울신문": ["seoul.co.kr"],
+    "세계일보": ["segye.com"], "한국일보": ["hankookilbo.com"], "국민일보": ["kmib.co.kr"],
+    "KBS": ["kbs.co.kr"], "MBC": ["imbc.com", "mbc.co.kr"], "SBS": ["news.sbs.co.kr"],
+    "JTBC": ["jtbc.co.kr", "jtbc.joins.com"], "TV조선": ["tvchosun.com"], "채널A": ["ichannela.com"],
+    "연합뉴스TV": ["yonhapnewstv.co.kr"], "YTN": ["ytn.co.kr"], "SBS비즈": ["biz.sbs.co.kr"],
+    "연합뉴스": ["yna.co.kr"], "뉴시스": ["newsis.com"], "뉴스1": ["news1.kr"], "뉴스핌": ["newspim.com"], "연합인포맥스": ["einfomax.co.kr"],
+    "서울경제": ["sedaily.com"], "매일경제": ["mk.co.kr"], "한국경제": ["hankyung.com"], "이데일리": ["edaily.co.kr"], "이투데이": ["etoday.co.kr"],
+    "아시아경제": ["asiae.co.kr"], "파이낸셜뉴스": ["fnnews.com"], "헤럴드경제": ["biz.heraldcorp.com", "heraldm.com"], "아주경제": ["ajunews.com"],
+    "머니투데이": ["mt.co.kr"], "글로벌이코노믹": ["g-enews.com"], "대한경제": ["dnews.co.kr"], "브릿지경제": ["viva100.com"],
+    "조선비즈": ["biz.chosun.com"], "이코노믹리뷰": ["econovill.com"], "조세일보": ["joseilbo.com"], "뉴스토마토": ["newstomato.com"], "에너지경제": ["ekn.kr"],
+    "비즈워치": ["bizwatch.co.kr"], "시사저널e": ["sisajournal-e.com"], "프라임경제": ["newsprime.co.kr"], "한국금융신문": ["fntimes.com"],
+    "전자신문": ["etnews.com"], "ZDNet코리아": ["zdnet.co.kr"], "아이뉴스24": ["inews24.com"], "노컷뉴스": ["nocutnews.co.kr"],
+}
+_HOST_NAME = {h: n for n, hs in ALLOWED.items() for h in hs}
+
+
+def outlet(host: str) -> str | None:
+    """호스트 -> 허용 매체 표시명. 정확히 일치하는 호스트를 먼저 보고, 그다음 상위 도메인을 차례로 본다. 허용 목록에 없으면 None."""
+    h = (host or "").lower()
+    parts = h.split(".")
+    for i in range(len(parts) - 1):
+        n = _HOST_NAME.get(".".join(parts[i:]))
+        if n:
+            return n
+    return None
+
+
 def press_from(url: str) -> str:
     m = re.match(r"https?://(?:www\.|m\.)?([^/]+)", url or "")
     return m.group(1) if m else ""
@@ -79,7 +109,8 @@ def norm_title(t: str) -> str:
 def load() -> list[dict]:
     if not NEWS.exists():
         return []
-    return [json.loads(l) for l in NEWS.read_text(encoding="utf-8").splitlines() if l.strip()]
+    rows = [json.loads(l) for l in NEWS.read_text(encoding="utf-8").splitlines() if l.strip()]
+    return [r for r in rows if r.get("official") or outlet(r.get("press", ""))]  # 허용 매체와 공식 발표만
 
 
 def save(items: list[dict]) -> None:
@@ -96,6 +127,8 @@ def parse_items(payload: dict, query: str) -> list[dict]:
             ts = parsedate_to_datetime(it["pubDate"]).astimezone(KST)
         except (KeyError, TypeError, ValueError):
             ts = now_kst()
+        if not outlet(press_from(link)):
+            continue  # 허용 매체 밖은 저장하지 않는다
         out.append({"id": hashlib.sha1(link.encode()).hexdigest()[:12], "title": clean(it.get("title")), "summary": "",  # 요약·본문은 저장하지 않는다(제목·링크·시각만)
                     
                     "link": link, "press": press_from(link), "published": ts.isoformat(timespec="minutes"), "queries": [query],
