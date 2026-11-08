@@ -12,8 +12,7 @@ export function Pressure({ P, asOf, S }: { P: J; asOf: string | null; S: J }) {
     let lo = -1; for (let i = 0; i < H.dates.length; i++) { if (H.dates[i] <= asOf) lo = i; else break; } return lo;
   }, [asOf, H]);
   const areas: J[] = P.areas_def.map((a: J) => ({ ...a, p: H[a.id][idx] }));
-  const fpi = H.fpi[idx], cov = H.coverage[idx], date = H.dates[idx];
-  const nAv = areas.filter((a) => a.p != null).length;
+  const fpi = H.fpi[idx], date = H.dates[idx];
   const prev = idx > 0 ? H.fpi[idx - 1] : null, wk = idx >= 5 ? H.fpi[idx - 5] : null;
   const L = P.latest; const live = idx === H.dates.length - 1;
   const comps: Record<string, J[]> = Object.fromEntries(L.areas.map((a: J) => [a.id, a.components]));
@@ -52,13 +51,10 @@ export function Pressure({ P, asOf, S }: { P: J; asOf: string | null; S: J }) {
           <div className="num text-5xl font-black" style={{ color: clr(fpi) }}>{fpi == null ? "–" : sgn(fpi, 1)}</div>
           <div className="pb-1 text-sm" style={{ color: "var(--ink-2)" }}>{dir}</div>
         </div>
-        <div className="mt-2 text-[12px] num" style={{ color: "var(--ink-3)" }}>전일 대비 {prev == null || fpi == null ? "–" : sgn(fpi - prev, 1)} · 5영업일 전 대비 {wk == null || fpi == null ? "–" : sgn(fpi - wk, 1)} · 자료 충족률 {fmt(cov * 100)}% ({nAv}/10개 영역)</div>
+        <div className="mt-2 text-[12px] num" style={{ color: "var(--ink-3)" }}>전일 대비 {prev == null || fpi == null ? "–" : sgn(fpi - prev, 1)} · 5영업일 전 대비 {wk == null || fpi == null ? "–" : sgn(fpi - wk, 1)}</div>
         <div className="relative mt-3 h-3 rounded-full" style={{ background: "linear-gradient(90deg,var(--down),var(--surface-2) 50%,var(--up))" }}>
           {fpi != null && <div className="absolute -top-1 h-5 w-1 rounded" style={{ left: `calc(${(fpi + 100) / 2}% - 2px)`, background: "var(--ink)" }} />}</div>
         <div className="mt-1 flex justify-between text-[11px]" style={{ color: "var(--ink-3)" }}><span>−100 강한 원화 강세 압력</span><span>0</span><span>+100 강한 원화 약세 압력</span></div>
-        <p className="mt-3 text-[12px] leading-relaxed" style={{ color: "var(--ink-2)" }}>
-          FPI +60은 환율 상승 확률 60%가 아닙니다. 가중치(10개 영역 동일)와 요인 부호를 사람이 정한 규칙 기반 지수이며, <b>아래 검증에서 이후 7·30일 환율과의 관계가 통계적으로 확인되지 않았습니다.</b> 그래서 확률 전망에 반영하지 않습니다.
-        </p>
       </div>
       <div className="card p-4 sm:p-5">
         <h3 className="text-lg font-bold">10개 요인별 압력</h3>
@@ -69,15 +65,11 @@ export function Pressure({ P, asOf, S }: { P: J; asOf: string | null; S: J }) {
               <td style={{ whiteSpace: "normal", textAlign: "left" }}>{a.desc}</td><td style={{ textAlign: "left" }}>{P.sources[a.id]}</td></tr>))}</tbody></table>
         </div>
         {live && sorted.length > 0 && <p className="mt-2 text-[13px] leading-relaxed">주요 <b style={{ color: "var(--up)" }}>상승(원화 약세) 요인</b>: {sorted.filter((a) => a.p > 0).slice(0, 3).map((a) => `${a.name}(${sgn(a.p, 0)})`).join(", ") || "없음"} · 주요 <b style={{ color: "var(--down)" }}>하락(원화 강세) 요인</b>: {[...sorted].reverse().filter((a) => a.p < 0).slice(0, 3).map((a) => `${a.name}(${sgn(a.p, 0)})`).join(", ") || "없음"}</p>}
-        <p className="mt-2 text-[11px] leading-relaxed" style={{ color: "var(--ink-3)" }}>
-          요인 신호는 최근 20영업일 변화(월별 자료는 3개월 합)를 과거 {P.z_window}영업일(월별 60개월) 분포로 표준화(±3 절단)해 −100~+100으로 환산합니다. 한국 금리는 미국 2년 금리, 엔·위안·대만 달러는 달러 공통요인을 회귀로 제거한 잔차만 써서 같은 달러 충격이 중복 집계되지 않게 했습니다.
-          경상수지·외국인 증권투자는 월별 발표 자료라 발표 시차(월말+41일)를 반영하며 극단값에 쉽게 포화(±100)됩니다. 결측 영역은 0점이 아니라 제외합니다.
-        </p>
       </div>
       <div className="card p-4 sm:p-5">
         <h3 className="text-lg font-bold">FPI 추이와 실제 환율 (최근 2년)</h3>
         <EChart option={tOpt} height={300} />
-        <p className="text-[12px] leading-relaxed" style={{ color: "var(--ink-3)" }}>FPI(주황)가 올라갈 때 환율(검정)이 뒤따라 오르면 지수가 방향을 짚은 것입니다. 육안으로는 두 선의 관계가 뚜렷하지 않으며, 아래 검증표가 이를 수치로 확인합니다.</p>
+        <p className="text-[12px] leading-relaxed" style={{ color: "var(--ink-3)" }}>FPI(주황)가 올라갈 때 환율(검정)이 뒤따라 오르면 지수가 방향을 짚은 것입니다.</p>
       </div>
       <div className="card p-4 sm:p-5">
         <h3 className="text-lg font-bold">검증: FPI는 이후 환율을 예고했는가 (2012~)</h3>
@@ -87,7 +79,6 @@ export function Pressure({ P, asOf, S }: { P: J; asOf: string | null; S: J }) {
         <p className="mt-2 text-[12px] leading-relaxed" style={{ color: "var(--ink-2)" }}>
           |t| &lt; 2, 적중률 약 50%: 현재 규칙으로는 방향 예측력이 확인되지 않습니다. 연도별 상관도 부호가 일정하지 않습니다. 파라미터를 적합하지 않은 규칙 지수라 look-ahead는 없지만 요인 구성을 사람이 정했기 때문에 완전한 표본 외 검증은 아닙니다. 모든 입력은 기준일에 이미 이용 가능했던 값(available_at ≤ 기준일)입니다.
         </p>
-        <p className="mt-2 text-[12px]" style={{ color: "var(--ink-3)" }}><b>미보유 자료</b>: {P.missing.join(" · ")}</p>
       </div>
     </div>
   );

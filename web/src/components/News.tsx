@@ -55,8 +55,6 @@ export function News({ N, R, H, spot, refDate, asOf }: { N: J; R: J; H: J; spot:
               <p className="mt-1 text-[11px]" style={{ color: "var(--ink-3)" }}>이미 분류된 사건만 입력으로 쓰고 전망·권유는 하지 않도록 제한했습니다. 문장은 매번 달라질 수 있고 오류가 있을 수 있습니다({N.ai_comment.model}).</p>
             </details>
           </div>)}
-        {N.npi_rule != null && <p className="mt-1 text-[12px] num" style={{ color: "var(--ink-3)" }}>규칙만 사용한 값 {sgn(N.npi_rule, 0)} · 규칙+AI 보조 {sgn(npi, 0)}
-          {N.agreement && N.agreement.n_dir > 0 ? ` · 규칙·AI 방향 일치 ${N.agreement.same}/${N.agreement.n_dir}건(반대 ${N.agreement.opposite}건)` : ""}</p>}
         <div className="mt-3 grid grid-cols-3 gap-2 text-center text-[12px]">
           {([["24h", "24시간"], ["7d", "7일"], ["30d", "30일"]] as const).map(([k, l]) => (
             <div key={k} className="rounded-lg p-2" style={{ background: "var(--surface-2)" }}>
@@ -71,7 +69,6 @@ export function News({ N, R, H, spot, refDate, asOf }: { N: J; R: J; H: J; spot:
           <b> 과거 환율과의 관계는 아직 검증되지 않았고</b>(과거 뉴스 보존본 없음) 오늘부터 기록을 쌓아 공개 검증합니다. 확률 전망에는 반영하지 않습니다.
         </p>
         </details>
-        <p className="mt-1 text-[11px]" style={{ color: "var(--ink-3)" }}>수집 {N.counts.n_articles}건 · 판단 {N.counts.n_judged}건 · 유보 {N.counts.n_hold}건 · 분류 불가 {N.counts.n_unclassified}건 · AI 보조 판단 {N.counts.n_ai}건 · 공식 발표 {N.counts.n_official}건 · 마지막 수집 {N.last_collected.replace("T", " ")}</p>
       </div>
       <div className="card p-4 sm:p-5">
         <h3 className="text-lg font-bold">증권사·기관 환율 전망 보고서</h3>

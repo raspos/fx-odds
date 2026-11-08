@@ -3,7 +3,7 @@ import EChart, { usePalette } from "./EChart";
 import { J, sgn } from "../lib";
 
 /** 뉴스 압력지수(FSI)와 통계 압력지수(FPI)의 흐름을 각각 선 하나로 보여 준다(아주 단순하게). asOf 가 있으면 그 날짜까지만 쓴다. */
-function Line({ title, note, dates, vals, color }: { title: string; note: string; dates: string[]; vals: (number | null)[]; color: string }) {
+function Line({ title, dates, vals, color }: { title: string; dates: string[]; vals: (number | null)[]; color: string }) {
   const pal = usePalette();
   const last = [...vals].reverse().find((v) => v != null) ?? null;
   const opt = useMemo(() => ({
@@ -19,7 +19,6 @@ function Line({ title, note, dates, vals, color }: { title: string; note: string
       <div className="flex items-baseline gap-2"><h3 className="mr-auto text-[15px] font-bold">{title}</h3>
         <span className="num text-lg font-black" style={{ color: last == null ? "var(--ink-3)" : last >= 0 ? "var(--up)" : "var(--down)" }}>{last == null ? "–" : sgn(last, 1)}</span></div>
       {dates.length < 2 ? <p className="mt-2 text-[12px]" style={{ color: "var(--ink-3)" }}>기록이 쌓이는 중입니다.</p> : <EChart option={opt} height={180} />}
-      <p className="text-[11px]" style={{ color: "var(--ink-3)" }}>{note}</p>
     </div>
   );
 }
@@ -33,8 +32,8 @@ export function TrendLines({ snap, fpi, asOf }: { snap?: J; fpi: J; asOf: string
   const fd: string[] = H.dates.slice(Math.max(0, end - n), end), fv: (number | null)[] = H.fpi.slice(Math.max(0, end - n), end);
   return (
     <div className="grid gap-4 md:grid-cols-2">
-      <Line title="뉴스 압력지수(FSI) 흐름" note="매일 한 번 기록한 값(10/27~). 매체를 47곳으로 제한하기 전 값은 전체 매체 기준이라 수준이 다를 수 있습니다. 확률 아님." dates={sd} vals={sv} color={pal.up || "#f24822"} />
-      <Line title="통계 압력지수(FPI) 흐름" note="최근 90영업일. 0 위는 원화 약세, 아래는 원화 강세 압력. 확률 아님." dates={fd} vals={fv} color={pal.down || "#0d99ff"} />
+      <Line title="뉴스 압력지수(FSI) 흐름" dates={sd} vals={sv} color={pal.up || "#f24822"} />
+      <Line title="통계 압력지수(FPI) 흐름" dates={fd} vals={fv} color={pal.down || "#0d99ff"} />
     </div>
   );
 }
