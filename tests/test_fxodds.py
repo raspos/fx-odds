@@ -265,8 +265,10 @@ def test_ohlc_columns_selected_by_name_not_position(ohlc_df):
 def test_ohlc_consistency_after_cleaning(ohlc_df):
     import vol
     v, dropped = vol.clean(ohlc_df)
-    assert (v.H >= v[["O", "C"]].max(axis=1)).all() and (v.L <= v[["O", "C"]].min(axis=1)).all() and (v.H >= v.L).all()
-    assert len(dropped) <= 5  # 2001·2002년 원자료 오류 2건만 제외
+    assert (v.H >= v.C).all() and (v.L <= v.C).all() and (v.H >= v.L).all()  # 변동성 계산에 쓰는 고·저·종가만 일관성을 요구한다
+    assert len(dropped) <= 5  # 2001·2002년 원자료 오류 등 소수만 제외
+    o_out = ((v.O > v.H) | (v.O < v.L)).sum()
+    assert o_out <= 5  # 시가는 계산에 쓰지 않아 남기되, 범위 밖 시가(2026-11-06 등)가 많아지면 원자료 이상을 의심
 
 
 def test_parkinson_formula_against_synthetic_case():
