@@ -36,9 +36,10 @@ def ohlc(df_long: pd.DataFrame) -> pd.DataFrame:
 
 
 def clean(w: pd.DataFrame):
-    """완결된 세션만 남긴다: 고·저·종가가 있고 H>=L, 시가·종가가 [L,H] 안. 제외한 행은 기록해 돌려준다."""
+    """완결된 세션만 남긴다: 고·저·종가가 있고 H>=L, 종가가 [L,H] 안. 제외한 행은 기록해 돌려준다.
+    시가는 변동성 계산에 쓰지 않으므로 [L,H] 밖이어도 세션을 버리지 않는다(2026-11-06: 시가가 전일과 같은 값으로 들어와 저가 밖이었으나 고·저·종가는 정상)."""
     v = w.dropna(subset=["H", "L", "C"])
-    ok = (v.H >= v.L) & (v.H >= v[["O", "C"]].max(axis=1)) & (v.L <= v[["O", "C"]].min(axis=1))
+    ok = (v.H >= v.L) & (v.H >= v.C) & (v.L <= v.C)
     dropped = v.index[~ok]
     return v[ok & (v.index >= FROM)], [d.strftime("%Y-%m-%d") for d in dropped]
 
