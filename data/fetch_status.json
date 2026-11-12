@@ -1,19 +1,19 @@
 {
- "at": "2026-11-11T17:25:19+00:00",
+ "at": "2026-11-12T04:09:06+00:00",
  "ecos": {
-  "ecos:KRW_per_USD": 6647,
-  "ecos:KRW_per_CNY": 2672,
-  "ecos:KRW_per_100JPY": 6647,
-  "ecos:KRW_per_TWD": 2921,
+  "ecos:KRW_per_USD": 6648,
+  "ecos:KRW_per_CNY": 2673,
+  "ecos:KRW_per_100JPY": 6648,
+  "ecos:KRW_per_TWD": 2922,
   "ecos:KTB3Y": 6647,
   "ecos:BASE_RATE": 7006,
   "ecos:BOP_CURRENT_ACCOUNT": 280,
   "ecos:BOP_EXPORTS": 321,
-  "ecos:OHLC_OPEN": 6632,
-  "ecos:OHLC_HIGH": 6631,
-  "ecos:OHLC_LOW": 6631,
+  "ecos:OHLC_OPEN": 6633,
+  "ecos:OHLC_HIGH": 6632,
+  "ecos:OHLC_LOW": 6632,
   "ecos:OHLC_CLOSE1530": 6632,
-  "ecos:OHLC_CLOSE_FULL": 580,
+  "ecos:OHLC_CLOSE_FULL": 581,
   "ecos:POLICY_US": 322,
   "ecos:POLICY_JP": 122,
   "ecos:POLICY_CN": 322,
@@ -21,41 +21,41 @@
   "ecos:BOP_PORTFOLIO_LIAB": 215
  },
  "yahoo": {
-  "yahoo:USDKRW": 5951,
-  "yahoo:USDJPY": 6191,
-  "yahoo:USDCNY": 6043,
-  "yahoo:USDTWD": 5458,
-  "yahoo:EURUSD": 5953,
-  "yahoo:GBPUSD": 5965,
-  "yahoo:AUDUSD": 5329,
-  "yahoo:USDCAD": 6021,
-  "yahoo:USDCHF": 6019,
-  "yahoo:USDSEK": 6039,
-  "yahoo:KOSPI": 5881,
-  "yahoo:DXY": 6018,
-  "yahoo:UST10Y": 5997,
-  "yahoo:UST5Y": 5997,
-  "yahoo:VIX": 6005,
-  "yahoo:WTI": 5996
+  "yahoo:USDKRW": 5952,
+  "yahoo:USDJPY": 6192,
+  "yahoo:USDCNY": 6044,
+  "yahoo:USDTWD": 5459,
+  "yahoo:EURUSD": 5954,
+  "yahoo:GBPUSD": 5966,
+  "yahoo:AUDUSD": 5330,
+  "yahoo:USDCAD": 6022,
+  "yahoo:USDCHF": 6020,
+  "yahoo:USDSEK": 6040,
+  "yahoo:KOSPI": 5882,
+  "yahoo:DXY": 6019,
+  "yahoo:UST10Y": 5998,
+  "yahoo:UST5Y": 5998,
+  "yahoo:VIX": 6006,
+  "yahoo:WTI": 5997
  },
  "gpr": {
   "gpr:GPRD": 10915
  },
  "naver": {
   "ok": true,
-  "received": 1580,
-  "kept": 6930,
+  "received": 1669,
+  "kept": 7153,
   "errors": []
  },
  "ai": {
   "ok": true,
-  "added": 82,
-  "calls": 9,
-  "tokens_in": 6985,
-  "tokens_out": 17329
+  "added": 79,
+  "calls": 8,
+  "tokens_in": 6336,
+  "tokens_out": 16830
  },
  "reports": {
   "ok": true,
-  "added": 2
+  "added": 3
  }
 }
