@@ -1,19 +1,19 @@
 {
- "at": "2026-11-12T17:43:48+00:00",
+ "at": "2026-11-13T03:34:10+00:00",
  "ecos": {
-  "ecos:KRW_per_USD": 6648,
-  "ecos:KRW_per_CNY": 2673,
-  "ecos:KRW_per_100JPY": 6648,
-  "ecos:KRW_per_TWD": 2922,
+  "ecos:KRW_per_USD": 6649,
+  "ecos:KRW_per_CNY": 2674,
+  "ecos:KRW_per_100JPY": 6649,
+  "ecos:KRW_per_TWD": 2923,
   "ecos:KTB3Y": 6648,
-  "ecos:BASE_RATE": 7007,
+  "ecos:BASE_RATE": 7010,
   "ecos:BOP_CURRENT_ACCOUNT": 280,
   "ecos:BOP_EXPORTS": 321,
-  "ecos:OHLC_OPEN": 6633,
-  "ecos:OHLC_HIGH": 6632,
-  "ecos:OHLC_LOW": 6632,
+  "ecos:OHLC_OPEN": 6634,
+  "ecos:OHLC_HIGH": 6633,
+  "ecos:OHLC_LOW": 6633,
   "ecos:OHLC_CLOSE1530": 6633,
-  "ecos:OHLC_CLOSE_FULL": 581,
+  "ecos:OHLC_CLOSE_FULL": 582,
   "ecos:POLICY_US": 322,
   "ecos:POLICY_JP": 122,
   "ecos:POLICY_CN": 322,
@@ -21,41 +21,41 @@
   "ecos:BOP_PORTFOLIO_LIAB": 215
  },
  "yahoo": {
-  "yahoo:USDKRW": 5952,
-  "yahoo:USDJPY": 6192,
-  "yahoo:USDCNY": 6044,
-  "yahoo:USDTWD": 5459,
-  "yahoo:EURUSD": 5954,
-  "yahoo:GBPUSD": 5966,
-  "yahoo:AUDUSD": 5330,
-  "yahoo:USDCAD": 6022,
-  "yahoo:USDCHF": 6020,
-  "yahoo:USDSEK": 6040,
-  "yahoo:KOSPI": 5882,
-  "yahoo:DXY": 6019,
-  "yahoo:UST10Y": 5998,
-  "yahoo:UST5Y": 5998,
-  "yahoo:VIX": 6006,
-  "yahoo:WTI": 5997
+  "yahoo:USDKRW": 5953,
+  "yahoo:USDJPY": 6193,
+  "yahoo:USDCNY": 6045,
+  "yahoo:USDTWD": 5460,
+  "yahoo:EURUSD": 5955,
+  "yahoo:GBPUSD": 5967,
+  "yahoo:AUDUSD": 5331,
+  "yahoo:USDCAD": 6023,
+  "yahoo:USDCHF": 6021,
+  "yahoo:USDSEK": 6041,
+  "yahoo:KOSPI": 5883,
+  "yahoo:DXY": 6020,
+  "yahoo:UST10Y": 5999,
+  "yahoo:UST5Y": 5999,
+  "yahoo:VIX": 6007,
+  "yahoo:WTI": 5998
  },
  "gpr": {
   "gpr:GPRD": 10915
  },
  "naver": {
   "ok": true,
-  "received": 1549,
-  "kept": 7331,
+  "received": 1589,
+  "kept": 7522,
   "errors": []
  },
  "ai": {
   "ok": true,
-  "added": 77,
-  "calls": 8,
-  "tokens_in": 6185,
-  "tokens_out": 21214
+  "added": 62,
+  "calls": 7,
+  "tokens_in": 5354,
+  "tokens_out": 13598
  },
  "reports": {
   "ok": true,
-  "added": 0
+  "added": 1
  }
 }
