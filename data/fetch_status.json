@@ -1,18 +1,18 @@
 {
- "at": "2026-11-17T05:13:56+00:00",
+ "at": "2026-11-17T18:44:43+00:00",
  "ecos": {
   "ecos:KRW_per_USD": 6651,
   "ecos:KRW_per_CNY": 2676,
   "ecos:KRW_per_100JPY": 6651,
   "ecos:KRW_per_TWD": 2925,
-  "ecos:KTB3Y": 6650,
+  "ecos:KTB3Y": 6651,
   "ecos:BASE_RATE": 7010,
   "ecos:BOP_CURRENT_ACCOUNT": 280,
   "ecos:BOP_EXPORTS": 321,
   "ecos:OHLC_OPEN": 6636,
   "ecos:OHLC_HIGH": 6635,
   "ecos:OHLC_LOW": 6635,
-  "ecos:OHLC_CLOSE1530": 6635,
+  "ecos:OHLC_CLOSE1530": 6636,
   "ecos:OHLC_CLOSE_FULL": 584,
   "ecos:POLICY_US": 322,
   "ecos:POLICY_JP": 122,
@@ -43,16 +43,16 @@
  },
  "naver": {
   "ok": true,
-  "received": 1608,
-  "kept": 8417,
+  "received": 1575,
+  "kept": 8616,
   "errors": []
  },
  "ai": {
   "ok": true,
-  "added": 71,
-  "calls": 8,
-  "tokens_in": 6101,
-  "tokens_out": 16767
+  "added": 64,
+  "calls": 7,
+  "tokens_in": 5317,
+  "tokens_out": 15135
  },
  "reports": {
   "ok": true,
