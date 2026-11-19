@@ -100,3 +100,4 @@
 {"id": "2db78babf22d", "is_forecast": false, "institution": "", "summary": "", "forecasts": [], "model": "gpt-5.4-mini-2026-03-17", "at": "2026-11-13T12:37+09:00"}
 {"id": "9a99a5e9c0af", "is_forecast": true, "institution": "우리은행", "summary": "내년 환율 1400원대 전망", "forecasts": [{"target_key": "2027-UNSPEC", "target_label": "내년 환율", "low": 1400, "high": 1400, "view": "krw_weak"}], "model": "gpt-5.4-mini-2026-03-17", "at": "2026-11-17T04:52+09:00"}
 {"id": "1fa7f0c56bb8", "is_forecast": true, "institution": "NH證", "summary": "내년 평균 1345원, 2분기 저점 후 반등", "forecasts": [{"target_key": "2027-AVG", "target_label": "내년 달러-원 평균", "low": 1345, "high": 1345, "view": "none"}], "model": "gpt-5.4-mini-2026-03-17", "at": "2026-11-17T04:52+09:00"}
+{"id": "0d7bd98025e5", "is_forecast": false, "institution": "", "summary": "", "forecasts": [], "model": "gpt-5.4-mini-2026-03-17", "at": "2026-11-19T13:33+09:00"}
