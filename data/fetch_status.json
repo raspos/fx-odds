@@ -1,19 +1,19 @@
 {
- "at": "2026-11-25T19:33:17+00:00",
+ "at": "2026-11-26T05:25:21+00:00",
  "ecos": {
-  "ecos:KRW_per_USD": 6657,
-  "ecos:KRW_per_CNY": 2682,
-  "ecos:KRW_per_100JPY": 6657,
-  "ecos:KRW_per_TWD": 2931,
+  "ecos:KRW_per_USD": 6658,
+  "ecos:KRW_per_CNY": 2683,
+  "ecos:KRW_per_100JPY": 6658,
+  "ecos:KRW_per_TWD": 2932,
   "ecos:KTB3Y": 6657,
-  "ecos:BASE_RATE": 7016,
+  "ecos:BASE_RATE": 7019,
   "ecos:BOP_CURRENT_ACCOUNT": 280,
   "ecos:BOP_EXPORTS": 321,
-  "ecos:OHLC_OPEN": 6642,
-  "ecos:OHLC_HIGH": 6641,
-  "ecos:OHLC_LOW": 6641,
+  "ecos:OHLC_OPEN": 6643,
+  "ecos:OHLC_HIGH": 6642,
+  "ecos:OHLC_LOW": 6642,
   "ecos:OHLC_CLOSE1530": 6642,
-  "ecos:OHLC_CLOSE_FULL": 590,
+  "ecos:OHLC_CLOSE_FULL": 591,
   "ecos:POLICY_US": 322,
   "ecos:POLICY_JP": 122,
   "ecos:POLICY_CN": 322,
@@ -21,41 +21,41 @@
   "ecos:BOP_PORTFOLIO_LIAB": 215
  },
  "yahoo": {
-  "yahoo:USDKRW": 5961,
-  "yahoo:USDJPY": 6201,
-  "yahoo:USDCNY": 6053,
-  "yahoo:USDTWD": 5468,
-  "yahoo:EURUSD": 5963,
-  "yahoo:GBPUSD": 5975,
-  "yahoo:AUDUSD": 5339,
-  "yahoo:USDCAD": 6031,
-  "yahoo:USDCHF": 6029,
-  "yahoo:USDSEK": 6049,
-  "yahoo:KOSPI": 5891,
-  "yahoo:DXY": 6028,
-  "yahoo:UST10Y": 6007,
-  "yahoo:UST5Y": 6007,
-  "yahoo:VIX": 6015,
-  "yahoo:WTI": 6006
+  "yahoo:USDKRW": 5962,
+  "yahoo:USDJPY": 6202,
+  "yahoo:USDCNY": 6054,
+  "yahoo:USDTWD": 5469,
+  "yahoo:EURUSD": 5964,
+  "yahoo:GBPUSD": 5976,
+  "yahoo:AUDUSD": 5340,
+  "yahoo:USDCAD": 6032,
+  "yahoo:USDCHF": 6030,
+  "yahoo:USDSEK": 6050,
+  "yahoo:KOSPI": 5892,
+  "yahoo:DXY": 6029,
+  "yahoo:UST10Y": 6008,
+  "yahoo:UST5Y": 6008,
+  "yahoo:VIX": 6016,
+  "yahoo:WTI": 6007
  },
  "gpr": {
   "gpr:GPRD": 10930
  },
  "naver": {
   "ok": true,
-  "received": 1596,
-  "kept": 11230,
+  "received": 1600,
+  "kept": 11492,
   "errors": []
  },
  "ai": {
   "ok": true,
-  "added": 62,
-  "calls": 7,
-  "tokens_in": 5332,
-  "tokens_out": 13511
+  "added": 105,
+  "calls": 11,
+  "tokens_in": 8655,
+  "tokens_out": 23369
  },
  "reports": {
   "ok": true,
-  "added": 0
+  "added": 2
  }
 }
